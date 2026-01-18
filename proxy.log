@@ -1,0 +1,3 @@
+TCP Proxy rodando: 127.0.0.1:9222 -> 192.168.192.1:9222
+Erro na conexão com Chrome: read ECONNRESET
+Erro na conexão com Chrome: read ECONNRESET

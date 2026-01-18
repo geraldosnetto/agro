@@ -1,0 +1,21 @@
+{
+    "mcpServers": {
+        "agro-prisma": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "tsx",
+                "/mnt/e/SITES/agro/scripts/mcp-server.ts"
+            ],
+            "env": {
+                "DATABASE_URL": "postgresql://postgres.yjxtufdlcgtutjzxebqx:Azxs1230%402468@aws-1-us-east-2.pooler.supabase.com:5432/postgres"
+            }
+        },
+        "context7": {
+            "url": "https://mcp.context7.com/mcp",
+            "headers": {
+                "CONTEXT7_API_KEY": "ctx7sk-c4d234c9-1dc6-47d9-8afa-b112e39fca74"
+            }
+        }
+    }
+}

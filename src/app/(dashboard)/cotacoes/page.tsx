@@ -1,0 +1,198 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { CotacaoCard, CotacaoCategoria } from "@/components/dashboard/CotacaoCard";
+import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
+import { PriceChart } from "@/components/dashboard/PriceChart";
+
+import prisma from "@/lib/prisma";
+
+// Helper para formatar unidade para display
+function formatarUnidade(unidade: string): string {
+    const map: Record<string, string> = {
+        'SACA_60KG': 'sc 60kg',
+        'ARROBA': '@',
+        'LITRO': 'L',
+        'TONELADA': 'ton',
+        'KG': 'kg',
+        'SACA_50KG': 'sc 50kg'
+    };
+    return map[unidade] || unidade;
+}
+
+// Helper para mapear categoria do banco para o esperado pelo componente (lowercase)
+function formatarCategoria(cat: string): CotacaoCategoria {
+    return cat.toLowerCase() as CotacaoCategoria;
+}
+
+// Fallback para dólar caso API falhe
+const dolarFallback = {
+    compra: 5.89,
+    venda: 5.91,
+    variacao: 0.35,
+};
+
+export default async function CotacoesPage() {
+    // Busca dólar PTAX real do Banco Central
+    const dolarData = await fetchDolarPTAX();
+    const dolar = dolarData ? {
+        compra: dolarData.compra,
+        venda: dolarData.venda,
+        variacao: dolarData.variacao ?? 0,
+    } : dolarFallback;
+
+    // Busca Commodities do banco
+    const commoditiesData = await prisma.commodity.findMany({
+        where: { ativo: true },
+        include: {
+            cotacoes: {
+                orderBy: { dataReferencia: 'desc' },
+                take: 1
+            }
+        }
+    });
+
+    // Mapeia para o formato de UI
+    const cotacoes = commoditiesData.map(c => {
+        const ultima = c.cotacoes[0];
+        const valor = ultima?.valor?.toNumber() ?? 0;
+        const valorAnterior = ultima?.valorAnterior?.toNumber() ?? 0;
+        const variacao = ultima?.variacao?.toNumber() ??
+            (valorAnterior > 0 ? ((valor - valorAnterior) / valorAnterior) * 100 : 0);
+
+        return {
+            slug: c.slug,
+            nome: c.nome,
+            valor: valor,
+            unidade: formatarUnidade(c.unidade),
+            variacao: variacao,
+            categoria: formatarCategoria(c.categoria),
+            praca: ultima?.praca ?? "N/A",
+            // Formatar data: "Hoje, HH:mm" ou DD/MM/YYYY
+            dataAtualizacao: ultima?.dataReferencia
+                ? new Date(ultima.dataReferencia).toLocaleDateString('pt-BR')
+                : new Date(c.updatedAt).toLocaleDateString('pt-BR'),
+        };
+    });
+
+    const graos = cotacoes.filter((c) => c.categoria === "graos");
+    const pecuaria = cotacoes.filter((c) => c.categoria === "pecuaria");
+    const sucroenergetico = cotacoes.filter((c) => c.categoria === "sucroenergetico");
+
+    return (
+        <div className="container px-4 py-6 md:py-8">
+            {/* Header da página */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold">Cotações</h1>
+                    <p className="text-muted-foreground mt-1">
+                        Preços atualizados de commodities agrícolas
+                    </p>
+                </div>
+
+                {/* Indicador do Dólar */}
+                <div className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                    <div className="flex items-center gap-2">
+                        <span className="text-2xl">🇺🇸</span>
+                        <div>
+                            <p className="text-xs text-muted-foreground">Dólar PTAX</p>
+                            <p className="font-semibold">
+                                R$ {dolar.venda.toFixed(2)}
+                            </p>
+                        </div>
+                    </div>
+                    <Badge
+                        variant="outline"
+                        className={
+                            dolar.variacao >= 0
+                                ? "bg-[var(--positive)]/10 text-[var(--positive)] border-[var(--positive)]/20"
+                                : "bg-[var(--negative)]/10 text-[var(--negative)] border-[var(--negative)]/20"
+                        }
+                    >
+                        {dolar.variacao >= 0 ? "+" : ""}
+                        {dolar.variacao.toFixed(2)}%
+                    </Badge>
+                </div>
+            </div>
+
+            {/* Gráfico de Destaque */}
+            <div className="mb-8">
+                <PriceChart commodityName="Indicador Soja ESALQ/BM&FBovespa" commoditySlug="soja" />
+            </div>
+
+            {/* Tabs de categoria */}
+            <Tabs defaultValue="todos" className="space-y-6">
+                <TabsList className="w-full md:w-auto grid grid-cols-4 md:flex">
+                    <TabsTrigger value="todos" className="flex-1 md:flex-none">
+                        Todos
+                        <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
+                            {cotacoes.length}
+                        </Badge>
+                    </TabsTrigger>
+                    <TabsTrigger value="graos" className="flex-1 md:flex-none">
+                        Grãos
+                        <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
+                            {graos.length}
+                        </Badge>
+                    </TabsTrigger>
+                    <TabsTrigger value="pecuaria" className="flex-1 md:flex-none">
+                        Pecuária
+                        <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
+                            {pecuaria.length}
+                        </Badge>
+                    </TabsTrigger>
+                    <TabsTrigger value="sucroenergetico" className="flex-1 md:flex-none text-xs sm:text-sm">
+                        Sucro
+                        <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
+                            {sucroenergetico.length}
+                        </Badge>
+                    </TabsTrigger>
+                </TabsList>
+
+                {/* Todos */}
+                <TabsContent value="todos" className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {cotacoes.map((cotacao) => (
+                            <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
+                        ))}
+                    </div>
+                </TabsContent>
+
+                {/* Grãos */}
+                <TabsContent value="graos" className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {graos.map((cotacao) => (
+                            <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
+                        ))}
+                    </div>
+                </TabsContent>
+
+                {/* Pecuária */}
+                <TabsContent value="pecuaria" className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {pecuaria.map((cotacao) => (
+                            <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
+                        ))}
+                    </div>
+                </TabsContent>
+
+                {/* Sucroenergetico */}
+                <TabsContent value="sucroenergetico" className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {sucroenergetico.map((cotacao) => (
+                            <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
+                        ))}
+                    </div>
+                </TabsContent>
+            </Tabs>
+
+            {/* Fonte */}
+            <div className="mt-8 pt-6 border-t">
+                <p className="text-sm text-muted-foreground text-center">
+                    Dados de referência. Fontes: CEPEA/ESALQ, CONAB, Banco Central.
+                    <br />
+                    Última atualização: Hoje às 14:30
+                </p>
+            </div>
+        </div >
+    );
+}

@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Categoria de commodity
+enum Categoria {
+  GRAOS
+  PECUARIA
+  SUCROENERGETICO
+  FIBRAS
+  OUTROS
+}
+
+// Unidade de medida
+enum Unidade {
+  SACA_60KG      // sc 60kg (soja, milho)
+  ARROBA         // @ (boi gordo)
+  LITRO          // litro (etanol)
+  TONELADA       // ton (açúcar)
+  KG             // kg (café)
+}
+
+// Commodity (produto agrícola)
+model Commodity {
+  id          String    @id @default(cuid())
+  slug        String    @unique // ex: "soja", "boi-gordo"
+  nome        String    // ex: "Soja"
+  categoria   Categoria
+  unidade     Unidade
+  descricao   String?
+  icone       String?   // emoji ou path do ícone
+  ativo       Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  cotacoes    Cotacao[]
+  alertas     Alerta[]
+
+  @@index([categoria])
+  @@index([slug])
+}
+
+// Cotação de preço
+model Cotacao {
+  id            String    @id @default(cuid())
+  commodityId   String
+  commodity     Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
+  
+  valor         Decimal   @db.Decimal(10, 2)
+  valorAnterior Decimal?  @db.Decimal(10, 2)
+  variacao      Decimal?  @db.Decimal(10, 2)
+  
+  praca         String    // ex: "Paranaguá/PR", "São Paulo/SP"
+  estado        String    // ex: "PR", "SP"
+  
+  fonte         String    // ex: "CEPEA", "CONAB"
+  fonteUrl      String?
+  
+  dataReferencia DateTime // data da cotação
+  createdAt      DateTime @default(now())
+
+  @@unique([commodityId, praca, dataReferencia])
+  @@index([commodityId])
+  @@index([dataReferencia])
+  @@index([estado])
+}
+
+// Alerta de preço (futuro)
+model Alerta {
+  id          String    @id @default(cuid())
+  commodityId String
+  commodity   Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
+  
+  email       String
+  tipo        String    // "ACIMA" | "ABAIXO"
+  valorAlvo   Decimal   @db.Decimal(10, 2)
+  ativo       Boolean   @default(true)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([commodityId])
+  @@index([email])
+}
+
+// Log de atualização de dados
+model AtualizacaoLog {
+  id        String   @id @default(cuid())
+  fonte     String   // "BCB", "CEPEA", "CONAB"
+  status    String   // "SUCCESS", "ERROR"
+  mensagem  String?
+  registros Int      @default(0)
+  duracao   Int?     // ms
+  createdAt DateTime @default(now())
+
+  @@index([fonte])
+  @@index([createdAt])
+}
+
+// Cotação do dólar (PTAX)
+model CotacaoDolar {
+  id             String   @id @default(cuid())
+  dataReferencia DateTime @unique
+  compra         Decimal  @db.Decimal(10, 4)
+  venda          Decimal  @db.Decimal(10, 4)
+  createdAt      DateTime @default(now())
+
+  @@index([dataReferencia])
+}
