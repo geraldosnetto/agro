@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
 import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import prisma from "@/lib/prisma";
+import { Categoria } from "@prisma/client";
+
+// Validador de categoria usando o enum do Prisma
+function isValidCategoria(value: string): value is Categoria {
+    return Object.values(Categoria).includes(value.toUpperCase() as Categoria);
+}
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const categoria = searchParams.get("categoria");
+    const categoriaParam = searchParams.get("categoria");
+
+    // Validação type-safe da categoria
+    const categoriaFilter = categoriaParam && isValidCategoria(categoriaParam)
+        ? categoriaParam.toUpperCase() as Categoria
+        : undefined;
 
     // Buscar dólar PTAX real (BCB)
     const dolar = await fetchDolarPTAX();
@@ -14,7 +25,7 @@ export async function GET(request: Request) {
         const commodities = await prisma.commodity.findMany({
             where: {
                 ativo: true,
-                ...(categoria ? { categoria: categoria.toUpperCase() as any } : {})
+                ...(categoriaFilter ? { categoria: categoriaFilter } : {})
             },
             include: {
                 cotacoes: {

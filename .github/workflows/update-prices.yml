@@ -10,22 +10,35 @@ jobs:
   update-prices:
     runs-on: ubuntu-latest
     steps:
-      - name: Call Update API
+      - name: Call Update API with Retry
         run: |
           if [ -z "${{ secrets.APP_URL }}" ]; then
             echo "Error: APP_URL secret is not set"
             exit 1
           fi
           
-          echo "Triggering price update at ${{ secrets.APP_URL }}..."
+          MAX_RETRIES=3
+          RETRY_DELAY=30
           
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-            "${{ secrets.APP_URL }}/api/admin/update-prices?key=${{ secrets.CRON_SECRET }}" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i of $MAX_RETRIES: Triggering price update..."
             
-          if [ "$HTTP_STATUS" -eq 200 ]; then
-             echo "Success: API returned 200 OK"
-          else
-             echo "Error: API returned $HTTP_STATUS"
-             exit 1
-          fi
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              "${{ secrets.APP_URL }}/api/admin/update-prices?key=${{ secrets.CRON_SECRET }}" \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              --max-time 120)
+              
+            if [ "$HTTP_STATUS" -eq 200 ]; then
+               echo "✅ Success: API returned 200 OK"
+               exit 0
+            else
+               echo "⚠️ Attempt $i failed with status $HTTP_STATUS"
+               if [ $i -lt $MAX_RETRIES ]; then
+                 echo "Waiting ${RETRY_DELAY}s before retry..."
+                 sleep $RETRY_DELAY
+               fi
+            fi
+          done
+          
+          echo "❌ All $MAX_RETRIES attempts failed"
+          exit 1

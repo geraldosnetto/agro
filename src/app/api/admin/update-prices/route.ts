@@ -2,6 +2,17 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { fetchCepeaSpotPrice } from "@/lib/data-sources/cepea";
+import { timingSafeEqual } from "crypto";
+
+// Comparação segura contra timing attacks
+function safeCompare(a: string | null | undefined, b: string | null | undefined): boolean {
+    if (!a || !b || a.length !== b.length) return false;
+    try {
+        return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+    } catch {
+        return false;
+    }
+}
 
 export async function POST(request: Request) {
     try {
@@ -11,11 +22,11 @@ export async function POST(request: Request) {
 
         const cronSecret = process.env.CRON_SECRET;
 
-        // Se CRON_SECRET não estiver configurado (dev), permite passar com aviso
-        // Em produção, deve ser obrigatório.
+        // Validação timing-safe para evitar timing attacks
+        const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
         const isAuthorized =
-            (authHeader === `Bearer ${cronSecret}`) ||
-            (queryKey === cronSecret) ||
+            safeCompare(bearerToken, cronSecret) ||
+            safeCompare(queryKey, cronSecret) ||
             (!cronSecret && process.env.NODE_ENV === 'development');
 
         if (!isAuthorized) {

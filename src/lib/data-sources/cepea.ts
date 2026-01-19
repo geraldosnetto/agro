@@ -1,6 +1,9 @@
 
 import { JSDOM } from 'jsdom';
-import { execSync } from 'child_process';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 interface CepeaData {
     valor: number;
@@ -41,7 +44,7 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
 
         // Timeout de 30s e User-Agent comum para evitar bloqueios simples
         const cmd = `curl -s -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" --max-time 30 "${config.url}"`;
-        const html = execSync(cmd, { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 });
+        const { stdout: html } = await execAsync(cmd, { maxBuffer: 10 * 1024 * 1024 });
 
         const dom = new JSDOM(html);
         const doc = dom.window.document;
