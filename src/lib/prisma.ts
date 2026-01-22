@@ -5,9 +5,13 @@ import pg from 'pg'
 const connectionString = process.env.DATABASE_URL!
 
 const prismaClientSingleton = () => {
-    // Para serverless/edge pode ser diferente, mas para Node runtime
-    // usar adapter é boa prática com Prisma 7 se configurado assim.
-    const pool = new pg.Pool({ connectionString })
+    // Pool configurado com limites explícitos para performance
+    const pool = new pg.Pool({
+        connectionString,
+        max: 10,                    // Máximo de conexões no pool
+        idleTimeoutMillis: 30000,   // Timeout para conexões idle (30s)
+        connectionTimeoutMillis: 5000, // Timeout para obter conexão (5s)
+    })
     const adapter = new PrismaPg(pool)
     return new PrismaClient({ adapter })
 }

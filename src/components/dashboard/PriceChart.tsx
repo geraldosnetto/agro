@@ -56,10 +56,19 @@ export function PriceChart({ commoditySlug = "soja", commodityName = "Soja" }: P
         }
     }, [commoditySlug, period]);
 
-    // Calculate min/max for Y axis domain
-    const values = data.map(d => d.valor);
-    const min = values.length ? Math.min(...values) * 0.98 : 0;
-    const max = values.length ? Math.max(...values) * 1.02 : 100;
+    // Calculate min/max for Y axis domain using reduce (evita stack overflow com arrays grandes)
+    const { min, max } = data.length > 0
+        ? data.reduce(
+            (acc, d) => ({
+                min: Math.min(acc.min, d.valor),
+                max: Math.max(acc.max, d.valor)
+            }),
+            { min: data[0].valor, max: data[0].valor }
+        )
+        : { min: 0, max: 100 };
+
+    const yMin = min * 0.98;
+    const yMax = max * 1.02;
 
     return (
         <Card className="w-full">
@@ -108,7 +117,7 @@ export function PriceChart({ commoditySlug = "soja", commodityName = "Soja" }: P
                                 />
                                 <YAxis
                                     hide={false}
-                                    domain={[min, max]}
+                                    domain={[yMin, yMax]}
                                     tickLine={false}
                                     axisLine={false}
                                     tickFormatter={(value) => `R$${value.toFixed(0)}`}

@@ -190,9 +190,9 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {features.map((feature, index) => (
+              {features.map((feature) => (
                 <div
-                  key={index}
+                  key={feature.title}
                   className="group p-6 rounded-xl border bg-card hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
                 >
                   <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">

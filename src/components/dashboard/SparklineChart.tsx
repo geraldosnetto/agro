@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import useSWR from "swr";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 
@@ -8,13 +9,18 @@ interface SparklineProps {
     isPositive: boolean;
 }
 
-const fetcher = (url: string) => fetch(url).then(res => {
-    if (!res.ok) throw new Error('Failed to fetch');
-    return res.json();
-});
+interface ChartData {
+    valor: number;
+}
 
-export function SparklineChart({ slug, isPositive }: SparklineProps) {
-    const { data, error, isLoading } = useSWR<{ valor: number }[]>(
+const fetcher = async (url: string): Promise<ChartData[]> => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+};
+
+export const SparklineChart = memo(function SparklineChart({ slug, isPositive }: SparklineProps) {
+    const { data, error, isLoading } = useSWR<ChartData[]>(
         `/api/cotacoes/${slug}/historico?days=7`,
         fetcher,
         {
@@ -46,4 +52,4 @@ export function SparklineChart({ slug, isPositive }: SparklineProps) {
             </LineChart>
         </ResponsiveContainer>
     );
-}
+});

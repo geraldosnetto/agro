@@ -1,9 +1,4 @@
-
 import { JSDOM } from 'jsdom';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
 
 interface CepeaData {
     valor: number;
@@ -14,8 +9,8 @@ interface CepeaData {
 
 interface CommodityConfig {
     url: string;
-    keywords?: string[]; // Palavras-chave para identificar a tabela correta (ex: "Anidro", "Paraná")
-    tableIndex?: number; // Fallback: índice da tabela se não tiver keywords
+    keywords?: string[];
+    tableIndex?: number;
 }
 
 const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
@@ -27,25 +22,41 @@ const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
     'acucar-cristal': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['Cristal', 'CRISTAL'] },
     'etanol-hidratado': { url: 'https://www.cepea.org.br/br/indicador/etanol.aspx', keywords: ['Hidratado', 'HIDRATADO'] },
     'etanol-anidro': { url: 'https://www.cepea.org.br/br/indicador/etanol.aspx', keywords: ['Anidro', 'ANIDRO'] },
-    'trigo': { url: 'https://www.cepea.org.br/br/indicador/trigo.aspx', keywords: ['Paraná', 'PR'] }, // Referência PR
-    'frango': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Congelado'] }, // Default Congelado
-    'suino': { url: 'https://www.cepea.org.br/br/indicador/suino.aspx', keywords: ['Vivo'] }, // Suíno Vivo
+    'trigo': { url: 'https://www.cepea.org.br/br/indicador/trigo.aspx', keywords: ['Paraná', 'PR'] },
+    'frango': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Congelado'] },
+    'suino': { url: 'https://www.cepea.org.br/br/indicador/suino.aspx', keywords: ['Vivo'] },
 };
 
+// Slugs válidos para validação
+const VALID_SLUGS = new Set(Object.keys(COMMODITY_CONFIG));
+
 export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | null> {
-    const config = COMMODITY_CONFIG[slug];
-    if (!config) {
-        console.warn(`Configuração não encontrada para commodity: ${slug}`);
+    // Validação de whitelist para evitar injection
+    if (!VALID_SLUGS.has(slug)) {
+        console.warn(`Slug inválido ou não configurado: ${slug}`);
         return null;
     }
 
+    const config = COMMODITY_CONFIG[slug];
+
     try {
-        console.log(`Buscando dados CEPEA para ${slug} [${config.url}]...`);
+        // Usar fetch nativo em vez de exec (elimina command injection)
+        const response = await fetch(config.url, {
+            method: 'GET',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+            },
+            signal: AbortSignal.timeout(30000), // 30s timeout
+        });
 
-        // Timeout de 30s e User-Agent comum para evitar bloqueios simples
-        const cmd = `curl -s -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" --max-time 30 "${config.url}"`;
-        const { stdout: html } = await execAsync(cmd, { maxBuffer: 10 * 1024 * 1024 });
+        if (!response.ok) {
+            console.error(`Erro HTTP ${response.status} ao buscar CEPEA para ${slug}`);
+            return null;
+        }
 
+        const html = await response.text();
         const dom = new JSDOM(html);
         const doc = dom.window.document;
         const tables = doc.querySelectorAll('table');
@@ -59,7 +70,6 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
 
         // Estratégia de seleção de tabela
         if (config.keywords && config.keywords.length > 0) {
-            // Procura tabela que contenha a keyword ou cujo título anterior contenha
             for (const table of Array.from(tables)) {
                 const tableText = table.textContent || '';
                 const prevElementText = table.previousElementSibling?.textContent || '';
@@ -74,13 +84,11 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
                 }
             }
         } else {
-            // Default: primeira tabela
             targetTable = tables[config.tableIndex || 0];
         }
 
         if (!targetTable) {
             console.warn(`Tabela não encontrada para ${slug} com keywords: ${config.keywords}`);
-            // Fallback: Tenta a primeira se não achou específica, mas loga aviso
             if (tables.length > 0) targetTable = tables[0];
             else return null;
         }
@@ -91,10 +99,8 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
 
         for (const row of Array.from(rows)) {
             const cells = row.querySelectorAll('td');
-            // Precisa ter pelo menos Data e Valor (2 células) e a primeira deve parecer uma data
             if (cells.length >= 2) {
                 const dataText = cells[0].textContent?.trim();
-                // Validação básica de data DD/MM/YYYY
                 if (dataText && /\d{1,2}\/\d{1,2}\/\d{4}/.test(dataText)) {
                     validRow = row;
                     break;
@@ -108,34 +114,44 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
         }
 
         const cells = validRow.querySelectorAll('td');
-        const dataStr = cells[0].textContent?.trim(); // Ex: 16/01/2026
-        const valorStr = cells[1].textContent?.trim(); // Ex: 131,45
-        const varDiaStr = cells[2]?.textContent?.trim().replace('%', ''); // Ex: -0,11
+        const dataStr = cells[0].textContent?.trim();
+        const valorStr = cells[1].textContent?.trim();
+        const varDiaStr = cells[2]?.textContent?.trim().replace('%', '');
 
         if (!dataStr || !valorStr) return null;
 
-        return {
-            valor: parseValor(valorStr),
-            data: parseData(dataStr),
-            variacaoDiaria: varDiaStr ? parseValor(varDiaStr) : 0
-        };
+        const valor = parseValor(valorStr);
+        const data = parseData(dataStr);
+        const variacaoDiaria = varDiaStr ? parseValor(varDiaStr) : 0;
+
+        // Validação dos valores parseados
+        if (isNaN(valor) || valor <= 0) {
+            console.warn(`Valor inválido parseado para ${slug}: ${valorStr} -> ${valor}`);
+            return null;
+        }
+
+        return { valor, data, variacaoDiaria };
 
     } catch (error) {
-        console.error(`Erro ao buscar dados CEPEA para ${slug}:`, error);
-        return null; // Retorna null para tentar novamente ou logar falha
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`Erro ao buscar dados CEPEA para ${slug}:`, { error: errorMessage });
+        return null;
     }
 }
 
 function parseValor(str: string): number {
     if (!str) return 0;
-    // Remove R$, espaços e converte
     const cleanStr = str.replace(/[^\d.,-]/g, '');
-    // Remove pontos de milhar e troca vírgula por ponto
-    return parseFloat(cleanStr.replace(/\./g, '').replace(',', '.'));
+    const value = parseFloat(cleanStr.replace(/\./g, '').replace(',', '.'));
+    return isNaN(value) ? 0 : value;
 }
 
 function parseData(str: string): Date {
     if (!str) return new Date();
-    const [dia, mes, ano] = str.split('/');
-    return new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
+    // Validar formato DD/MM/YYYY
+    const match = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!match) return new Date();
+    const [, dia, mes, ano] = match;
+    // Usar UTC para evitar problemas de timezone
+    return new Date(Date.UTC(parseInt(ano), parseInt(mes) - 1, parseInt(dia)));
 }

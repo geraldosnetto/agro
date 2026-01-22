@@ -1,21 +1,17 @@
 import { NextResponse } from "next/server";
 import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import prisma from "@/lib/prisma";
-import { Categoria } from "@prisma/client";
-
-// Validador de categoria usando o enum do Prisma
-function isValidCategoria(value: string): value is Categoria {
-    return Object.values(Categoria).includes(value.toUpperCase() as Categoria);
-}
+import { CategoriaSchema } from "@/lib/schemas/api";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const categoriaParam = searchParams.get("categoria");
 
-    // Validação type-safe da categoria
-    const categoriaFilter = categoriaParam && isValidCategoria(categoriaParam)
-        ? categoriaParam.toUpperCase() as Categoria
-        : undefined;
+    // Validação type-safe da categoria com Zod
+    const categoriaResult = CategoriaSchema.safeParse(
+        categoriaParam ? categoriaParam.toUpperCase() : undefined
+    );
+    const categoriaFilter = categoriaResult.success ? categoriaResult.data : undefined;
 
     // Buscar dólar PTAX real (BCB)
     const dolar = await fetchDolarPTAX();
@@ -52,9 +48,7 @@ export async function GET(request: Request) {
                 nome: c.nome,
                 valor: valor,
                 valorAnterior: valorAnterior,
-                unidade: c.unidade, // O enum do banco bate com o esperado? (SACA_60KG vs "sc 60kg") -> Precisa mapear para display?
-                // O Frontend exibe direto string. O Seed populou "SACA_60KG".
-                // Talvez precise formatar a unidade para ficar bonito ("sc 60kg").
+                unidade: c.unidade,
                 categoria: c.categoria,
                 praca: ultimaCotacao?.praca ?? "N/A",
                 estado: ultimaCotacao?.estado ?? "N/A",
@@ -80,6 +74,10 @@ export async function GET(request: Request) {
                 total: cotacoesFormatadas.length,
                 ultimaAtualizacao: new Date().toISOString(),
             },
+        }, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600'
+            }
         });
     } catch (error) {
         console.error("Erro ao buscar cotações:", error);
