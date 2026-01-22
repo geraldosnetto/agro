@@ -1,44 +1,21 @@
 /**
  * Cliente para API do Banco Central do Brasil
  * Documentação: https://dadosabertos.bcb.gov.br/
+ * API PTAX: https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/swagger-ui3
  */
 
 import logger from '@/lib/logger';
 
-const BCB_API_URL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs";
+const PTAX_API_URL = "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata";
 
-// Séries do BCB
-const SERIES = {
-    PTAX_COMPRA: 1,  // PTAX compra
-    PTAX_VENDA: 10813, // PTAX venda  
-    SELIC: 432, // Taxa SELIC
-};
-
-interface BCBResponse {
-    data: string; // DD/MM/YYYY
-    valor: string;
+interface PTAXCotacao {
+    cotacaoCompra: number;
+    cotacaoVenda: number;
+    dataHoraCotacao: string;
 }
 
-/**
- * Busca últimos N valores de uma série do BCB
- */
-async function fetchSerie(serie: number, ultimos: number = 1): Promise<BCBResponse[]> {
-    const url = `${BCB_API_URL}/${serie}/dados/ultimos/${ultimos}?formato=json`;
-
-    try {
-        const response = await fetch(url, {
-            next: { revalidate: 3600 }, // Cache de 1 hora
-        });
-
-        if (!response.ok) {
-            throw new Error(`BCB API error: ${response.status}`);
-        }
-
-        return response.json();
-    } catch (error) {
-        logger.error(`Erro ao buscar série ${serie} do BCB`, { error: error instanceof Error ? error.message : String(error) });
-        return [];
-    }
+interface PTAXResponse {
+    value: PTAXCotacao[];
 }
 
 export interface CotacaoDolar {
@@ -49,38 +26,84 @@ export interface CotacaoDolar {
 }
 
 /**
- * Busca cotação do dólar PTAX
+ * Formata data para o formato MM-DD-YYYY usado pela API do BCB
  */
-export async function fetchDolarPTAX(): Promise<CotacaoDolar | null> {
-    try {
-        // Busca últimos 2 valores para calcular variação
-        const [compraData, vendaData] = await Promise.all([
-            fetchSerie(SERIES.PTAX_COMPRA, 2),
-            fetchSerie(SERIES.PTAX_VENDA, 2),
-        ]);
+function formatDateForBCB(date: Date): string {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}-${day}-${year}`;
+}
 
-        if (!compraData.length || !vendaData.length) {
+/**
+ * Busca cotação do dólar PTAX para uma data específica
+ */
+async function fetchPTAXForDate(date: Date): Promise<PTAXCotacao | null> {
+    const formattedDate = formatDateForBCB(date);
+    const url = `${PTAX_API_URL}/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='${formattedDate}'&$format=json`;
+
+    try {
+        const response = await fetch(url, {
+            next: { revalidate: 3600 }, // Cache de 1 hora
+        });
+
+        if (!response.ok) {
+            throw new Error(`BCB API error: ${response.status}`);
+        }
+
+        const data: PTAXResponse = await response.json();
+
+        if (!data.value || data.value.length === 0) {
             return null;
         }
 
-        const compraAtual = parseFloat(compraData[compraData.length - 1].valor);
-        const vendaAtual = parseFloat(vendaData[vendaData.length - 1].valor);
+        // Retorna a última cotação do dia (pode ter várias)
+        return data.value[data.value.length - 1];
+    } catch (error) {
+        logger.error(`Erro ao buscar PTAX para ${formattedDate}`, { error: error instanceof Error ? error.message : String(error) });
+        return null;
+    }
+}
+
+/**
+ * Busca cotação do dólar PTAX (última disponível)
+ */
+export async function fetchDolarPTAX(): Promise<CotacaoDolar | null> {
+    try {
+        const hoje = new Date();
+        let cotacaoHoje: PTAXCotacao | null = null;
+        let cotacaoAnterior: PTAXCotacao | null = null;
+
+        // Tenta buscar cotação de hoje e dos últimos 5 dias úteis
+        for (let i = 0; i <= 5 && !cotacaoHoje; i++) {
+            const data = new Date(hoje);
+            data.setDate(data.getDate() - i);
+            cotacaoHoje = await fetchPTAXForDate(data);
+        }
+
+        if (!cotacaoHoje) {
+            logger.warn('Nenhuma cotação PTAX encontrada nos últimos 5 dias');
+            return null;
+        }
+
+        // Busca cotação anterior para calcular variação
+        const dataAtual = new Date(cotacaoHoje.dataHoraCotacao);
+        for (let i = 1; i <= 5 && !cotacaoAnterior; i++) {
+            const dataAnterior = new Date(dataAtual);
+            dataAnterior.setDate(dataAnterior.getDate() - i);
+            cotacaoAnterior = await fetchPTAXForDate(dataAnterior);
+        }
 
         // Calcula variação se houver dado anterior
         let variacao: number | undefined;
-        if (vendaData.length > 1) {
-            const vendaAnterior = parseFloat(vendaData[vendaData.length - 2].valor);
-            variacao = ((vendaAtual - vendaAnterior) / vendaAnterior) * 100;
+        if (cotacaoAnterior) {
+            variacao = ((cotacaoHoje.cotacaoVenda - cotacaoAnterior.cotacaoVenda) / cotacaoAnterior.cotacaoVenda) * 100;
         }
 
-        // Parse da data (DD/MM/YYYY)
-        const [dia, mes, ano] = compraData[compraData.length - 1].data.split("/");
-        const data = new Date(parseInt(ano), parseInt(mes) - 1, parseInt(dia));
-
         return {
-            data,
-            compra: compraAtual,
-            venda: vendaAtual,
+            data: dataAtual,
+            compra: cotacaoHoje.cotacaoCompra,
+            venda: cotacaoHoje.cotacaoVenda,
             variacao,
         };
     } catch (error) {
@@ -90,11 +113,20 @@ export async function fetchDolarPTAX(): Promise<CotacaoDolar | null> {
 }
 
 /**
- * Busca taxa SELIC
+ * Busca taxa SELIC (usando API SGS que ainda funciona para séries específicas)
  */
 export async function fetchSELIC(): Promise<number | null> {
     try {
-        const data = await fetchSerie(SERIES.SELIC, 1);
+        const url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json";
+        const response = await fetch(url, {
+            next: { revalidate: 86400 }, // Cache de 24 horas
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const data = await response.json();
         if (!data.length) return null;
         return parseFloat(data[0].valor);
     } catch {
