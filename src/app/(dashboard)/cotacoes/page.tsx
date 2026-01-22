@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { CotacaoCard, CotacaoCategoria } from "@/components/dashboard/CotacaoCard";
 import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
-import { PriceChart } from "@/components/dashboard/PriceChart";
+import { PriceChartSelector } from "@/components/dashboard/PriceChartSelector";
 import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
 
@@ -100,9 +100,12 @@ export default async function CotacoesPage() {
                 </div>
             </div>
 
-            {/* Gráfico de Destaque */}
+            {/* Gráfico com Seletor */}
             <div className="mb-8">
-                <PriceChart commodityName="Indicador Soja ESALQ/BM&FBovespa" commoditySlug="soja" />
+                <PriceChartSelector
+                    commodities={commoditiesData.map(c => ({ slug: c.slug, nome: c.nome }))}
+                    defaultSlug="soja"
+                />
             </div>
 
             {/* Tabs de categoria */}
