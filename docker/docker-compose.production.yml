@@ -1,0 +1,72 @@
+# ==========================================
+# AgroIndica - Docker Compose Production
+# Domain: indicagro.com.br
+# ==========================================
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: indicagro_db_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: indicagro
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: indicagro
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '127.0.0.1:5433:5432'  # Port 5433 to avoid conflict with folkor
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U indicagro']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - indicagro_network
+
+  # Next.js Application
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.production
+      args:
+        NEXT_PUBLIC_APP_URL: https://indicagro.com.br
+    container_name: indicagro_web_prod
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://indicagro:${DB_PASSWORD}@postgres:5432/indicagro
+      - CRON_SECRET=${CRON_SECRET}
+      - NEXT_PUBLIC_APP_URL=https://indicagro.com.br
+    ports:
+      - '127.0.0.1:3010:3000'  # Port 3010 to avoid conflict with other apps
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3000/']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - indicagro_network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  indicagro_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.22.0.0/16

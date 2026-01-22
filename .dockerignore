@@ -1,0 +1,13 @@
+# Arquivos de ambiente locais
+.env
+.env.local
+.env.production
+
+# Docker ignore básico
+.git
+.gitignore
+node_modules
+.next
+*.log
+*.md
+!README.md

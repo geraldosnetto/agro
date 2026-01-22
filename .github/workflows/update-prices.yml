@@ -1,3 +1,13 @@
+# ==========================================
+# INDICAGRO - Atualização Automática de Preços
+# ==========================================
+# 
+# SECRETS NECESSÁRIOS (configure em Settings > Secrets > Actions):
+#   APP_URL     = https://indicagro.com.br
+#   CRON_SECRET = (mesma chave do .env.production)
+#
+# ==========================================
+
 name: Update Prices
 
 on:
