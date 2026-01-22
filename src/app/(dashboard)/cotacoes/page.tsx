@@ -6,6 +6,9 @@ import { PriceChart } from "@/components/dashboard/PriceChart";
 import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
 
+// Força renderização dinâmica - evita erro de conexão Prisma durante build
+export const dynamic = 'force-dynamic';
+
 export default async function CotacoesPage() {
     // Busca dólar PTAX real do Banco Central
     const dolarData = await fetchDolarPTAX();
