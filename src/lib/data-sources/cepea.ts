@@ -1,4 +1,5 @@
 import { JSDOM } from 'jsdom';
+import logger from '@/lib/logger';
 
 interface CepeaData {
     valor: number;
@@ -33,7 +34,7 @@ const VALID_SLUGS = new Set(Object.keys(COMMODITY_CONFIG));
 export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | null> {
     // Validação de whitelist para evitar injection
     if (!VALID_SLUGS.has(slug)) {
-        console.warn(`Slug inválido ou não configurado: ${slug}`);
+        logger.warn(`Slug inválido ou não configurado: ${slug}`);
         return null;
     }
 
@@ -52,7 +53,7 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
         });
 
         if (!response.ok) {
-            console.error(`Erro HTTP ${response.status} ao buscar CEPEA para ${slug}`);
+            logger.error(`Erro HTTP ${response.status} ao buscar CEPEA para ${slug}`);
             return null;
         }
 
@@ -62,7 +63,7 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
         const tables = doc.querySelectorAll('table');
 
         if (tables.length === 0) {
-            console.error(`Nenhuma tabela encontrada em ${config.url}`);
+            logger.error(`Nenhuma tabela encontrada em ${config.url}`);
             return null;
         }
 
@@ -88,7 +89,7 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
         }
 
         if (!targetTable) {
-            console.warn(`Tabela não encontrada para ${slug} com keywords: ${config.keywords}`);
+            logger.warn(`Tabela não encontrada para ${slug} com keywords: ${config.keywords}`);
             if (tables.length > 0) targetTable = tables[0];
             else return null;
         }
@@ -109,7 +110,7 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
         }
 
         if (!validRow) {
-            console.warn(`Nenhuma linha de dados válida encontrada na tabela para ${slug}`);
+            logger.warn(`Nenhuma linha de dados válida encontrada na tabela para ${slug}`);
             return null;
         }
 
@@ -126,7 +127,7 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
 
         // Validação dos valores parseados
         if (isNaN(valor) || valor <= 0) {
-            console.warn(`Valor inválido parseado para ${slug}: ${valorStr} -> ${valor}`);
+            logger.warn(`Valor inválido parseado para ${slug}: ${valorStr} -> ${valor}`);
             return null;
         }
 
@@ -134,7 +135,7 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(`Erro ao buscar dados CEPEA para ${slug}:`, { error: errorMessage });
+        logger.error(`Erro ao buscar dados CEPEA para ${slug}:`, { error: errorMessage });
         return null;
     }
 }

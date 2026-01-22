@@ -1,8 +1,8 @@
-
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { fetchCepeaSpotPrice } from "@/lib/data-sources/cepea";
 import { timingSafeEqual } from "crypto";
+import logger from "@/lib/logger";
 
 // Comparação segura contra timing attacks
 function safeCompare(a: string | null | undefined, b: string | null | undefined): boolean {
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        console.log("Iniciando atualização de preços...");
+        logger.info("Iniciando atualização de preços");
         const commodities = await prisma.commodity.findMany({
             where: { ativo: true }
         });
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
                 const data = await fetchCepeaSpotPrice(commodity.slug);
 
                 if (data) {
-                    console.log(`Atualizando ${commodity.nome}: R$ ${data.valor}`);
+                    logger.info(`Atualizando ${commodity.nome}`, { valor: data.valor });
 
                     const startOfDay = new Date(data.data);
                     startOfDay.setHours(0, 0, 0, 0);
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
                     updates.push({ slug: commodity.slug, status: 'failed_fetch' });
                 }
             } catch (err) {
-                console.error(`Falha ao processar ${commodity.slug}`, err);
+                logger.error(`Falha ao processar ${commodity.slug}`, { error: err instanceof Error ? err.message : String(err) });
                 updates.push({ slug: commodity.slug, status: 'error' });
             }
         }
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
         });
 
     } catch (error) {
-        console.error("Erro geral na atualização:", error);
+        logger.error("Erro geral na atualização", { error: error instanceof Error ? error.message : String(error) });
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }

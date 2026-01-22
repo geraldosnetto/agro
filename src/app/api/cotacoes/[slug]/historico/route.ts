@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { HistoricoQuerySchema, SlugSchema } from "@/lib/schemas/api";
+import logger from "@/lib/logger";
 
 export async function GET(
     request: Request,
@@ -76,7 +77,7 @@ export async function GET(
         });
 
     } catch (error) {
-        console.error("Erro ao buscar histórico:", { slug, days, error: error instanceof Error ? error.message : error });
+        logger.error("Erro ao buscar histórico", { slug, days, error: error instanceof Error ? error.message : String(error) });
         return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }

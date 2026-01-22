@@ -44,8 +44,8 @@ export function PriceChart({ commoditySlug = "soja", commodityName = "Soja" }: P
                     const json = await res.json();
                     setData(json);
                 }
-            } catch (error) {
-                console.error("Failed to fetch chart data", error);
+            } catch {
+                // Erro silencioso - componente mostra "Sem dados" como fallback
             } finally {
                 setLoading(false);
             }

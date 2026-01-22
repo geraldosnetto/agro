@@ -2,8 +2,23 @@ import { NextResponse } from "next/server";
 import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import prisma from "@/lib/prisma";
 import { CategoriaSchema } from "@/lib/schemas/api";
+import { formatarUnidade } from "@/lib/formatters";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
+import logger from "@/lib/logger";
 
 export async function GET(request: Request) {
+    // Rate limiting
+    const rateLimitResult = checkRateLimit(request);
+    if (!rateLimitResult.allowed) {
+        return NextResponse.json(
+            { error: "Rate limit exceeded. Tente novamente em alguns segundos." },
+            {
+                status: 429,
+                headers: getRateLimitHeaders(rateLimitResult),
+            }
+        );
+    }
+
     const { searchParams } = new URL(request.url);
     const categoriaParam = searchParams.get("categoria");
 
@@ -76,23 +91,12 @@ export async function GET(request: Request) {
             },
         }, {
             headers: {
-                'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600'
+                'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+                ...getRateLimitHeaders(rateLimitResult),
             }
         });
     } catch (error) {
-        console.error("Erro ao buscar cotações:", error);
+        logger.error("Erro ao buscar cotações", { error: error instanceof Error ? error.message : String(error) });
         return NextResponse.json({ error: "Erro interno ao buscar dados" }, { status: 500 });
     }
-}
-
-function formatarUnidade(unidade: string): string {
-    const map: Record<string, string> = {
-        'SACA_60KG': 'sc 60kg',
-        'ARROBA': '@',
-        'LITRO': 'L',
-        'TONELADA': 'ton',
-        'KG': 'kg',
-        'SACA_50KG': 'sc 50kg'
-    };
-    return map[unidade] || unidade;
 }

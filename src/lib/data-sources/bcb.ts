@@ -3,6 +3,8 @@
  * Documentação: https://dadosabertos.bcb.gov.br/
  */
 
+import logger from '@/lib/logger';
+
 const BCB_API_URL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs";
 
 // Séries do BCB
@@ -34,7 +36,7 @@ async function fetchSerie(serie: number, ultimos: number = 1): Promise<BCBRespon
 
         return response.json();
     } catch (error) {
-        console.error(`Erro ao buscar série ${serie} do BCB:`, error);
+        logger.error(`Erro ao buscar série ${serie} do BCB`, { error: error instanceof Error ? error.message : String(error) });
         return [];
     }
 }
@@ -82,7 +84,7 @@ export async function fetchDolarPTAX(): Promise<CotacaoDolar | null> {
             variacao,
         };
     } catch (error) {
-        console.error("Erro ao buscar dólar PTAX:", error);
+        logger.error("Erro ao buscar dólar PTAX", { error: error instanceof Error ? error.message : String(error) });
         return null;
     }
 }

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Ticker } from "@/components/layout/Ticker";
 import prisma from "@/lib/prisma";
+import logger from "@/lib/logger";
 import "./globals.css";
 
 const inter = Inter({
@@ -52,13 +53,9 @@ async function getTickerData() {
       change: c.cotacoes[0]?.variacao?.toNumber() ?? 0
     })).filter(item => item.value > 0); // Só mostra se tiver valor
   } catch (error) {
-    console.error('Erro ao buscar dados do Ticker:', error);
-    // Fallback para dados estáticos em caso de erro
-    return [
-      { symbol: "SOJA", value: 142.50, change: 1.25 },
-      { symbol: "MILHO", value: 72.80, change: -0.50 },
-      { symbol: "BOI", value: 312.80, change: 0.15 },
-    ];
+    logger.error('Erro ao buscar dados do Ticker', { error: error instanceof Error ? error.message : String(error) });
+    // Retorna array vazio em caso de erro - ticker não será exibido
+    return [];
   }
 }
 

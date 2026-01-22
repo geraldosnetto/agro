@@ -3,33 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { CotacaoCard, CotacaoCategoria } from "@/components/dashboard/CotacaoCard";
 import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import { PriceChart } from "@/components/dashboard/PriceChart";
-
+import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
-
-// Helper para formatar unidade para display
-function formatarUnidade(unidade: string): string {
-    const map: Record<string, string> = {
-        'SACA_60KG': 'sc 60kg',
-        'ARROBA': '@',
-        'LITRO': 'L',
-        'TONELADA': 'ton',
-        'KG': 'kg',
-        'SACA_50KG': 'sc 50kg'
-    };
-    return map[unidade] || unidade;
-}
-
-// Helper para mapear categoria do banco para o esperado pelo componente (lowercase)
-function formatarCategoria(cat: string): CotacaoCategoria {
-    return cat.toLowerCase() as CotacaoCategoria;
-}
-
-// Fallback para dólar caso API falhe
-const dolarFallback = {
-    compra: 5.89,
-    venda: 5.91,
-    variacao: 0.35,
-};
 
 export default async function CotacoesPage() {
     // Busca dólar PTAX real do Banco Central
@@ -38,7 +13,13 @@ export default async function CotacoesPage() {
         compra: dolarData.compra,
         venda: dolarData.venda,
         variacao: dolarData.variacao ?? 0,
-    } : dolarFallback;
+        disponivel: true,
+    } : {
+        compra: 0,
+        venda: 0,
+        variacao: 0,
+        disponivel: false,
+    };
 
     // Busca Commodities do banco
     const commoditiesData = await prisma.commodity.findMany({
@@ -65,7 +46,7 @@ export default async function CotacoesPage() {
             valor: valor,
             unidade: formatarUnidade(c.unidade),
             variacao: variacao,
-            categoria: formatarCategoria(c.categoria),
+            categoria: formatarCategoria(c.categoria) as CotacaoCategoria,
             praca: ultima?.praca ?? "N/A",
             // Formatar data: "Hoje, HH:mm" ou DD/MM/YYYY
             dataAtualizacao: ultima?.dataReferencia
@@ -96,21 +77,23 @@ export default async function CotacoesPage() {
                         <div>
                             <p className="text-xs text-muted-foreground">Dólar PTAX</p>
                             <p className="font-semibold">
-                                R$ {dolar.venda.toFixed(2)}
+                                {dolar.disponivel ? `R$ ${dolar.venda.toFixed(2)}` : 'Indisponível'}
                             </p>
                         </div>
                     </div>
-                    <Badge
-                        variant="outline"
-                        className={
-                            dolar.variacao >= 0
-                                ? "bg-[var(--positive)]/10 text-[var(--positive)] border-[var(--positive)]/20"
-                                : "bg-[var(--negative)]/10 text-[var(--negative)] border-[var(--negative)]/20"
-                        }
-                    >
-                        {dolar.variacao >= 0 ? "+" : ""}
-                        {dolar.variacao.toFixed(2)}%
-                    </Badge>
+                    {dolar.disponivel && (
+                        <Badge
+                            variant="outline"
+                            className={
+                                dolar.variacao >= 0
+                                    ? "bg-[var(--positive)]/10 text-[var(--positive)] border-[var(--positive)]/20"
+                                    : "bg-[var(--negative)]/10 text-[var(--negative)] border-[var(--negative)]/20"
+                            }
+                        >
+                            {dolar.variacao >= 0 ? "+" : ""}
+                            {dolar.variacao.toFixed(2)}%
+                        </Badge>
+                    )}
                 </div>
             </div>
 
