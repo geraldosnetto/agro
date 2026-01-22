@@ -12,6 +12,8 @@ interface CommodityConfig {
     url: string;
     keywords?: string[];
     tableIndex?: number;
+    priceColumnIndex?: number; // Default 1
+    varColumnIndex?: number; // Default priceColumnIndex + 1. Set -1 to disable.
 }
 
 const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
@@ -26,6 +28,12 @@ const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
     'trigo': { url: 'https://www.cepea.org.br/br/indicador/trigo.aspx', keywords: ['Paraná', 'PR'] },
     'frango': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Congelado'] },
     'suino': { url: 'https://www.cepea.org.br/br/indicador/suino.aspx', keywords: ['Vivo'] },
+    'algodao': { url: 'https://www.cepea.org.br/br/indicador/algodao.aspx' },
+    'arroz': { url: 'https://www.cepea.org.br/br/indicador/arroz.aspx' },
+    'cafe-robusta': { url: 'https://www.cepea.org.br/br/indicador/cafe.aspx', tableIndex: 1, keywords: ['Robusta', 'ROBUSTA'] },
+    'mandioca': { url: 'https://www.cepea.org.br/br/indicador/mandioca.aspx', priceColumnIndex: 2, varColumnIndex: -1 },
+    'leite': { url: 'https://www.cepea.org.br/br/indicador/leite.aspx', priceColumnIndex: 2, varColumnIndex: -1 },
+    // 'ovinos': { url: 'https://www.cepea.org.br/br/indicador/ovinos.aspx' }, // Tabela desconhecida ainda, manter
 };
 
 // Slugs válidos para validação
@@ -84,14 +92,18 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
                     break;
                 }
             }
-        } else {
-            targetTable = tables[config.tableIndex || 0];
+        }
+
+        // Fallback or explicit index
+        if (!targetTable && typeof config.tableIndex === 'number') {
+            targetTable = tables[config.tableIndex];
+        } else if (!targetTable) {
+            targetTable = tables[0];
         }
 
         if (!targetTable) {
-            logger.warn(`Tabela não encontrada para ${slug} com keywords: ${config.keywords}`);
-            if (tables.length > 0) targetTable = tables[0];
-            else return null;
+            logger.warn(`Tabela não encontrada para ${slug}`);
+            return null;
         }
 
         // Parse da primeira linha de dados válida
@@ -102,7 +114,12 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
             const cells = row.querySelectorAll('td');
             if (cells.length >= 2) {
                 const dataText = cells[0].textContent?.trim();
-                if (dataText && /\d{1,2}\/\d{1,2}\/\d{4}/.test(dataText)) {
+                // Regex para DD/MM/YYYY, MM/YYYY ou mmm/yy (suportar prefixos)
+                if (dataText && (
+                    /\d{1,2}\/\d{1,2}\/\d{4}/.test(dataText) ||
+                    /\d{1,2}\/\d{4}/.test(dataText) ||
+                    /[a-z]{3}\/\d{2}/i.test(dataText)
+                )) {
                     validRow = row;
                     break;
                 }
@@ -116,8 +133,15 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
 
         const cells = validRow.querySelectorAll('td');
         const dataStr = cells[0].textContent?.trim();
-        const valorStr = cells[1].textContent?.trim();
-        const varDiaStr = cells[2]?.textContent?.trim().replace('%', '');
+
+        const priceIdx = config.priceColumnIndex || 1;
+        const valorStr = cells[priceIdx]?.textContent?.trim();
+
+        let varDiaStr = '';
+        const varIdx = config.varColumnIndex !== undefined ? config.varColumnIndex : (priceIdx + 1);
+        if (varIdx >= 0) {
+            varDiaStr = cells[varIdx]?.textContent?.trim().replace('%', '') || '';
+        }
 
         if (!dataStr || !valorStr) return null;
 
@@ -149,10 +173,37 @@ function parseValor(str: string): number {
 
 function parseData(str: string): Date {
     if (!str) return new Date();
-    // Validar formato DD/MM/YYYY
-    const match = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (!match) return new Date();
-    const [, dia, mes, ano] = match;
-    // Usar UTC para evitar problemas de timezone
-    return new Date(Date.UTC(parseInt(ano), parseInt(mes) - 1, parseInt(dia)));
+
+    // 1. Tentar encontrar DD/MM/YYYY em qualquer lugar da string (Mandioca: "5 - 09/01/2026")
+    const matchFull = str.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (matchFull) {
+        const [, dia, mes, ano] = matchFull;
+        return new Date(Date.UTC(parseInt(ano), parseInt(mes) - 1, parseInt(dia)));
+    }
+
+    // 2. Tentar formato MM/YYYY (numérico)
+    // Usar ^ para garantir que é MM/YYYY se não tiver dia, mas Mandioca pode ter tudo mistura.
+    // Melhor verificar mmm/yy ou MM/YYYY isolado.
+    const matchMonth = str.match(/^(\d{1,2})\/(\d{4})$/);
+    if (matchMonth) {
+        const [, mes, ano] = matchMonth;
+        return new Date(Date.UTC(parseInt(ano), parseInt(mes) - 1, 1));
+    }
+
+    // 3. Tentar formato mmm/yy (Leite: "nov/25")
+    const matchMonthName = str.match(/([a-z]{3})\/(\d{2})/i);
+    if (matchMonthName) {
+        const [, mesStr, anoShort] = matchMonthName;
+        const meses: Record<string, number> = {
+            'jan': 0, 'fev': 1, 'mar': 2, 'abr': 3, 'mai': 4, 'jun': 5,
+            'jul': 6, 'ago': 7, 'set': 8, 'out': 9, 'nov': 10, 'dez': 11
+        };
+        const mesIndex = meses[mesStr.toLowerCase()];
+        if (mesIndex !== undefined) {
+            const fullYear = 2000 + parseInt(anoShort);
+            return new Date(Date.UTC(fullYear, mesIndex, 1));
+        }
+    }
+
+    return new Date();
 }
