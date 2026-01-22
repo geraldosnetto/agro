@@ -25,6 +25,12 @@ async function main() {
         { slug: 'etanol-hidratado', nome: 'Etanol Hidratado', categoria: Categoria.SUCROENERGETICO, unidade: Unidade.LITRO, descricao: 'Indicador Diário Etanol Hidratado ESALQ/BM&FBovespa' },
         { slug: 'etanol-anidro', nome: 'Etanol Anidro', categoria: Categoria.SUCROENERGETICO, unidade: Unidade.LITRO, descricao: 'Indicador Semanal Etanol Anidro ESALQ/BM&FBovespa' },
         { slug: 'acucar-cristal', nome: 'Açúcar Cristal', categoria: Categoria.SUCROENERGETICO, unidade: Unidade.SACA_60KG, descricao: 'Indicador Açúcar Cristal ESALQ/São Paulo' },
+        // Novos - completando todas commodities do CEPEA
+        { slug: 'algodao', nome: 'Algodão', categoria: Categoria.FIBRAS, unidade: Unidade.ARROBA, descricao: 'Indicador Algodão em Pluma CEPEA/ESALQ' },
+        { slug: 'arroz', nome: 'Arroz', categoria: Categoria.GRAOS, unidade: Unidade.SACA_60KG, descricao: 'Indicador Arroz CEPEA/IRGA-RS' },
+        { slug: 'cafe-robusta', nome: 'Café Robusta', categoria: Categoria.GRAOS, unidade: Unidade.SACA_60KG, descricao: 'Indicador Café Robusta CEPEA/ESALQ' },
+        { slug: 'mandioca', nome: 'Mandioca', categoria: Categoria.OUTROS, unidade: Unidade.TONELADA, descricao: 'Indicador Mandioca CEPEA/ESALQ' },
+        { slug: 'leite', nome: 'Leite', categoria: Categoria.PECUARIA, unidade: Unidade.LITRO, descricao: 'Indicador Leite CEPEA/ESALQ' },
     ]
 
     for (const c of commodities) {

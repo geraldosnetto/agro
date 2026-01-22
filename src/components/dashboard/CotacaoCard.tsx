@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { SparklineChart } from "./SparklineChart";
 
-export type CotacaoCategoria = "graos" | "pecuaria" | "sucroenergetico";
+export type CotacaoCategoria = "graos" | "pecuaria" | "sucroenergetico" | "fibras" | "outros";
 
 interface CotacaoCardProps {
     slug: string;
@@ -29,6 +29,14 @@ const categoriaConfig: Record<CotacaoCategoria, { label: string; className: stri
     sucroenergetico: {
         label: "Sucroenergetico",
         className: "bg-chart-3/10 text-chart-3 border-chart-3/20",
+    },
+    fibras: {
+        label: "Fibras",
+        className: "bg-chart-4/10 text-chart-4 border-chart-4/20",
+    },
+    outros: {
+        label: "Outros",
+        className: "bg-chart-5/10 text-chart-5 border-chart-5/20",
     },
 };
 
@@ -63,7 +71,9 @@ export function CotacaoCard({
                     "absolute top-0 left-0 right-0 h-1",
                     categoria === "graos" && "bg-chart-1",
                     categoria === "pecuaria" && "bg-chart-2",
-                    categoria === "sucroenergetico" && "bg-chart-3"
+                    categoria === "sucroenergetico" && "bg-chart-3",
+                    categoria === "fibras" && "bg-chart-4",
+                    categoria === "outros" && "bg-chart-5"
                 )}
             />
 
