@@ -16,6 +16,15 @@
             "headers": {
                 "CONTEXT7_API_KEY": "ctx7sk-c4d234c9-1dc6-47d9-8afa-b112e39fca74"
             }
+        },
+        "hostinger-mcp": {
+            "command": "npx",
+            "args": [
+                "hostinger-api-mcp@latest"
+            ],
+            "env": {
+                "API_TOKEN": "6YnPcOO7jhS2baV5y1d8XB7a0Lw81n229XlfIfqM3a25575d"
+            }
         }
     }
 }
