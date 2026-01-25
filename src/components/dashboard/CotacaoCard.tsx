@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,6 @@ interface CotacaoCardProps {
     categoria: CotacaoCategoria;
     praca?: string;
     dataAtualizacao?: string;
-    href?: string;
 }
 
 const categoriaConfig: Record<CotacaoCategoria, { label: string; className: string }> = {
@@ -49,22 +49,19 @@ export function CotacaoCard({
     categoria,
     praca,
     dataAtualizacao,
-    href,
 }: CotacaoCardProps) {
     const isPositive = variacao >= 0;
     const config = categoriaConfig[categoria];
 
-    const CardWrapper = href ? "a" : "div";
-    const cardProps = href ? { href } : {};
-
     return (
-        <Card
-            className={cn(
-                "group relative overflow-hidden transition-all duration-300",
-                "hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1",
-                "border-border/50 bg-card"
-            )}
-        >
+        <Link href={`/cotacoes/${slug}`} className="block">
+            <Card
+                className={cn(
+                    "group relative overflow-hidden transition-all duration-300",
+                    "hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1",
+                    "border-border/50 bg-card cursor-pointer"
+                )}
+            >
             {/* Gradient accent bar */}
             <div
                 className={cn(
@@ -139,6 +136,7 @@ export function CotacaoCard({
                     <SparklineChart slug={slug} isPositive={isPositive} />
                 </div>
             </CardContent>
-        </Card>
+            </Card>
+        </Link>
     );
 }

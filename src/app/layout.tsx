@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 import { Ticker } from "@/components/layout/Ticker";
 import prisma from "@/lib/prisma";
 import logger from "@/lib/logger";
@@ -69,10 +70,12 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <ThemeProvider>
-          <Ticker items={tickerData} />
-          {children}
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <Ticker items={tickerData} />
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

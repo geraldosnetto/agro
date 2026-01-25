@@ -1,10 +1,107 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+// ==================== AUTH ====================
+
+// Usuário
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // Para login com email/senha
+
+  // Plano do usuário
+  plan          String    @default("free") // free, pro, business
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  alertas       AlertaUsuario[]
+  favoritos     Favorito[]
+}
+
+// Conta OAuth (Google, GitHub, etc)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+// Sessão de usuário
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// Token de verificação de email
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Alerta de preço do usuário (relacionado com User)
+model AlertaUsuario {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commodityId String
+
+  tipo        String    // "ACIMA" | "ABAIXO" | "VARIACAO"
+  valorAlvo   Decimal?  @db.Decimal(10, 2)
+  percentual  Decimal?  @db.Decimal(5, 2) // Para alerta de variação
+  ativo       Boolean   @default(true)
+  disparado   Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([commodityId])
+}
+
+// Commodities favoritas do usuário
+model Favorito {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commodityId String
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, commodityId])
+  @@index([userId])
+}
+
+// ==================== COMMODITIES ====================
 
 // Categoria de commodity
 enum Categoria {

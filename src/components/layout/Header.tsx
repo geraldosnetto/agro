@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserMenu } from "@/components/auth/UserMenu";
 
 export function Header() {
 
@@ -66,6 +67,9 @@ export function Header() {
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>
+
+          {/* User Menu */}
+          <UserMenu />
 
           {/* Mobile Menu */}
           <Sheet>
