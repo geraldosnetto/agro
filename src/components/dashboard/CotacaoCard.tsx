@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { SparklineChart } from "./SparklineChart";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 export type CotacaoCategoria = "graos" | "pecuaria" | "sucroenergetico" | "fibras" | "outros";
 
@@ -84,9 +87,12 @@ export function CotacaoCard({
                             <p className="text-xs text-muted-foreground">{praca}</p>
                         )}
                     </div>
-                    <Badge variant="outline" className={cn("text-xs", config.className)}>
-                        {config.label}
-                    </Badge>
+                    <div className="flex items-center gap-1">
+                        <FavoriteButton commoditySlug={slug} size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Badge variant="outline" className={cn("text-xs", config.className)}>
+                            {config.label}
+                        </Badge>
+                    </div>
                 </div>
             </CardHeader>
 

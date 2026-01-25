@@ -72,7 +72,7 @@ export function UserMenu() {
                         <span>Meu Perfil</span>
                     </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild disabled>
+                <DropdownMenuItem asChild>
                     <Link href="/favoritos" className="cursor-pointer">
                         <Heart className="mr-2 h-4 w-4" />
                         <span>Favoritos</span>

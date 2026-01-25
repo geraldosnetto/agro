@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PriceChart } from "@/components/dashboard/PriceChart";
 import { CommodityStats } from "@/components/dashboard/CommodityStats";
-import { ChevronLeft, Bell, Download, Share2 } from "lucide-react";
+import { ChevronLeft, Bell, Share2 } from "lucide-react";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { ExportButton } from "@/components/ExportButton";
 
 export const dynamic = 'force-dynamic';
 
@@ -165,16 +167,14 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2">
+                    <FavoriteButton commoditySlug={slug} variant="button" size="sm" />
                     <Link href={`/alertas/novo?commodity=${slug}`}>
                         <Button variant="outline" size="sm">
                             <Bell className="h-4 w-4 mr-2" />
                             Criar Alerta
                         </Button>
                     </Link>
-                    <Button variant="outline" size="sm" disabled>
-                        <Download className="h-4 w-4 mr-2" />
-                        Baixar CSV
-                    </Button>
+                    <ExportButton commoditySlug={slug} size="sm" />
                     <Button variant="outline" size="sm" disabled>
                         <Share2 className="h-4 w-4 mr-2" />
                         Compartilhar
