@@ -10,7 +10,7 @@ import {
     YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 
 const periods = [
@@ -28,10 +28,11 @@ interface ChartData {
 interface PriceChartProps {
     commoditySlug?: string;
     commodityName?: string;
+    praca?: number;
 }
 
-export function PriceChart({ commoditySlug = "soja", commodityName = "Soja" }: PriceChartProps) {
-    const [period, setPeriod] = useState("30"); // Default 30 dias
+export function PriceChart({ commoditySlug = "soja", commodityName = "Soja", praca }: PriceChartProps) {
+    const [period, setPeriod] = useState("30");
     const [data, setData] = useState<ChartData[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -39,13 +40,14 @@ export function PriceChart({ commoditySlug = "soja", commodityName = "Soja" }: P
         async function fetchData() {
             setLoading(true);
             try {
-                const res = await fetch(`/api/cotacoes/${commoditySlug}/historico?days=${period}`);
+                const pracaParam = praca !== undefined ? `&praca=${praca}` : '';
+                const res = await fetch(`/api/cotacoes/${commoditySlug}/historico?days=${period}${pracaParam}`);
                 if (res.ok) {
                     const json = await res.json();
                     setData(json);
                 }
             } catch {
-                // Erro silencioso - componente mostra "Sem dados" como fallback
+                // Erro silencioso
             } finally {
                 setLoading(false);
             }
@@ -54,9 +56,8 @@ export function PriceChart({ commoditySlug = "soja", commodityName = "Soja" }: P
         if (commoditySlug) {
             fetchData();
         }
-    }, [commoditySlug, period]);
+    }, [commoditySlug, period, praca]);
 
-    // Calculate min/max for Y axis domain using reduce (evita stack overflow com arrays grandes)
     const { min, max } = data.length > 0
         ? data.reduce(
             (acc, d) => ({

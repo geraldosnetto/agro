@@ -32,6 +32,10 @@ export async function GET(
     }
     const { days } = queryResult.data;
 
+    // Praça filter (optional) - will be resolved to actual praça name from DB
+    const pracaIndexParam = searchParams.get("praca");
+    let pracaFilter: string | undefined;
+
     try {
         // Calcular data de corte
         const startDate = new Date();
@@ -47,27 +51,60 @@ export async function GET(
             return NextResponse.json({ error: "Commodity não encontrada" }, { status: 404 });
         }
 
+        // If praça index provided, get actual praça name from DB
+        if (pracaIndexParam !== null) {
+            const pracaIndex = parseInt(pracaIndexParam, 10);
+            if (!isNaN(pracaIndex)) {
+                const pracasResult = await prisma.cotacao.findMany({
+                    where: {
+                        commodityId: commodity.id,
+                        NOT: { praca: 'Seed History' }
+                    },
+                    select: { praca: true },
+                    distinct: ['praca'],
+                    orderBy: { praca: 'asc' }
+                });
+
+                if (pracaIndex < pracasResult.length) {
+                    pracaFilter = pracasResult[pracaIndex].praca || undefined;
+                }
+            }
+        }
+
+        // Build where clause
+        const whereClause: {
+            commodityId: string;
+            dataReferencia: { gte: Date };
+            praca?: string;
+        } = {
+            commodityId: commodity.id,
+            dataReferencia: {
+                gte: startDate
+            }
+        };
+
+        if (pracaFilter) {
+            whereClause.praca = pracaFilter;
+        }
+
         // Buscar histórico
         const historico = await prisma.cotacao.findMany({
-            where: {
-                commodityId: commodity.id,
-                dataReferencia: {
-                    gte: startDate
-                }
-            },
+            where: whereClause,
             orderBy: {
                 dataReferencia: 'asc'
             },
             select: {
                 dataReferencia: true,
-                valor: true
+                valor: true,
+                praca: true
             }
         });
 
         // Formatar para o gráfico
         const data = historico.map(h => ({
             date: new Date(h.dataReferencia).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-            valor: h.valor.toNumber()
+            valor: h.valor.toNumber(),
+            praca: h.praca
         }));
 
         return NextResponse.json(data, {

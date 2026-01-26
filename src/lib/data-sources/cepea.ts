@@ -8,6 +8,32 @@ interface CepeaData {
     variacaoMensal?: number;
 }
 
+// Data with praça information for multi-table scraping
+export interface CepeaPracaData extends CepeaData {
+    pracaIndex: number;
+    pracaNome: string;
+}
+
+// Praça names per commodity (based on CEPEA table structure)
+const PRACA_NAMES: Record<string, string[]> = {
+    'soja': ['Paranaguá/PR', 'Porto Base'],
+    'milho': ['ESALQ/BM&FBovespa'],
+    'boi-gordo': ['Indicador CEPEA', 'Média SP', 'A Prazo'],
+    'cafe-arabica': ['Indicador CEPEA'],
+    'cafe-robusta': ['Indicador Robusta'],
+    'bezerro': ['Indicador CEPEA'],
+    'acucar-cristal': ['Cristal SP'],
+    'etanol-hidratado': ['Hidratado SP'],
+    'etanol-anidro': ['Anidro SP'],
+    'trigo': ['Paraná'],
+    'frango': ['Congelado'],
+    'suino': ['Vivo'],
+    'algodao': ['Indicador CEPEA'],
+    'arroz': ['Indicador CEPEA'],
+    'mandioca': ['Indicador CEPEA'],
+    'leite': ['Indicador CEPEA'],
+};
+
 interface CommodityConfig {
     url: string;
     keywords?: string[];
@@ -162,6 +188,99 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
         logger.error(`Erro ao buscar dados CEPEA para ${slug}:`, { error: errorMessage });
         return null;
     }
+}
+
+/**
+ * Fetch prices from ALL tables (praças) for a commodity
+ * Returns array with data from each praça
+ */
+export async function fetchAllCepeaPrices(slug: string): Promise<CepeaPracaData[]> {
+    if (!VALID_SLUGS.has(slug)) {
+        logger.warn(`Slug inválido ou não configurado: ${slug}`);
+        return [];
+    }
+
+    const config = COMMODITY_CONFIG[slug];
+    const pracaNames = PRACA_NAMES[slug] || ['Indicador CEPEA'];
+    const results: CepeaPracaData[] = [];
+
+    try {
+        const response = await fetch(config.url, {
+            method: 'GET',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+            },
+            signal: AbortSignal.timeout(30000),
+        });
+
+        if (!response.ok) {
+            logger.error(`Erro HTTP ${response.status} ao buscar CEPEA para ${slug}`);
+            return [];
+        }
+
+        const html = await response.text();
+        const dom = new JSDOM(html);
+        const doc = dom.window.document;
+        const tables = doc.querySelectorAll('table');
+
+        // Process each table as a different praça
+        for (let tableIdx = 0; tableIdx < tables.length && tableIdx < pracaNames.length; tableIdx++) {
+            const table = tables[tableIdx];
+            const pracaNome = pracaNames[tableIdx];
+
+            const rows = table.querySelectorAll('tbody tr');
+
+            for (const row of Array.from(rows)) {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 2) continue;
+
+                const dataText = cells[0].textContent?.trim();
+                if (!dataText || !/\d{1,2}\/\d{1,2}\/\d{4}/.test(dataText)) continue;
+
+                const priceIdx = config.priceColumnIndex || 1;
+                const valorStr = cells[priceIdx]?.textContent?.trim();
+
+                let varDiaStr = '';
+                const varIdx = config.varColumnIndex !== undefined ? config.varColumnIndex : (priceIdx + 1);
+                if (varIdx >= 0) {
+                    varDiaStr = cells[varIdx]?.textContent?.trim().replace('%', '') || '';
+                }
+
+                if (!valorStr) continue;
+
+                const valor = parseValor(valorStr);
+                const data = parseData(dataText);
+                const variacaoDiaria = varDiaStr ? parseValor(varDiaStr) : 0;
+
+                if (isNaN(valor) || valor <= 0) continue;
+
+                results.push({
+                    valor,
+                    data,
+                    variacaoDiaria,
+                    pracaIndex: tableIdx,
+                    pracaNome
+                });
+            }
+        }
+
+        return results;
+
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`Erro ao buscar todas praças CEPEA para ${slug}:`, { error: errorMessage });
+        return [];
+    }
+}
+
+/**
+ * Get available praças for a commodity
+ */
+export function getPracasForCommodity(slug: string): { index: number; nome: string }[] {
+    const names = PRACA_NAMES[slug] || ['Indicador CEPEA'];
+    return names.map((nome, index) => ({ index, nome }));
 }
 
 function parseValor(str: string): number {

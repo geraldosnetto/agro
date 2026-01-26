@@ -6,7 +6,7 @@ import { formatarUnidade, formatarCategoria, formatarMoeda } from "@/lib/formatt
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PriceChart } from "@/components/dashboard/PriceChart";
+import { PriceChartWithPraca } from "@/components/dashboard/PriceChartWithPraca";
 import { CommodityStats } from "@/components/dashboard/CommodityStats";
 import { ChevronLeft, Bell, Share2 } from "lucide-react";
 import { FavoriteButton } from "@/components/FavoriteButton";
@@ -182,9 +182,9 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                 </div>
             </div>
 
-            {/* Chart Section */}
+            {/* Chart Section with Praça Selector */}
             <div className="mb-8">
-                <PriceChart
+                <PriceChartWithPraca
                     commoditySlug={slug}
                     commodityName={commodity.nome}
                 />
@@ -246,11 +246,10 @@ function VariationBadge({ label, value }: { label: string; value: number }) {
         <div className="flex items-center gap-1.5">
             <span className="text-sm text-muted-foreground">{label}:</span>
             <span
-                className={`flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border ${
-                    isPositive
+                className={`flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border ${isPositive
                         ? "text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900"
                         : "text-rose-600 bg-rose-50 border-rose-100 dark:bg-rose-950/20 dark:border-rose-900"
-                }`}
+                    }`}
             >
                 {isPositive ? (
                     <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

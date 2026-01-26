@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { fetchCepeaSpotPrice } from "@/lib/data-sources/cepea";
+import { fetchAllCepeaPrices } from "@/lib/data-sources/cepea";
 import { timingSafeEqual } from "crypto";
 import logger from "@/lib/logger";
 
@@ -33,68 +33,76 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        logger.info("Iniciando atualização de preços");
+        logger.info("Iniciando atualização de preços (modo histórico)");
         const commodities = await prisma.commodity.findMany({
             where: { ativo: true }
         });
 
-        const updates = [];
+        const updates: { slug: string; status: string; count?: number }[] = [];
 
         for (const commodity of commodities) {
             try {
-                const data = await fetchCepeaSpotPrice(commodity.slug);
+                // Fetch ALL historical data from CEPEA (all rows from table)
+                const allPrices = await fetchAllCepeaPrices(commodity.slug);
 
-                if (data) {
-                    logger.info(`Atualizando ${commodity.nome}`, { valor: data.valor });
+                // Only use the first praça (main indicator - index 0)
+                const mainPrices = allPrices.filter(p => p.pracaIndex === 0);
 
+                if (mainPrices.length === 0) {
+                    updates.push({ slug: commodity.slug, status: 'failed_fetch' });
+                    continue;
+                }
+
+                logger.info(`Processando ${commodity.nome}`, { totalRows: mainPrices.length });
+
+                let insertedCount = 0;
+                let skippedCount = 0;
+
+                for (const data of mainPrices) {
                     const startOfDay = new Date(data.data);
                     startOfDay.setHours(0, 0, 0, 0);
                     const endOfDay = new Date(data.data);
                     endOfDay.setHours(23, 59, 59, 999);
 
+                    // Check if cotação already exists for this day
                     const existing = await prisma.cotacao.findFirst({
                         where: {
                             commodityId: commodity.id,
                             dataReferencia: {
                                 gte: startOfDay,
                                 lte: endOfDay
-                            }
+                            },
+                            praca: 'Referência CEPEA'
                         }
                     });
 
                     if (!existing) {
-                        const lastCotacao = await prisma.cotacao.findFirst({
-                            where: { commodityId: commodity.id },
-                            orderBy: { dataReferencia: 'desc' }
-                        });
-
-                        let variacao = data.variacaoDiaria ?? 0;
-                        if (!data.variacaoDiaria && lastCotacao) {
-                            const valorAnt = lastCotacao.valor.toNumber();
-                            if (valorAnt > 0) {
-                                variacao = ((data.valor - valorAnt) / valorAnt) * 100;
-                            }
-                        }
-
                         await prisma.cotacao.create({
                             data: {
                                 commodityId: commodity.id,
                                 valor: data.valor,
-                                valorAnterior: lastCotacao?.valor ?? data.valor,
-                                variacao: variacao,
+                                valorAnterior: data.valor,
+                                variacao: data.variacaoDiaria ?? 0,
                                 praca: 'Referência CEPEA',
                                 estado: 'BR',
                                 fonte: 'CEPEA',
                                 dataReferencia: data.data
                             }
                         });
-                        updates.push({ slug: commodity.slug, status: 'updated', valor: data.valor });
+                        insertedCount++;
                     } else {
-                        updates.push({ slug: commodity.slug, status: 'skipped_exists' });
+                        skippedCount++;
                     }
-                } else {
-                    updates.push({ slug: commodity.slug, status: 'failed_fetch' });
                 }
+
+                updates.push({
+                    slug: commodity.slug,
+                    status: insertedCount > 0 ? 'updated' : 'skipped_all_exist',
+                    count: insertedCount
+                });
+
+                logger.info(`${commodity.nome}: ${insertedCount} inseridos, ${skippedCount} já existiam`);
+
             } catch (err) {
                 logger.error(`Falha ao processar ${commodity.slug}`, { error: err instanceof Error ? err.message : String(err) });
                 updates.push({ slug: commodity.slug, status: 'error' });
