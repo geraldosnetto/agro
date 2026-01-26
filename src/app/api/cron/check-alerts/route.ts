@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import logger from "@/lib/logger";
+import { sendAlertNotificationEmail } from "@/lib/email";
 
 // This endpoint should be called by a cron job (e.g., Vercel Cron, GitHub Actions)
 // Recommended frequency: every 30 minutes during market hours
@@ -18,6 +19,7 @@ export async function GET(request: Request) {
         const startTime = Date.now();
         let alertsChecked = 0;
         let alertsTriggered = 0;
+        let emailsSent = 0;
 
         // Get all active alerts that haven't been triggered
         const activeAlerts = await prisma.alertaUsuario.findMany({
@@ -135,8 +137,7 @@ export async function GET(request: Request) {
                 },
             });
 
-            // TODO: Send email notifications
-            // For now, just log them
+            // Send email notifications
             for (const alert of alertsToTrigger) {
                 logger.info("Alerta disparado", {
                     alertId: alert.alertId,
@@ -148,22 +149,25 @@ export async function GET(request: Request) {
                     percentual: alert.percentual,
                 });
 
-                // Here you would integrate with an email service like:
-                // - Resend
-                // - SendGrid
-                // - AWS SES
-                // Example:
-                // await sendAlertEmail({
-                //     to: alert.email,
-                //     userName: alert.userName,
-                //     commodityName: alert.commodityName,
-                //     commoditySlug: alert.commoditySlug,
-                //     tipo: alert.tipo,
-                //     valorAlvo: alert.valorAlvo,
-                //     percentual: alert.percentual,
-                //     precoAtual: alert.precoAtual,
-                //     variacao: alert.variacao,
-                // });
+                // Envia email de notificação
+                try {
+                    const targetValue = alert.valorAlvo ?? alert.percentual ?? 0;
+                    await sendAlertNotificationEmail(
+                        alert.email,
+                        alert.commodityName,
+                        alert.tipo,
+                        targetValue,
+                        alert.precoAtual,
+                        alert.userName ?? undefined
+                    );
+                    emailsSent++;
+                    logger.info("Email de alerta enviado", { email: alert.email, commodity: alert.commodityName });
+                } catch (emailError) {
+                    logger.error("Erro ao enviar email de alerta", {
+                        email: alert.email,
+                        error: emailError instanceof Error ? emailError.message : String(emailError),
+                    });
+                }
             }
         }
 

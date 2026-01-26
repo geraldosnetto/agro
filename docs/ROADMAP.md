@@ -86,7 +86,7 @@ Página dedicada para cada commodity com informações completas.
 - [x] Botões de ação (favoritar, download, compartilhar)
 - [x] SEO: meta tags dinâmicas por commodity (`generateMetadata`)
 - [x] Link dos CotacaoCards para página de detalhe
-- [ ] Breadcrumb de navegação (opcional)
+- [x] Breadcrumb de navegação
 
 **Páginas:** `/cotacoes/[slug]`
 
@@ -101,21 +101,21 @@ Sistema de login para personalização e funcionalidades avançadas.
 - [x] OAuth com Google
 - [x] OAuth com GitHub
 - [x] Email + Senha tradicional
-- [ ] Verificação de email
-- [ ] Reset de senha
+- [x] Verificação de email
+- [x] Reset de senha
 
 **Funcionalidades do perfil:**
 - [x] Página de perfil (`/perfil`)
 - [x] Editar dados (nome, email)
 - [ ] Gerenciar sessões
-- [ ] Excluir conta (LGPD)
+- [x] Excluir conta (LGPD)
 
 **Stack implementada:**
 - NextAuth.js (Auth.js) para autenticação
 - Prisma para modelo User, Account, Session
 - AuthProvider.tsx para contexto
 
-**Páginas:** `/login`, `/cadastro`, `/perfil`
+**Páginas:** `/login`, `/cadastro`, `/perfil`, `/esqueci-senha`, `/redefinir-senha`, `/verificar-email`
 
 ---
 
@@ -126,7 +126,7 @@ Sistema de login para personalização e funcionalidades avançadas.
 - [x] Tipos de alerta: ACIMA, ABAIXO, VARIAÇÃO
 - [x] Dashboard de alertas ativos (`/alertas`)
 - [x] API completa (`/api/alertas`)
-- [ ] Notificação por email quando alerta dispara
+- [x] Notificação por email quando alerta dispara
 - [ ] Histórico de alertas disparados
 
 **Páginas:** `/alertas`, `/alertas/novo`
@@ -138,7 +138,7 @@ Sistema de login para personalização e funcionalidades avançadas.
 - [x] Página "Meus Favoritos" (`/favoritos`)
 - [x] API completa (`/api/favoritos`)
 - [x] Sincronizar entre dispositivos
-- [ ] Ordenar favoritos primeiro na listagem do dashboard
+- [x] Ordenar favoritos primeiro na listagem do dashboard
 
 ---
 

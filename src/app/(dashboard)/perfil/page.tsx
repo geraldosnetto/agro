@@ -6,8 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Calendar, Crown, Bell, Heart, Settings } from "lucide-react";
+import { User, Mail, Calendar, Crown, Bell, Heart, Settings, CheckCircle, XCircle } from "lucide-react";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { DeleteAccountButton } from "@/components/auth/DeleteAccountButton";
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,8 @@ export default async function PerfilPage() {
         .toUpperCase()
         .slice(0, 2) || "U";
 
+    const isEmailVerified = !!userData.emailVerified;
+
     return (
         <div className="container px-4 py-8 max-w-4xl">
             <h1 className="text-3xl font-bold mb-8">Meu Perfil</h1>
@@ -68,6 +71,17 @@ export default async function PerfilPage() {
                                     <CardDescription className="flex items-center gap-2 mt-1">
                                         <Mail className="h-4 w-4" />
                                         {userData.email}
+                                        {isEmailVerified ? (
+                                            <Badge variant="outline" className="text-green-600 border-green-600">
+                                                <CheckCircle className="h-3 w-3 mr-1" />
+                                                Verificado
+                                            </Badge>
+                                        ) : (
+                                            <Badge variant="outline" className="text-amber-600 border-amber-600">
+                                                <XCircle className="h-3 w-3 mr-1" />
+                                                Não verificado
+                                            </Badge>
+                                        )}
                                     </CardDescription>
                                     <div className="flex items-center gap-2 mt-2">
                                         <Badge className={userPlan.className}>
@@ -136,8 +150,8 @@ export default async function PerfilPage() {
                                     {userData.plan === "free"
                                         ? "Acesso básico às cotações"
                                         : userData.plan === "pro"
-                                        ? "Alertas ilimitados + Histórico completo"
-                                        : "Todos os recursos + API"}
+                                            ? "Alertas ilimitados + Histórico completo"
+                                            : "Todos os recursos + API"}
                                 </p>
                             </div>
                             {userData.plan === "free" && (
@@ -171,6 +185,19 @@ export default async function PerfilPage() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <SignOutButton />
+                    </CardContent>
+                </Card>
+
+                {/* Danger Zone */}
+                <Card className="border-destructive/50">
+                    <CardHeader>
+                        <CardTitle className="text-lg text-destructive">Zona de Perigo</CardTitle>
+                        <CardDescription>
+                            Ações irreversíveis que afetam permanentemente sua conta
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <DeleteAccountButton />
                     </CardContent>
                 </Card>
             </div>

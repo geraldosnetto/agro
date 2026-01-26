@@ -5,11 +5,25 @@ import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import { PriceChartSelector } from "@/components/dashboard/PriceChartSelector";
 import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
+import { auth } from "@/auth";
 
 // Força renderização dinâmica - evita erro de conexão Prisma durante build
 export const dynamic = 'force-dynamic';
 
 export default async function CotacoesPage() {
+    // Busca sessão do usuário
+    const session = await auth();
+    const userId = session?.user?.id;
+
+    // Busca favoritos do usuário (se logado)
+    const userFavorites = userId
+        ? await prisma.favorito.findMany({
+            where: { userId },
+            select: { commodityId: true }
+        })
+        : [];
+    const favoriteSlugs = new Set(userFavorites.map(f => f.commodityId));
+
     // Busca dólar PTAX real do Banco Central
     const dolarData = await fetchDolarPTAX();
     const dolar = dolarData ? {
@@ -55,12 +69,20 @@ export default async function CotacoesPage() {
             dataAtualizacao: ultima?.dataReferencia
                 ? new Date(ultima.dataReferencia).toLocaleDateString('pt-BR')
                 : new Date(c.updatedAt).toLocaleDateString('pt-BR'),
+            isFavorite: favoriteSlugs.has(c.slug),
         };
     });
 
-    const graos = cotacoes.filter((c) => c.categoria === "graos");
-    const pecuaria = cotacoes.filter((c) => c.categoria === "pecuaria");
-    const sucroenergetico = cotacoes.filter((c) => c.categoria === "sucroenergetico");
+    // Ordena: favoritos primeiro, depois por nome
+    const sortedCotacoes = [...cotacoes].sort((a, b) => {
+        if (a.isFavorite && !b.isFavorite) return -1;
+        if (!a.isFavorite && b.isFavorite) return 1;
+        return a.nome.localeCompare(b.nome);
+    });
+
+    const graos = sortedCotacoes.filter((c) => c.categoria === "graos");
+    const pecuaria = sortedCotacoes.filter((c) => c.categoria === "pecuaria");
+    const sucroenergetico = sortedCotacoes.filter((c) => c.categoria === "sucroenergetico");
 
     return (
         <div className="container px-4 py-6 md:py-8">
@@ -114,7 +136,7 @@ export default async function CotacoesPage() {
                     <TabsTrigger value="todos" className="flex-1 md:flex-none">
                         Todos
                         <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
-                            {cotacoes.length}
+                            {sortedCotacoes.length}
                         </Badge>
                     </TabsTrigger>
                     <TabsTrigger value="graos" className="flex-1 md:flex-none">
@@ -140,7 +162,7 @@ export default async function CotacoesPage() {
                 {/* Todos */}
                 <TabsContent value="todos" className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {cotacoes.map((cotacao) => (
+                        {sortedCotacoes.map((cotacao) => (
                             <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
                         ))}
                     </div>
