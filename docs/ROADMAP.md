@@ -39,35 +39,30 @@
 - [x] Design moderno e responsivo (Next.js 16 + Tailwind)
 - [x] Gráficos interativos (Recharts)
 - [x] Dados CEPEA em tempo real (16 commodities)
-- [x] Categorias organizadas (Grãos, Pecuária, Sucroenergetico, Fibras, Outros)
+- [x] Categorias organizadas (Grãos, Pecuária, Sucroenergético, Fibras, Outros)
 - [x] Dólar PTAX integrado (API BCB)
 - [x] Sparklines nos cards
 - [x] Seletor de commodity no gráfico principal
 - [x] Dark mode
+- [x] **Página detalhada por commodity** (`/cotacoes/[slug]`)
+- [x] **Sistema de autenticação** (NextAuth + OAuth + Email/Senha)
+- [x] **Alertas de preço** (cadastro, dashboard, tipos ACIMA/ABAIXO/VARIACAO)
+- [x] **Favoritos** (botão + página + sincronização)
+- [x] **Múltiplas praças/regiões** por commodity
+- [x] **Botão de exportação** (CSV/Excel)
+- [x] Deploy em produção (Docker + Hostinger VPS)
 
 ---
 
 ## 🚀 Em Desenvolvimento Agora
 
-### Página Detalhada por Commodity (`/cotacoes/[slug]`)
+### Feed de Notícias & IndicAgro IA
 
-**Status:** Em desenvolvimento
+**Status:** Próximo passo
 
-**Objetivo:** Criar uma página dedicada para cada commodity com todas as informações relevantes em um só lugar.
+**Objetivo:** Agregar notícias do setor agrícola e implementar ferramentas de IA para análise de mercado.
 
-**Componentes:**
-1. Header com preço atual e variações
-2. Gráfico grande com seletores de período
-3. Cards de estatísticas (mín/máx/média/volatilidade)
-4. Tabela de preços por região
-5. Informações do produto
-6. Botões de ação (alerta, download, compartilhar)
-
-**Arquivos a criar/modificar:**
-- `src/app/(dashboard)/cotacoes/[slug]/page.tsx` - Página principal
-- `src/components/dashboard/CommodityStats.tsx` - Cards de estatísticas
-- `src/components/dashboard/RegionPrices.tsx` - Tabela de preços por região
-- `src/components/dashboard/CotacaoCard.tsx` - Adicionar link para detalhe
+**Ver seções 2.3 e 2.6 do roadmap para detalhes.**
 
 ---
 
@@ -75,130 +70,98 @@
 
 ### Fase 1: Fundação (Curto Prazo)
 
-#### 1.1 Página Detalhada por Commodity ⭐ PRÓXIMO
+#### 1.1 Página Detalhada por Commodity ✅ CONCLUÍDO
 **Prioridade:** MÁXIMA | **Referência:** Todos os concorrentes
 
 Página dedicada para cada commodity com informações completas.
 
-**Estrutura da página `/cotacoes/[slug]`:**
-
-```
-┌─────────────────────────────────────────────────────┐
-│  🌾 Soja                              GRÃOS         │
-│  R$ 138,50 /sc 60kg                                 │
-│  ▲ +1,25% hoje  │  ▲ +3,2% semana  │  ▼ -2,1% mês  │
-├─────────────────────────────────────────────────────┤
-│  [7d] [30d] [90d] [1a] [5a] [máx]     📥 Download   │
-│  ┌─────────────────────────────────────────────┐    │
-│  │            📈 GRÁFICO GRANDE                │    │
-│  │                                             │    │
-│  └─────────────────────────────────────────────┘    │
-├─────────────────────────────────────────────────────┤
-│  Estatísticas                                       │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌────────┐ │
-│  │ Mín 52s  │ │ Máx 52s  │ │ Média 30d│ │ Volat. │ │
-│  │ R$125,00 │ │ R$158,00 │ │ R$142,50 │ │ 3,2%   │ │
-│  └──────────┘ └──────────┘ └──────────┘ └────────┘ │
-├─────────────────────────────────────────────────────┤
-│  Preços por Região                                  │
-│  ┌─────────────────────────────────────────────┐    │
-│  │ Paranaguá (PR)    R$ 139,20   ▲ +0,8%      │    │
-│  │ Rio Grande (RS)   R$ 137,80   ▼ -0,3%      │    │
-│  │ Santos (SP)       R$ 140,10   ▲ +1,1%      │    │
-│  └─────────────────────────────────────────────┘    │
-├─────────────────────────────────────────────────────┤
-│  [🔔 Criar Alerta]  [📥 Baixar CSV]  [📤 Compartilhar]│
-└─────────────────────────────────────────────────────┘
-```
-
 **Checklist de implementação:**
 
-- [ ] Rota dinâmica `/cotacoes/[slug]/page.tsx`
-- [ ] Header com preço atual, variações (dia/semana/mês)
-- [ ] Gráfico grande interativo com seletores de período
-- [ ] Cards de estatísticas (mín/máx 52 semanas, média, volatilidade)
-- [ ] Tabela de preços por praça/região (se disponível)
-- [ ] Seção de informações (unidade, fonte, descrição)
-- [ ] Botões de ação (alerta, download, compartilhar)
-- [ ] SEO: meta tags dinâmicas por commodity
-- [ ] Link dos CotacaoCards para página de detalhe
-- [ ] Breadcrumb de navegação
-
-**Benefícios:**
-- SEO: URLs indexáveis (`/cotacoes/soja`, `/cotacoes/milho`)
-- Compartilhamento direto de commodity específica
-- Mais espaço para dados detalhados
-- Base para futuras features (alertas, download)
+- [x] Rota dinâmica `/cotacoes/[slug]/page.tsx`
+- [x] Header com preço atual, variações (dia/semana/mês)
+- [x] Gráfico grande interativo com seletores de período (`PriceChartWithPraca`)
+- [x] Cards de estatísticas (`CommodityStats.tsx`)
+- [x] Tabela de preços por praça/região (`PracaSelector.tsx`)
+- [x] Seção de informações (unidade, fonte, descrição)
+- [x] Botões de ação (favoritar, download, compartilhar)
+- [x] SEO: meta tags dinâmicas por commodity (`generateMetadata`)
+- [x] Link dos CotacaoCards para página de detalhe
+- [ ] Breadcrumb de navegação (opcional)
 
 **Páginas:** `/cotacoes/[slug]`
 
 ---
 
-#### 1.2 Sistema de Autenticação
+#### 1.2 Sistema de Autenticação ✅ CONCLUÍDO
 **Prioridade:** Alta | **Pré-requisito para:** Alertas, Favoritos, Métricas
 
 Sistema de login para personalização e funcionalidades avançadas.
 
 **Métodos de autenticação:**
-- [ ] OAuth com Google
-- [ ] OAuth com GitHub
-- [ ] Email + Senha tradicional
+- [x] OAuth com Google
+- [x] OAuth com GitHub
+- [x] Email + Senha tradicional
 - [ ] Verificação de email
 - [ ] Reset de senha
 
 **Funcionalidades do perfil:**
-- [ ] Página de perfil (`/perfil`)
-- [ ] Editar dados (nome, email)
+- [x] Página de perfil (`/perfil`)
+- [x] Editar dados (nome, email)
 - [ ] Gerenciar sessões
 - [ ] Excluir conta (LGPD)
 
-**Stack sugerida:**
+**Stack implementada:**
 - NextAuth.js (Auth.js) para autenticação
-- Prisma para modelo User
-- Resend ou SendGrid para emails transacionais
+- Prisma para modelo User, Account, Session
+- AuthProvider.tsx para contexto
 
-**Páginas:** `/login`, `/cadastro`, `/perfil`, `/esqueci-senha`
+**Páginas:** `/login`, `/cadastro`, `/perfil`
 
 ---
 
-#### 1.3 Alertas de Preço
+#### 1.3 Alertas de Preço ✅ CONCLUÍDO
 **Prioridade:** Alta | **Referência:** CME, Stock Alarm | **Requer:** Auth
 
-- [ ] Cadastro de alertas por commodity
-- [ ] Notificação por email quando preço atinge valor X
-- [ ] Notificação quando variação > Y%
-- [ ] Dashboard de alertas ativos
+- [x] Cadastro de alertas por commodity (`/alertas/novo`)
+- [x] Tipos de alerta: ACIMA, ABAIXO, VARIAÇÃO
+- [x] Dashboard de alertas ativos (`/alertas`)
+- [x] API completa (`/api/alertas`)
+- [ ] Notificação por email quando alerta dispara
 - [ ] Histórico de alertas disparados
 
-**Páginas:** `/alertas`, `/alertas/novo`, `/alertas/historico`
+**Páginas:** `/alertas`, `/alertas/novo`
 
-#### 1.4 Favoritar Commodities
+#### 1.4 Favoritar Commodities ✅ CONCLUÍDO
 **Prioridade:** Alta | **Requer:** Auth
 
-- [ ] Botão de favoritar em cada commodity
-- [ ] Seção "Meus Favoritos" no dashboard
-- [ ] Ordenar favoritos primeiro na listagem
-- [ ] Sincronizar entre dispositivos
+- [x] Botão de favoritar em cada commodity (`FavoriteButton.tsx`)
+- [x] Página "Meus Favoritos" (`/favoritos`)
+- [x] API completa (`/api/favoritos`)
+- [x] Sincronizar entre dispositivos
+- [ ] Ordenar favoritos primeiro na listagem do dashboard
 
 ---
 
-#### 1.5 Histórico com Download
+#### 1.5 Histórico com Download ✅ PARCIALMENTE CONCLUÍDO
 **Prioridade:** Alta | **Referência:** CEPEA, Agrolink
 
-- [ ] Gráfico de 1 ano, 2 anos, 5 anos
-- [ ] Seletor de período customizado
-- [ ] Download CSV/Excel
+- [x] Seletor de período (7d, 30d, 90d, 1a)
+- [x] Download CSV/Excel (`ExportButton.tsx`)
+- [ ] Gráfico de 5 anos, máx
 - [ ] Comparação entre períodos
 - [ ] Médias móveis (7d, 30d, 90d)
 
-*Nota: Integrado na página de detalhe da commodity*
+*Integrado na página de detalhe da commodity*
 
-#### 1.6 Mais Praças/Regiões
+#### 1.6 Mais Praças/Regiões ✅ CONCLUÍDO
 **Prioridade:** Média | **Referência:** Agrolink (997 cidades)
 
-- [ ] Expandir cotações por estado
-- [ ] Preços por praça de comercialização
-- [ ] Filtro por região no dashboard
+- [x] Cotações por praça (campo `praca` no modelo)
+- [x] Cotações por estado (campo `estado` no modelo)
+- [x] Seletor de praça na página de detalhe (`PracaSelector.tsx`)
+- [x] API de praças (`/api/pracas/[slug]`)
+
+> **Nota:** Filtro por região na dashboard principal não é necessário. A dashboard mostra uma visão geral consolidada, enquanto a página de detalhe permite ver preços por praça específica.
 
 ---
 
@@ -497,20 +460,22 @@ src/
 
 | Rota | Descrição | Fase | Status |
 |------|-----------|------|--------|
-| `/cotacoes/[slug]` | **Página detalhada por commodity** | 1 | ⭐ PRÓXIMO |
-| `/login` | Login (OAuth + Email/Senha) | 1 | Pendente |
-| `/cadastro` | Criar conta | 1 | Pendente |
-| `/perfil` | Perfil do usuário | 1 | Pendente |
-| `/alertas` | Gerenciar alertas de preço | 1 | Pendente |
+| `/cotacoes/[slug]` | **Página detalhada por commodity** | 1 | ✅ Concluído |
+| `/login` | Login (OAuth + Email/Senha) | 1 | ✅ Concluído |
+| `/cadastro` | Criar conta | 1 | ✅ Concluído |
+| `/perfil` | Perfil do usuário | 1 | ✅ Concluído |
+| `/alertas` | Gerenciar alertas de preço | 1 | ✅ Concluído |
+| `/alertas/novo` | Criar novo alerta | 1 | ✅ Concluído |
+| `/favoritos` | Commodities favoritas | 1 | ✅ Concluído |
 | `/mapa` | Mapa de calor por região | 2 | Pendente |
 | `/clima` | Previsão do tempo agrícola | 2 | Pendente |
-| `/noticias` | Feed de notícias do agro | 2 | Pendente |
+| `/noticias` | Feed de notícias do agro | 2 | ⭐ PRÓXIMO |
 | `/comparar` | Comparador de commodities | 2 | Pendente |
 | `/calculadora` | Calculadora de rentabilidade | 2 | Pendente |
 | `/futuros` | Cotações B3/CME | 3 | Pendente |
 | `/api-docs` | Documentação da API pública | 3 | Pendente |
 | `/precos` | Página de planos e preços | 2 | Pendente |
-| `/ia` | Hub de ferramentas de IA | 2 | Pendente |
+| `/ia` | Hub de ferramentas de IA | 2 | ⭐ PRÓXIMO |
 | `/ia/previsoes` | Previsões de preço por IA | 2 | Pendente |
 | `/ia/relatorios` | Relatórios automáticos | 2 | Pendente |
 | `/ia/assistente` | Chatbot especializado | 2 | Pendente |
