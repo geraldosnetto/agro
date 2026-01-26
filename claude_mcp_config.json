@@ -18,12 +18,13 @@
             }
         },
         "hostinger-mcp": {
+            "type": "stdio",
             "command": "npx",
             "args": [
                 "hostinger-api-mcp@latest"
             ],
             "env": {
-                "API_TOKEN": "6YnPcOO7jhS2baV5y1d8XB7a0Lw81n229XlfIfqM3a25575d"
+                "API_TOKEN": "ulKKQlnLB0TZpJUlevFicpW4UCAe0o5e0lKCHvyD9063cd42"
             }
         }
     }

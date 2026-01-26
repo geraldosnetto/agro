@@ -42,29 +42,29 @@ export async function POST(request: Request) {
 
         for (const commodity of commodities) {
             try {
-                // Fetch ALL historical data from CEPEA (all rows from table)
+                // Fetch ALL historical data from CEPEA (all rows from all tables/praças)
                 const allPrices = await fetchAllCepeaPrices(commodity.slug);
 
-                // Only use the first praça (main indicator - index 0)
-                const mainPrices = allPrices.filter(p => p.pracaIndex === 0);
-
-                if (mainPrices.length === 0) {
+                if (allPrices.length === 0) {
                     updates.push({ slug: commodity.slug, status: 'failed_fetch' });
                     continue;
                 }
 
-                logger.info(`Processando ${commodity.nome}`, { totalRows: mainPrices.length });
+                logger.info(`Processando ${commodity.nome}`, { totalRows: allPrices.length });
 
                 let insertedCount = 0;
                 let skippedCount = 0;
 
-                for (const data of mainPrices) {
+                for (const data of allPrices) {
                     const startOfDay = new Date(data.data);
                     startOfDay.setHours(0, 0, 0, 0);
                     const endOfDay = new Date(data.data);
                     endOfDay.setHours(23, 59, 59, 999);
 
-                    // Check if cotação already exists for this day
+                    // Use the actual praça name from scraper
+                    const pracaNome = data.pracaNome || 'Referência CEPEA';
+
+                    // Check if cotação already exists for this day AND praça
                     const existing = await prisma.cotacao.findFirst({
                         where: {
                             commodityId: commodity.id,
@@ -72,7 +72,7 @@ export async function POST(request: Request) {
                                 gte: startOfDay,
                                 lte: endOfDay
                             },
-                            praca: 'Referência CEPEA'
+                            praca: pracaNome
                         }
                     });
 
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
                                 valor: data.valor,
                                 valorAnterior: data.valor,
                                 variacao: data.variacaoDiaria ?? 0,
-                                praca: 'Referência CEPEA',
+                                praca: pracaNome,
                                 estado: 'BR',
                                 fonte: 'CEPEA',
                                 dataReferencia: data.data
