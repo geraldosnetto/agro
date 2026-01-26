@@ -1,6 +1,6 @@
 #!/bin/bash
 # Cron job para atualizar preços do CEPEA - IndicAgro
-# Adicionar ao crontab: 0 18 * * 1-5 /opt/indicagro/scripts/cron-update-prices.sh
+# Adicionar ao crontab: 0 18 * * 1-5 /home/indicagro/scripts/cron-update-prices.sh
 # Roda às 18:00 de segunda a sexta (após fechamento CEPEA)
 
 APP_URL="https://indicagro.com.br"
