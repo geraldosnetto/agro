@@ -59,6 +59,12 @@ export function Header() {
           >
             Sucroenergetico
           </Link>
+          <Link
+            href="/noticias"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Notícias
+          </Link>
         </nav>
 
         {/* Actions */}
@@ -93,6 +99,9 @@ export function Header() {
                 </Link>
                 <Link href="/sucroenergetico" className="text-lg font-medium">
                   Sucroenergetico
+                </Link>
+                <Link href="/noticias" className="text-lg font-medium">
+                  Notícias
                 </Link>
                 <div className="mt-4">
                   <ThemeToggle />

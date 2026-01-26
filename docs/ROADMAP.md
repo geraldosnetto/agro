@@ -206,11 +206,11 @@ Agregador de notícias do setor agrícola com duas abordagens complementares.
    - [x] Cache de 1 hora
    - [x] Atribuição de fonte
 
-2. **Página dedicada `/noticias`** (Fase 2)
-   - [ ] Feed agregado de todas as fontes
-   - [ ] Filtro por commodity
-   - [ ] Filtro por fonte
-   - [ ] Busca por texto
+2. **Página dedicada `/noticias`** (Fase 2) ✅ CONCLUÍDO
+   - [x] Feed agregado de todas as fontes
+   - [x] Filtro por commodity (via busca)
+   - [x] Filtro por fonte
+   - [x] Busca por texto
    - [ ] Resumo por IA (opcional)
 
 **Arquivos criados:**
@@ -218,7 +218,7 @@ Agregador de notícias do setor agrícola com duas abordagens complementares.
 - `src/app/api/news/[slug]/route.ts` - API endpoint com cache ✅
 - `src/components/dashboard/NewsFeed.tsx` - Componente reutilizável ✅
 
-**Páginas:** `/noticias` (pendente), seção em `/cotacoes/[slug]` ✅
+**Páginas:** `/noticias` ✅, seção em `/cotacoes/[slug]` ✅
 
 #### 2.4 Comparador
 **Prioridade:** Média | **Referência:** Agrolink
@@ -469,7 +469,7 @@ src/
 | `/favoritos` | Commodities favoritas | 1 | ✅ Concluído |
 | `/mapa` | Mapa de calor por região | 2 | Pendente |
 | `/clima` | Previsão do tempo agrícola | 2 | Pendente |
-| `/noticias` | Feed de notícias do agro | 2 | ⭐ PRÓXIMO |
+| `/noticias` | Feed de notícias do agro | 2 | ✅ Concluído |
 | `/comparar` | Comparador de commodities | 2 | Pendente |
 | `/calculadora` | Calculadora de rentabilidade | 2 | Pendente |
 | `/futuros` | Cotações B3/CME | 3 | Pendente |
