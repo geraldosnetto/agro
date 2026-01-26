@@ -193,18 +193,18 @@ Sistema de login para personalização e funcionalidades avançadas.
 Agregador de notícias do setor agrícola com duas abordagens complementares.
 
 **Fontes RSS disponíveis:**
-- Canal Rural (canalrural.com.br/rss)
-- Notícias Agrícolas (noticiasagricolas.com.br/rss)
-- Agrolink (agrolink.com.br/rss)
+- Canal Rural (canalrural.com.br/feed/) ✅ Implementado
+- Agrolink (agrolink.com.br/rss/)
 - USDA (usda.gov/rss) - internacional
-- Reuters Commodities - internacional
 
 **Implementação em 2 etapas:**
 
-1. **Na página de detalhe `/cotacoes/[slug]`** (Fase 1.1)
-   - [ ] Seção "Notícias sobre [Commodity]"
-   - [ ] 5-10 últimas notícias filtradas por keyword
-   - [ ] Links externos para fonte original
+1. **Na página de detalhe `/cotacoes/[slug]`** ✅ CONCLUÍDO (26/01/2026)
+   - [x] Seção "Notícias sobre [Commodity]"
+   - [x] 5 últimas notícias filtradas por keyword
+   - [x] Links externos para fonte original
+   - [x] Cache de 1 hora
+   - [x] Atribuição de fonte
 
 2. **Página dedicada `/noticias`** (Fase 2)
    - [ ] Feed agregado de todas as fontes
@@ -213,12 +213,12 @@ Agregador de notícias do setor agrícola com duas abordagens complementares.
    - [ ] Busca por texto
    - [ ] Resumo por IA (opcional)
 
-**Arquivos a criar:**
-- `src/lib/data-sources/news.ts` - Agregador de RSS
-- `src/app/api/news/route.ts` - API endpoint com cache
-- `src/components/dashboard/NewsFeed.tsx` - Componente reutilizável
+**Arquivos criados:**
+- `src/lib/data-sources/news.ts` - Agregador de RSS ✅
+- `src/app/api/news/[slug]/route.ts` - API endpoint com cache ✅
+- `src/components/dashboard/NewsFeed.tsx` - Componente reutilizável ✅
 
-**Páginas:** `/noticias`, seção em `/cotacoes/[slug]`
+**Páginas:** `/noticias` (pendente), seção em `/cotacoes/[slug]` ✅
 
 #### 2.4 Comparador
 **Prioridade:** Média | **Referência:** Agrolink
