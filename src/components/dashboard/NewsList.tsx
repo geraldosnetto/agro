@@ -99,7 +99,7 @@ export function NewsList({ initialNews, commodities }: NewsListProps) {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filteredNews.map((item, index) => (
-                        <Card key={index} className="group hover:bg-muted/50 transition-colors border-l-4 border-l-primary/0 hover:border-l-primary">
+                        <Card key={index} className="group relative hover:bg-muted/50 transition-colors border-l-4 border-l-primary/0 hover:border-l-primary">
                             <CardContent className="p-5">
                                 <div className="flex justify-between items-start gap-4 h-full flex-col">
                                     <div className="space-y-2 flex-1">

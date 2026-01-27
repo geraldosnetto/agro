@@ -35,10 +35,6 @@ export function WeatherProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('indicagro_city', JSON.stringify(city));
     };
 
-    if (!mounted) {
-        return <>{children}</>;
-    }
-
     return (
         <WeatherContext.Provider value={{ selectedCity, setCity }}>
             {children}

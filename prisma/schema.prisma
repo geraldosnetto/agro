@@ -163,6 +163,7 @@ model Cotacao {
   @@unique([commodityId, praca, dataReferencia])
   @@index([commodityId])
   @@index([dataReferencia])
+  @@index([commodityId, dataReferencia]) // Otimização para o Ticker (última cotação por commodity)
   @@index([estado])
 }
 

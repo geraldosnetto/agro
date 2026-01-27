@@ -3,9 +3,8 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { WeatherProvider } from "@/contexts/WeatherContext";
-import { Ticker } from "@/components/layout/Ticker";
-import prisma from "@/lib/prisma";
-import logger from "@/lib/logger";
+import { TickerServer } from "@/components/layout/TickerServer";
+import { Suspense } from "react";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,46 +34,20 @@ export const metadata: Metadata = {
   },
 };
 
-// Busca dados reais para o Ticker (Server Component)
-async function getTickerData() {
-  try {
-    const commodities = await prisma.commodity.findMany({
-      where: { ativo: true },
-      include: {
-        cotacoes: {
-          orderBy: { dataReferencia: 'desc' },
-          take: 1
-        }
-      },
-      take: 8 // Limitar para não sobrecarregar o ticker
-    });
-
-    return commodities.map(c => ({
-      symbol: c.slug.toUpperCase().replace('-', ' '),
-      value: c.cotacoes[0]?.valor?.toNumber() ?? 0,
-      change: c.cotacoes[0]?.variacao?.toNumber() ?? 0
-    })).filter(item => item.value > 0); // Só mostra se tiver valor
-  } catch (error) {
-    logger.error('Erro ao buscar dados do Ticker', { error: error instanceof Error ? error.message : String(error) });
-    // Retorna array vazio em caso de erro - ticker não será exibido
-    return [];
-  }
-}
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const tickerData = await getTickerData();
-
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <AuthProvider>
           <WeatherProvider>
             <ThemeProvider>
-              <Ticker items={tickerData} />
+              <Suspense fallback={<div className="h-10 bg-zinc-900 border-b w-full" />}>
+                <TickerServer />
+              </Suspense>
               {children}
             </ThemeProvider>
           </WeatherProvider>

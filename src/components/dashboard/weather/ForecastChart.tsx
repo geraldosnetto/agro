@@ -31,8 +31,8 @@ export function ForecastChart({ data }: ForecastChartProps) {
                 <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2} />
-                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                            <stop offset="5%" stopColor="var(--chart-2)" stopOpacity={0.2} />
+                            <stop offset="95%" stopColor="var(--chart-2)" stopOpacity={0} />
                         </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
@@ -71,7 +71,7 @@ export function ForecastChart({ data }: ForecastChartProps) {
                         yAxisId="right"
                         dataKey="rainSum"
                         name="Chuva (mm)"
-                        fill="#3b82f6"
+                        fill="var(--primary)"
                         radius={[4, 4, 0, 0]}
                         barSize={20}
                     />
@@ -82,7 +82,7 @@ export function ForecastChart({ data }: ForecastChartProps) {
                         type="monotone"
                         dataKey="max"
                         name="Máxima"
-                        stroke="#f59e0b"
+                        stroke="var(--chart-2)"
                         strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorTemp)"
@@ -92,7 +92,7 @@ export function ForecastChart({ data }: ForecastChartProps) {
                         type="monotone"
                         dataKey="min"
                         name="Mínima"
-                        stroke="#0ea5e9"
+                        stroke="var(--chart-4)"
                         strokeWidth={2}
                         dot={{ r: 3 }}
                     />
