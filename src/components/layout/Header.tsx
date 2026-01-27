@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
+import { HeaderWidget } from "@/components/weather/HeaderWidget";
 
 export function Header() {
 
@@ -75,6 +76,9 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {/* Weather Widget */}
+          <HeaderWidget />
+
           {/* Theme Toggle */}
           <div className="hidden sm:block">
             <ThemeToggle />

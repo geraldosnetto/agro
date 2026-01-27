@@ -2,23 +2,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useWeather } from '@/contexts/WeatherContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Wind, Droplets, Thermometer, Calendar } from 'lucide-react';
-import { AGRICULTURAL_CITIES, type City, type WeatherData, getWeatherDescription } from '@/lib/data-sources/weather';
+import { Wind, Droplets, Thermometer, Calendar } from 'lucide-react';
+import { type WeatherData, getWeatherDescription } from '@/lib/data-sources/weather';
 import { ForecastChart } from './ForecastChart';
+import { CitySearch } from './CitySearch';
 import { Button } from '@/components/ui/button';
 
 export function WeatherDashboard() {
-    const [selectedCity, setSelectedCity] = useState<City>(AGRICULTURAL_CITIES[0]);
+    // Agora usa o Contexto Global em vez de estado local
+    const { selectedCity, setCity } = useWeather();
     const [weather, setWeather] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchWeatherData = async (city: City) => {
+    const fetchWeatherData = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/weather?lat=${city.lat}&lon=${city.lon}`);
+            const res = await fetch(`/api/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}`);
             const data = await res.json();
             if (data.success) {
                 setWeather(data.data);
@@ -31,14 +33,14 @@ export function WeatherDashboard() {
     };
 
     useEffect(() => {
-        fetchWeatherData(selectedCity);
+        fetchWeatherData();
     }, [selectedCity]);
 
     if (!weather && !loading) {
         return (
             <div className="text-center py-12">
                 <p className="text-muted-foreground">Não foi possível carregar os dados do clima.</p>
-                <Button onClick={() => fetchWeatherData(selectedCity)} variant="outline" className="mt-4">Tentar Novamente</Button>
+                <Button onClick={fetchWeatherData} variant="outline" className="mt-4">Tentar Novamente</Button>
             </div>
         );
     }
@@ -47,32 +49,17 @@ export function WeatherDashboard() {
 
     return (
         <div className="space-y-6">
-            {/* Seletor de Cidade */}
+            {/* Seletor de Cidade (Agora com Busca) */}
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight mb-2">Previsão do Tempo</h2>
                     <p className="text-muted-foreground">Condições climáticas nas principais regiões produtoras.</p>
                 </div>
-                <div className="w-[280px]">
-                    <Select
-                        value={selectedCity.id}
-                        onValueChange={(val) => {
-                            const city = AGRICULTURAL_CITIES.find(c => c.id === val);
-                            if (city) setSelectedCity(city);
-                        }}
-                    >
-                        <SelectTrigger>
-                            <MapPin className="w-4 h-4 mr-2" />
-                            <SelectValue placeholder="Selecione uma região" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {AGRICULTURAL_CITIES.map(city => (
-                                <SelectItem key={city.id} value={city.id}>
-                                    {city.name} - {city.state}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                <div className="w-full sm:w-[320px]">
+                    <CitySearch
+                        value={selectedCity}
+                        onSelect={setCity}
+                    />
                 </div>
             </div>
 
@@ -144,7 +131,7 @@ export function WeatherDashboard() {
                         <CardHeader>
                             <CardTitle>Previsão 7 Dias</CardTitle>
                             <CardDescription>
-                                Temperatura máxima, mínima e volume de chuvas para {selectedCity.name}.
+                                Temperatura máxima, mínima e volume de chuvas para {selectedCity.name} - {selectedCity.state}.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>

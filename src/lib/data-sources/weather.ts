@@ -22,7 +22,7 @@ export interface WeatherData {
 }
 
 export interface City {
-    id: string;
+    id: string; // "lat,lon" for search results or specific ID for preset
     name: string;
     state: string;
     lat: number;
@@ -85,29 +85,64 @@ export async function fetchWeather(lat: number, lon: number): Promise<WeatherDat
     }
 }
 
+interface GeocodingResult {
+    id: number;
+    name: string;
+    latitude: number;
+    longitude: number;
+    admin1: string; // Estado
+    country_code: string;
+}
+
+export async function searchCities(query: string): Promise<City[]> {
+    if (!query || query.length < 3) return [];
+
+    try {
+        const response = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=pt&format=json`
+        );
+        const data = await response.json();
+
+        if (!data.results) return [];
+
+        return data.results
+            .filter((item: GeocodingResult) => item.country_code === 'BR') // Filtrar apenas Brasil por enquanto
+            .map((item: GeocodingResult) => ({
+                id: `${item.latitude},${item.longitude}`, // ID único baseado na coord
+                name: item.name,
+                state: item.admin1 || '',
+                lat: item.latitude,
+                lon: item.longitude
+            }));
+    } catch (error) {
+        console.error('Error searching cities:', error);
+        return [];
+    }
+}
+
 // Mapa de códigos WMO para descrições em PT-BR
 export const WEATHER_CODES: Record<number, { label: string; icon: string }> = {
-    0: { label: 'Céu Limpo', icon: 'sun' },
-    1: { label: 'Principalmente Limpo', icon: 'cloud-sun' },
-    2: { label: 'Parcialmente Nublado', icon: 'cloud-sun' },
-    3: { label: 'Nublado', icon: 'cloud' },
-    45: { label: 'Nevoeiro', icon: 'align-justify' }, // Fog
-    48: { label: 'Nevoeiro com Geada', icon: 'align-justify' },
-    51: { label: 'Garoa Leve', icon: 'cloud-drizzle' },
-    53: { label: 'Garoa Moderada', icon: 'cloud-drizzle' },
-    55: { label: 'Garoa Densa', icon: 'cloud-drizzle' },
-    61: { label: 'Chuva Leve', icon: 'cloud-rain' },
-    63: { label: 'Chuva Moderada', icon: 'cloud-rain' },
-    65: { label: 'Chuva Forte', icon: 'cloud-rain' },
-    71: { label: 'Neve Leve', icon: 'snowflake' }, // Raríssimo no BR agro, mas vai que
-    80: { label: 'Pancadas de Chuva Leves', icon: 'cloud-rain' },
-    81: { label: 'Pancadas de Chuva Moderadas', icon: 'cloud-rain' },
-    82: { label: 'Pancadas de Chuva Fortes', icon: 'cloud-lightning' },
-    95: { label: 'Tempestade', icon: 'cloud-lightning' },
-    96: { label: 'Tempestade com Granizo Leve', icon: 'cloud-lightning' },
-    99: { label: 'Tempestade com Granizo Forte', icon: 'cloud-lightning' },
+    0: { label: 'Céu Limpo', icon: 'Sun' },
+    1: { label: 'Principalmente Limpo', icon: 'CloudSun' },
+    2: { label: 'Parcialmente Nublado', icon: 'CloudSun' },
+    3: { label: 'Nublado', icon: 'Cloud' },
+    45: { label: 'Nevoeiro', icon: 'AlignJustify' }, // Fog
+    48: { label: 'Nevoeiro com Geada', icon: 'AlignJustify' },
+    51: { label: 'Garoa Leve', icon: 'CloudDrizzle' },
+    53: { label: 'Garoa Moderada', icon: 'CloudDrizzle' },
+    55: { label: 'Garoa Densa', icon: 'CloudDrizzle' },
+    61: { label: 'Chuva Leve', icon: 'CloudRain' },
+    63: { label: 'Chuva Moderada', icon: 'CloudRain' },
+    65: { label: 'Chuva Forte', icon: 'CloudRain' },
+    71: { label: 'Neve Leve', icon: 'Snowflake' },
+    80: { label: 'Pancadas de Chuva Leves', icon: 'CloudRain' },
+    81: { label: 'Pancadas de Chuva Moderadas', icon: 'CloudRain' },
+    82: { label: 'Pancadas de Chuva Fortes', icon: 'CloudLightning' },
+    95: { label: 'Tempestade', icon: 'CloudLightning' },
+    96: { label: 'Tempestade com Granizo Leve', icon: 'CloudLightning' },
+    99: { label: 'Tempestade com Granizo Forte', icon: 'CloudLightning' },
 };
 
 export function getWeatherDescription(code: number) {
-    return WEATHER_CODES[code] || { label: 'Desconhecido', icon: 'help-circle' };
+    return WEATHER_CODES[code] || { label: 'Desconhecido', icon: 'HelpCircle' };
 }

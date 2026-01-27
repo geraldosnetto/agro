@@ -182,10 +182,12 @@ Sistema de login para personalização e funcionalidades avançadas.
 
 - [x] Integração com API de clima (OpenMeteo)
 - [x] Previsão por região produtora (principais cidades agrícolas)
+- [x] **Busca de cidades** (Geocoding API)
+- [x] **Widget no Header** (com persistência de local)
 - [x] Alertas de eventos climáticos (via forecast)
 - [ ] Correlação clima x preços (Fase 3)
 
-**Páginas:** `/clima` ✅
+**Páginas:** `/clima` ✅ + Widget Global ✅
 
 #### 2.3 Feed de Notícias
 **Prioridade:** Média | **Referência:** Agrolink, Notícias Agrícolas
