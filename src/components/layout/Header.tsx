@@ -65,6 +65,12 @@ export function Header() {
           >
             Notícias
           </Link>
+          <Link
+            href="/clima"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Clima
+          </Link>
         </nav>
 
         {/* Actions */}
@@ -102,6 +108,9 @@ export function Header() {
                 </Link>
                 <Link href="/noticias" className="text-lg font-medium">
                   Notícias
+                </Link>
+                <Link href="/clima" className="text-lg font-medium">
+                  Clima
                 </Link>
                 <div className="mt-4">
                   <ThemeToggle />

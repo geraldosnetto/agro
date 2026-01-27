@@ -177,15 +177,15 @@ Sistema de login para personalização e funcionalidades avançadas.
 
 **Páginas:** `/mapa`
 
-#### 2.2 Previsão do Tempo
+#### 2.2 Previsão do Tempo ✅ CONCLUÍDO
 **Prioridade:** Média | **Referência:** Agroclima, Rural Clima, INMET
 
-- [ ] Integração com API de clima (INMET/CPTEC)
-- [ ] Previsão por região produtora
-- [ ] Alertas de eventos climáticos
-- [ ] Correlação clima x preços
+- [x] Integração com API de clima (OpenMeteo)
+- [x] Previsão por região produtora (principais cidades agrícolas)
+- [x] Alertas de eventos climáticos (via forecast)
+- [ ] Correlação clima x preços (Fase 3)
 
-**Páginas:** `/clima`
+**Páginas:** `/clima` ✅
 
 #### 2.3 Feed de Notícias
 **Prioridade:** Média | **Referência:** Agrolink, Notícias Agrícolas
@@ -468,7 +468,7 @@ src/
 | `/alertas/novo` | Criar novo alerta | 1 | ✅ Concluído |
 | `/favoritos` | Commodities favoritas | 1 | ✅ Concluído |
 | `/mapa` | Mapa de calor por região | 2 | Pendente |
-| `/clima` | Previsão do tempo agrícola | 2 | Pendente |
+| `/clima` | Previsão do tempo agrícola | 2 | ✅ Concluído |
 | `/noticias` | Feed de notícias do agro | 2 | ✅ Concluído |
 | `/comparar` | Comparador de commodities | 2 | Pendente |
 | `/calculadora` | Calculadora de rentabilidade | 2 | Pendente |
