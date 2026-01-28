@@ -67,6 +67,12 @@ export function Header() {
           >
             Comparador
           </Link>
+          <Link
+            href="/relatorios"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Relatórios
+          </Link>
         </nav>
 
         {/* Actions */}
@@ -108,6 +114,9 @@ export function Header() {
                 </Link>
                 <Link href="/comparador" className="text-lg font-medium">
                   Comparador
+                </Link>
+                <Link href="/relatorios" className="text-lg font-medium">
+                  Relatórios
                 </Link>
                 <div className="mt-4">
                   <ThemeToggle />

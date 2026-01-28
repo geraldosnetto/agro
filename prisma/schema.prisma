@@ -28,6 +28,10 @@ model User {
   sessions      Session[]
   alertas       AlertaUsuario[]
   favoritos     Favorito[]
+
+  // IA
+  chatConversations ChatConversation[]
+  aiUsage           AIUsage[]
 }
 
 // Conta OAuth (Google, GitHub, etc)
@@ -216,8 +220,152 @@ model NewsAccess {
   title     String
   source    String
   clicks    Int      @default(1)
-  
+
   updatedAt DateTime @updatedAt
-  
+
   @@index([clicks(sort: Desc)])
+}
+
+// ==================== IA ====================
+
+// Relatórios gerados por IA
+model AIReport {
+  id            String   @id @default(cuid())
+  type          String   // DAILY_MARKET | WEEKLY_COMMODITY | CONTEXTUAL_ALERT
+  commodityId   String?
+  title         String
+  content       String   @db.Text
+  summary       String?  @db.Text
+
+  // Metadados
+  model         String   // claude-3-haiku, etc
+  tokensUsed    Int
+  generatedAt   DateTime @default(now())
+  validUntil    DateTime // Quando o relatório expira
+
+  // Cache control
+  dataHash      String?  // Hash dos dados usados (para invalidação)
+
+  @@index([type, generatedAt])
+  @@index([commodityId])
+}
+
+// Conversas do chatbot
+model ChatConversation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?  // Auto-gerado do primeiro prompt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages  ChatMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+// Mensagens individuais do chat
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  role           String   // user | assistant
+  content        String   @db.Text
+
+  // Metadados (apenas para assistant)
+  tokensUsed     Int?
+  model          String?
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+// Previsões de preço
+model PricePrediction {
+  id              String   @id @default(cuid())
+  commodityId     String
+
+  // Previsão
+  predictedValue  Decimal  @db.Decimal(10, 2)
+  confidenceLevel Decimal  @db.Decimal(5, 2) // 0-100%
+  direction       String   // UP | DOWN | STABLE
+  horizon         Int      // dias para frente (7, 14, 30)
+
+  // Metadados do modelo
+  model           String   // SMA | EMA | LINEAR_REGRESSION | ENSEMBLE
+  dataPointsUsed  Int
+
+  // Validade
+  generatedAt     DateTime @default(now())
+  targetDate      DateTime
+
+  // Resultado real (preenchido depois para tracking de accuracy)
+  actualValue     Decimal? @db.Decimal(10, 2)
+  wasAccurate     Boolean?
+
+  @@index([commodityId, generatedAt])
+  @@index([targetDate])
+}
+
+// Análise de sentimento de notícias
+model NewsSentiment {
+  id           String   @id @default(cuid())
+
+  // Referência à notícia (URL como identificador único)
+  newsUrl      String   @unique
+  newsTitle    String
+
+  // Análise
+  sentiment    String   // POSITIVE | NEGATIVE | NEUTRAL
+  score        Decimal  @db.Decimal(3, 2) // -1.0 a 1.0
+
+  // Commodities afetadas
+  commodities  String[] // Array de slugs
+  impactScore  Decimal  @db.Decimal(3, 2) // 0-1 relevância
+
+  analyzedAt   DateTime @default(now())
+
+  @@index([sentiment])
+  @@index([analyzedAt])
+}
+
+// Anomalias detectadas
+model PriceAnomaly {
+  id               String   @id @default(cuid())
+  commodityId      String
+
+  type             String   // PRICE_SPIKE | PRICE_DROP | HIGH_VOLATILITY | HISTORICAL_EXTREME
+  severity         String   // LOW | MEDIUM | HIGH
+
+  description      String
+  detectedValue    Decimal  @db.Decimal(10, 2)
+  expectedRange    String   // "R$ 100 - R$ 120"
+  deviationPercent Decimal  @db.Decimal(5, 2)
+
+  detectedAt       DateTime @default(now())
+  acknowledged     Boolean  @default(false)
+
+  @@index([commodityId, detectedAt])
+  @@index([severity])
+}
+
+// Uso de IA por usuário (para rate limiting e billing)
+model AIUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date      DateTime @db.Date
+
+  // Contadores diários
+  chatMessages    Int @default(0)
+  reportsViewed   Int @default(0)
+  predictionsUsed Int @default(0)
+  tokensUsed      Int @default(0)
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }
