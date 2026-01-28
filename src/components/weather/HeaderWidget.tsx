@@ -60,11 +60,11 @@ export function HeaderWidget() {
 
     // Cores personalizadas para "ilustração"
     const getIconColor = (iconName: string) => {
-        if (iconName === 'Sun') return 'text-amber-500 fill-amber-500/20';
-        if (iconName === 'CloudSun') return 'text-amber-400';
-        if (iconName === 'Cloud') return 'text-slate-400 fill-slate-200/50';
-        if (iconName.includes('Rain') || iconName.includes('Drizzle')) return 'text-blue-400';
-        if (iconName.includes('Lightning')) return 'text-purple-500';
+        if (iconName === 'Sun') return 'text-amber-600 fill-amber-500/20';
+        if (iconName === 'CloudSun') return 'text-amber-500';
+        if (iconName === 'Cloud') return 'text-slate-500 fill-slate-200/50';
+        if (iconName.includes('Rain') || iconName.includes('Drizzle')) return 'text-blue-600';
+        if (iconName.includes('Lightning')) return 'text-purple-600';
         return 'text-muted-foreground';
     };
 

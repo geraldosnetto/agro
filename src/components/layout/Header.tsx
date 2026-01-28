@@ -42,24 +42,7 @@ export function Header() {
           >
             Cotações
           </Link>
-          <Link
-            href="/graos"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Grãos
-          </Link>
-          <Link
-            href="/pecuaria"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Pecuária
-          </Link>
-          <Link
-            href="/sucroenergetico"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Sucroenergetico
-          </Link>
+
           <Link
             href="/noticias"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -77,6 +60,12 @@ export function Header() {
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Calculadora
+          </Link>
+          <Link
+            href="/comparador"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Comparador
           </Link>
         </nav>
 
@@ -96,7 +85,7 @@ export function Header() {
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Abrir menu">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -107,15 +96,7 @@ export function Header() {
                 <Link href="/cotacoes" className="text-lg font-medium">
                   Cotações
                 </Link>
-                <Link href="/graos" className="text-lg font-medium">
-                  Grãos
-                </Link>
-                <Link href="/pecuaria" className="text-lg font-medium">
-                  Pecuária
-                </Link>
-                <Link href="/sucroenergetico" className="text-lg font-medium">
-                  Sucroenergetico
-                </Link>
+
                 <Link href="/noticias" className="text-lg font-medium">
                   Notícias
                 </Link>
@@ -124,6 +105,9 @@ export function Header() {
                 </Link>
                 <Link href="/calculadora" className="text-lg font-medium">
                   Calculadora
+                </Link>
+                <Link href="/comparador" className="text-lg font-medium">
+                  Comparador
                 </Link>
                 <div className="mt-4">
                   <ThemeToggle />
