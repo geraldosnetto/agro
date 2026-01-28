@@ -100,11 +100,25 @@ export async function GET(
             }
         });
 
-        // Formatar para o gráfico
-        const data = historico.map(h => ({
-            date: new Date(h.dataReferencia).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-            valor: h.valor.toNumber(),
-            praca: h.praca
+        // Agrupar por data (para evitar múltiplos pontos no mesmo dia se houver várias praças)
+        // Se houver filtro de praça, isso será redundante mas inofensivo
+        // Se não houver, calculará a média das praças para o dia
+        const groupedData = new Map<string, { total: number; count: number; dateRef: Date }>();
+
+        historico.forEach(h => {
+            const dateKey = h.dataReferencia.toISOString().split('T')[0];
+            const current = groupedData.get(dateKey) || { total: 0, count: 0, dateRef: h.dataReferencia };
+
+            current.total += h.valor.toNumber();
+            current.count += 1;
+            groupedData.set(dateKey, current);
+        });
+
+        const data = Array.from(groupedData.entries()).map(([_, val]) => ({
+            date: val.dateRef.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+            valor: Number((val.total / val.count).toFixed(2)),
+            // Se filtrou por praça, retorna ela, senão "Média"
+            praca: pracaFilter || "Média"
         }));
 
         return NextResponse.json(data, {

@@ -15,6 +15,29 @@ export interface NewsItem {
     sourceUrl: string;
     pubDate: string;
     timeAgo: string;
+    imageUrl?: string | null;
+}
+
+// Interface customizada para o RSS Parser
+interface CustomItem {
+    'media:content'?: {
+        $: {
+            url: string;
+        }
+    };
+    enclosure?: {
+        url: string;
+    };
+    contentEncoded?: string;
+    content?: string;
+    // Campos padrão do rss-parser
+    title?: string;
+    link?: string;
+    pubDate?: string;
+}
+
+interface CustomFeed {
+    items: CustomItem[];
 }
 
 // Fontes RSS públicas
@@ -83,24 +106,57 @@ function getTimeAgo(dateStr: string): string {
  * Busca notícias de uma fonte RSS específica
  */
 async function fetchFromSource(source: typeof RSS_SOURCES[0]): Promise<NewsItem[]> {
-    const parser = new Parser({
+    // Parser tipado com generics para evitar 'any'
+    const parser = new Parser<CustomFeed, CustomItem>({
         timeout: 10000,
         headers: {
             'User-Agent': 'IndicAgro/1.0 (News Aggregator)'
+        },
+        customFields: {
+            item: [
+                ['media:content', 'media:content', { keepArray: false }],
+                ['enclosure', 'enclosure', { keepArray: false }],
+                ['content:encoded', 'contentEncoded'],
+            ]
         }
     });
 
     try {
         const feed = await parser.parseURL(source.url);
 
-        return (feed.items || []).slice(0, 20).map(item => ({
-            title: item.title || 'Sem título',
-            link: item.link || source.baseUrl,
-            source: source.name,
-            sourceUrl: source.baseUrl,
-            pubDate: item.pubDate || new Date().toISOString(),
-            timeAgo: getTimeAgo(item.pubDate || new Date().toISOString()),
-        }));
+        return (feed.items || []).slice(0, 20).map((item) => {
+            // Tenta extrair imagem de várias fontes
+            let imageUrl: string | null = null;
+
+            // 1. Tenta media:content ou enclosure
+            if (item['media:content'] && item['media:content'].$.url) {
+                imageUrl = item['media:content'].$.url;
+            } else if (item.enclosure && item.enclosure.url) {
+                imageUrl = item.enclosure.url;
+            }
+
+            // 2. Se não achou, tenta extrair do content:encoded ou description via Regex
+            if (!imageUrl && (item.contentEncoded || item.content)) {
+                const content = item.contentEncoded || item.content;
+                // Type guard para garantir que content é string antes de chamar match
+                if (typeof content === 'string') {
+                    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+                    if (imgMatch && imgMatch[1]) {
+                        imageUrl = imgMatch[1];
+                    }
+                }
+            }
+
+            return {
+                title: item.title || 'Sem título',
+                link: item.link || source.baseUrl,
+                source: source.name,
+                sourceUrl: source.baseUrl,
+                pubDate: item.pubDate || new Date().toISOString(),
+                timeAgo: getTimeAgo(item.pubDate || new Date().toISOString()),
+                imageUrl: imageUrl
+            };
+        });
     } catch (error) {
         console.error(`Erro ao buscar RSS de ${source.name}:`, error);
         return [];

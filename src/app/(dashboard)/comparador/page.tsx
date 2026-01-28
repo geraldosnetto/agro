@@ -3,6 +3,8 @@ import { Metadata } from "next";
 import prisma from "@/lib/prisma";
 import { CommodityComparator } from "@/components/dashboard/comparator/CommodityComparator";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
     title: "Comparador de Commodities | IndicAgro",
     description: "Compare a evolução de preços de diferentes commodities agrícolas lado a lado.",

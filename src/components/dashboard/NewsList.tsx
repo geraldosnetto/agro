@@ -54,6 +54,22 @@ export function NewsList({ initialNews, commodities }: NewsListProps) {
         filterNews(searchTerm, val);
     };
 
+    const handleNewsClick = async (item: NewsItem) => {
+        try {
+            await fetch('/api/news/click', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    url: item.link,
+                    title: item.title,
+                    source: item.source
+                })
+            });
+        } catch (error) {
+            console.error('Error tracking click:', error);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Filtros e Busca */}
@@ -102,22 +118,44 @@ export function NewsList({ initialNews, commodities }: NewsListProps) {
                         <Card key={index} className="group relative hover:bg-muted/50 transition-colors border-l-4 border-l-primary/0 hover:border-l-primary">
                             <CardContent className="p-5">
                                 <div className="flex justify-between items-start gap-4 h-full flex-col">
-                                    <div className="space-y-2 flex-1">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <Badge variant="outline" className="text-xs font-normal">
-                                                {item.source}
-                                            </Badge>
-                                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                                <Calendar className="h-3 w-3" />
-                                                {item.timeAgo}
-                                            </span>
+                                    <div className="space-y-2 flex-1 relative">
+                                        <div className="flex gap-4">
+                                            {item.imageUrl && (
+                                                <div className="relative w-24 h-24 shrink-0 rounded-md overflow-hidden bg-muted hidden sm:block">
+                                                    <img
+                                                        src={item.imageUrl}
+                                                        alt=""
+                                                        className="object-cover w-full h-full transform transition-transform group-hover:scale-105"
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).style.display = 'none';
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap mb-2">
+                                                    <Badge variant="outline" className="text-xs font-normal">
+                                                        {item.source}
+                                                    </Badge>
+                                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                        <Calendar className="h-3 w-3" />
+                                                        {item.timeAgo}
+                                                    </span>
+                                                </div>
+                                                <h3 className="font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-3">
+                                                    <a
+                                                        href={item.link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="focus:outline-none"
+                                                        onClick={() => handleNewsClick(item)}
+                                                    >
+                                                        {item.title}
+                                                        <span className="absolute inset-0" aria-hidden="true" />
+                                                    </a>
+                                                </h3>
+                                            </div>
                                         </div>
-                                        <h3 className="font-semibold leading-tight group-hover:text-primary transition-colors">
-                                            <a href={item.link} target="_blank" rel="noopener noreferrer" className="focus:outline-none">
-                                                {item.title}
-                                                <span className="absolute inset-0" aria-hidden="true" />
-                                            </a>
-                                        </h3>
                                     </div>
                                     <div className="flex justify-between items-center w-full pt-2 mt-auto">
                                         <Button variant="ghost" size="sm" className="ml-auto text-xs h-8 items-center gap-1 pointer-events-none group-hover:bg-primary group-hover:text-primary-foreground">

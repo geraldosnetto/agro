@@ -86,7 +86,8 @@ export function ComparatorChart({
                                 locale: ptBR,
                             })
                         }
-                        formatter={(value: number | string) => {
+                        formatter={(value: number | string | undefined) => {
+                            if (value === undefined || value === null) return ["-", undefined];
                             const val = Number(value);
                             return [
                                 normalized

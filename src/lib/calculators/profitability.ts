@@ -8,12 +8,12 @@ export const profitabilitySchema = z.object({
     salePrice: z.number().min(0, 'O preço de venda deve ser maior ou igual a 0'),
 
     // Custos
-    seedsCost: z.number().min(0).default(0),
-    fertilizerCost: z.number().min(0).default(0),
-    pesticideCost: z.number().min(0).default(0),
-    operationCost: z.number().min(0).default(0), // Mecanização, combustivel
-    adminCost: z.number().min(0).default(0),     // Administrativo, outros
-    otherCost: z.number().min(0).default(0),     // Arrendamento, etc
+    seedsCost: z.number().min(0),
+    fertilizerCost: z.number().min(0),
+    pesticideCost: z.number().min(0),
+    operationCost: z.number().min(0), // Mecanização, combustivel
+    adminCost: z.number().min(0),     // Administrativo, outros
+    otherCost: z.number().min(0),     // Arrendamento, etc
 });
 
 export type CalculatorInputs = z.infer<typeof profitabilitySchema>;

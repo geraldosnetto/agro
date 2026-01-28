@@ -209,3 +209,15 @@ model CotacaoDolar {
 
   @@index([dataReferencia])
 }
+
+// Analytics de Notícias (Mais Lidas)
+model NewsAccess {
+  url       String   @id
+  title     String
+  source    String
+  clicks    Int      @default(1)
+  
+  updatedAt DateTime @updatedAt
+  
+  @@index([clicks(sort: Desc)])
+}
