@@ -17,13 +17,13 @@ interface TickerProps {
 const TICKER_DUPLICATION = 4;
 
 export function Ticker({ items, className }: TickerProps) {
-    // Duplicar itens suficientes para garantir scroll suave em telas grandes
-    const content = items.flatMap((item, idx) =>
-        Array.from({ length: TICKER_DUPLICATION }, (_, rep) => ({
-            ...item,
-            _key: `${item.symbol}-${idx}-${rep}`
-        }))
-    );
+    // Duplicar a lista inteira para garantir scroll suave e cíclico
+    const duplicatedItems = Array.from({ length: TICKER_DUPLICATION }).flatMap(() => items);
+
+    const content = duplicatedItems.map((item, idx) => ({
+        ...item,
+        _key: `${item.symbol}-${idx}`
+    }));
 
     return (
         <div className={cn(

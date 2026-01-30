@@ -9,6 +9,7 @@ import Parser from 'rss-parser';
 
 // Tipos para as notícias
 export interface NewsItem {
+    slug: string;
     title: string;
     link: string;
     source: string;
@@ -16,6 +17,23 @@ export interface NewsItem {
     pubDate: string;
     timeAgo: string;
     imageUrl?: string | null;
+    content?: string;
+}
+
+/**
+ * Converte string para slug (URL friendly)
+ */
+function slugify(text: string): string {
+    return text
+        .toString()
+        .toLowerCase()
+        .normalize('NFD') // Remove acentos
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '-') // Espaços para hifens
+        .replace(/[^\w\-]+/g, '') // Remove chars especiais
+        .replace(/\-\-+/g, '-') // Remove hifens duplicados
+        .replace(/^-+/, '') // Remove hifens do inicio
+        .replace(/-+$/, ''); // Remove hifens do fim
 }
 
 // Interface customizada para o RSS Parser
@@ -110,7 +128,7 @@ async function fetchFromSource(source: typeof RSS_SOURCES[0]): Promise<NewsItem[
     const parser = new Parser<CustomFeed, CustomItem>({
         timeout: 10000,
         headers: {
-            'User-Agent': 'IndicAgro/1.0 (News Aggregator)'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         },
         customFields: {
             item: [
@@ -136,25 +154,43 @@ async function fetchFromSource(source: typeof RSS_SOURCES[0]): Promise<NewsItem[
             }
 
             // 2. Se não achou, tenta extrair do content:encoded ou description via Regex
-            if (!imageUrl && (item.contentEncoded || item.content)) {
-                const content = item.contentEncoded || item.content;
+            if (item.contentEncoded || item.content) {
+                const contentStr = item.contentEncoded || item.content;
                 // Type guard para garantir que content é string antes de chamar match
-                if (typeof content === 'string') {
-                    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+                if (typeof contentStr === 'string' && !imageUrl) {
+                    const imgMatch = contentStr.match(/<img[^>]+src="([^">]+)"/);
                     if (imgMatch && imgMatch[1]) {
                         imageUrl = imgMatch[1];
                     }
                 }
             }
 
+            const title = item.title || 'Sem título';
+            const slug = slugify(title);
+
+            let content = item.contentEncoded || item.content;
+
+            // Remove a imagem destacada do conteúdo para evitar duplicação
+            if (imageUrl && typeof content === 'string') {
+                // Remove a tag img exata que contém a URL
+                const imgRegex = new RegExp(`<img[^>]+src=["']${imageUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*>`, 'i');
+                content = content.replace(imgRegex, '');
+
+                // Limpa tags vazias que podem ter ficado (ex: <figure></figure> ou <p></p>)
+                content = content.replace(/<figure>\s*<\/figure>/gi, '')
+                    .replace(/<p>\s*<\/p>/gi, '');
+            }
+
             return {
-                title: item.title || 'Sem título',
+                slug,
+                title,
                 link: item.link || source.baseUrl,
                 source: source.name,
                 sourceUrl: source.baseUrl,
                 pubDate: item.pubDate || new Date().toISOString(),
                 timeAgo: getTimeAgo(item.pubDate || new Date().toISOString()),
-                imageUrl: imageUrl
+                imageUrl: imageUrl,
+                content: content
             };
         });
     } catch (error) {
@@ -178,12 +214,16 @@ export async function fetchNewsForCommodity(slug: string, limit = 5): Promise<Ne
     // Keywords para filtrar
     const keywords = COMMODITY_KEYWORDS[slug] || [slug.replace('-', ' ')];
 
-    // Busca de todas as fontes em paralelo
-    const allPromises = RSS_SOURCES.map(source => fetchFromSource(source));
-    const results = await Promise.all(allPromises);
+    // Busca de todas as fontes em paralelo com tratamento de erro individual
+    const results = await Promise.allSettled(RSS_SOURCES.map(source => fetchFromSource(source)));
+
+    // Filtra apenas os sucessos
+    const successfulFeeds = results
+        .filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === 'fulfilled')
+        .map(r => r.value);
 
     // Combina e filtra por keywords
-    let allNews = results.flat();
+    const allNews = successfulFeeds.flat();
 
     // Filtra por keywords (case insensitive)
     const filteredNews = allNews.filter(news => {
@@ -213,10 +253,13 @@ export async function fetchAllNews(limit = 20): Promise<NewsItem[]> {
         return cached.data.slice(0, limit);
     }
 
-    const allPromises = RSS_SOURCES.map(source => fetchFromSource(source));
-    const results = await Promise.all(allPromises);
+    const results = await Promise.allSettled(RSS_SOURCES.map(source => fetchFromSource(source)));
 
-    let allNews = results.flat();
+    const successfulFeeds = results
+        .filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === 'fulfilled')
+        .map(r => r.value);
+
+    const allNews = successfulFeeds.flat();
 
     // Ordena por data
     allNews.sort((a, b) =>
@@ -226,6 +269,24 @@ export async function fetchAllNews(limit = 20): Promise<NewsItem[]> {
     cache.set(cacheKey, { data: allNews, timestamp: Date.now() });
 
     return allNews.slice(0, limit);
+}
+
+/**
+ * Busca uma notícia pelo slug
+ */
+export async function getNewsBySlug(slug: string): Promise<NewsItem | null> {
+    // Tenta buscar no cache geral primeiro
+    const cachedAll = cache.get('news_all');
+    if (cachedAll) {
+        const found = cachedAll.data.find(n => n.slug === slug);
+        if (found) return found;
+    }
+
+    // Se não achar, busca tudo (que vai popular o cache)
+    const allNews = await fetchAllNews(100);
+    const found = allNews.find(n => n.slug === slug);
+
+    return found || null;
 }
 
 /**

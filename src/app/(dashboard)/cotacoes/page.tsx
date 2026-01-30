@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { CotacaoCard, CotacaoCategoria } from "@/components/dashboard/CotacaoCard";
 import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import { PriceChartSelector } from "@/components/dashboard/PriceChartSelector";
+import { AnomalyAlert } from "@/components/ai/AnomalyAlert";
 import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
@@ -128,6 +129,11 @@ export default async function CotacoesPage() {
                     commodities={commoditiesData.map(c => ({ slug: c.slug, nome: c.nome }))}
                     defaultSlug="soja"
                 />
+            </div>
+
+            {/* Alertas de Anomalia */}
+            <div className="mb-8">
+                <AnomalyAlert limit={3} />
             </div>
 
             {/* Tabs de categoria */}

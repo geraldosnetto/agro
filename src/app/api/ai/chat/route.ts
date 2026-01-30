@@ -43,12 +43,10 @@ export async function POST(request: Request) {
 
     // 4. Validar input
     const body = await request.json();
-    console.log('Chat API - Received body:', JSON.stringify(body));
 
     const parseResult = ChatMessageInputSchema.safeParse(body);
 
     if (!parseResult.success) {
-      console.log('Chat API - Validation failed:', JSON.stringify(parseResult.error.issues));
       return NextResponse.json(
         {
           error: 'Input inválido',

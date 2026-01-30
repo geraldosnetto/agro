@@ -114,7 +114,7 @@ export async function GET(
             groupedData.set(dateKey, current);
         });
 
-        const data = Array.from(groupedData.entries()).map(([_, val]) => ({
+        const data = Array.from(groupedData.values()).map((val) => ({
             date: val.dateRef.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
             valor: Number((val.total / val.count).toFixed(2)),
             // Se filtrou por praça, retorna ela, senão "Média"

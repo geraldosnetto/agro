@@ -51,7 +51,7 @@ export function DeleteAccountButton() {
             // Logout e redireciona
             await signOut({ redirect: false });
             router.push('/?deleted=true');
-        } catch (err) {
+        } catch {
             setError('Erro de conexão. Tente novamente.');
             setLoading(false);
         }

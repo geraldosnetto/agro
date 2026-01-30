@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { type City, AGRICULTURAL_CITIES } from '@/lib/data-sources/weather';
 
 interface WeatherContextType {
@@ -12,23 +12,19 @@ interface WeatherContextType {
 const WeatherContext = createContext<WeatherContextType | undefined>(undefined);
 
 export function WeatherProvider({ children }: { children: React.ReactNode }) {
-    // Estado inicial padrão (pode ser substituído por localStorage)
-    const [selectedCity, setSelectedCity] = useState<City>(AGRICULTURAL_CITIES[0]);
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        // Recuperar do localStorage
-        const saved = localStorage.getItem('indicagro_city');
-        if (saved) {
-            try {
-                const city = JSON.parse(saved);
-                setSelectedCity(city);
-            } catch (e) {
-                console.error('Erro ao ler cidade salva:', e);
+    // Inicializa com valor do localStorage (lazy init)
+    const [selectedCity, setSelectedCity] = useState<City>(() => {
+        if (typeof window === 'undefined') return AGRICULTURAL_CITIES[0];
+        try {
+            const saved = localStorage.getItem('indicagro_city');
+            if (saved) {
+                return JSON.parse(saved) as City;
             }
+        } catch (e) {
+            console.error('Erro ao ler cidade salva:', e);
         }
-        setMounted(true);
-    }, []);
+        return AGRICULTURAL_CITIES[0];
+    });
 
     const setCity = (city: City) => {
         setSelectedCity(city);

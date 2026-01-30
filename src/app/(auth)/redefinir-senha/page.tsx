@@ -73,7 +73,7 @@ function RedefinirSenhaForm() {
 
             setSuccess(true);
             setTimeout(() => router.push('/login'), 3000);
-        } catch (err) {
+        } catch {
             setError('Erro de conexão. Tente novamente.');
         } finally {
             setLoading(false);

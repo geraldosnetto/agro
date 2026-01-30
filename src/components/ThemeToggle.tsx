@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-    const { theme, setTheme, resolvedTheme } = useTheme();
+    const { setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
-    // Evita hydration mismatch
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    // Evita hydration mismatch - padrão recomendado pelo next-themes
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    useEffect(() => setMounted(true), []);
 
     if (!mounted) {
         return (

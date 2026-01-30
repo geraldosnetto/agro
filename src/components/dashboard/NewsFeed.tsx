@@ -7,7 +7,7 @@
  * Busca dados da API /api/news/[slug].
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Newspaper, ExternalLink, RefreshCw } from 'lucide-react';
@@ -33,7 +33,7 @@ export function NewsFeed({ slug, commodityName, limit = 5 }: NewsFeedProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchNews = async () => {
+    const fetchNews = useCallback(async () => {
         setLoading(true);
         setError(null);
 
@@ -52,11 +52,11 @@ export function NewsFeed({ slug, commodityName, limit = 5 }: NewsFeedProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [slug, limit]);
 
     useEffect(() => {
         fetchNews();
-    }, [slug, limit]);
+    }, [fetchNews]);
 
     return (
         <Card className="mt-6">

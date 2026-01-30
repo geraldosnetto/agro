@@ -14,10 +14,10 @@ import { type NewsItem } from '@/lib/data-sources/news';
 
 interface NewsListProps {
     initialNews: NewsItem[];
-    commodities: string[];
+    commodities?: string[];
 }
 
-export function NewsList({ initialNews, commodities }: NewsListProps) {
+export function NewsList({ initialNews }: NewsListProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSource, setSelectedSource] = useState('all');
     const [filteredNews, setFilteredNews] = useState(initialNews);
@@ -52,22 +52,6 @@ export function NewsList({ initialNews, commodities }: NewsListProps) {
     const handleSourceChange = (val: string) => {
         setSelectedSource(val);
         filterNews(searchTerm, val);
-    };
-
-    const handleNewsClick = async (item: NewsItem) => {
-        try {
-            await fetch('/api/news/click', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: item.link,
-                    title: item.title,
-                    source: item.source
-                })
-            });
-        } catch (error) {
-            console.error('Error tracking click:', error);
-        }
     };
 
     return (
@@ -144,11 +128,8 @@ export function NewsList({ initialNews, commodities }: NewsListProps) {
                                                 </div>
                                                 <h3 className="font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-3">
                                                     <a
-                                                        href={item.link}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                        href={`/noticias/${item.slug}`}
                                                         className="focus:outline-none"
-                                                        onClick={() => handleNewsClick(item)}
                                                     >
                                                         {item.title}
                                                         <span className="absolute inset-0" aria-hidden="true" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Heart, Loader2 } from "lucide-react";
@@ -26,15 +26,7 @@ export function FavoriteButton({
     const [loading, setLoading] = useState(false);
     const [checking, setChecking] = useState(true);
 
-    useEffect(() => {
-        if (status === "authenticated") {
-            checkFavoriteStatus();
-        } else if (status === "unauthenticated") {
-            setChecking(false);
-        }
-    }, [status, commoditySlug]);
-
-    const checkFavoriteStatus = async () => {
+    const checkFavoriteStatus = useCallback(async () => {
         try {
             const res = await fetch(`/api/favoritos/check?commodityId=${commoditySlug}`);
             const data = await res.json();
@@ -44,7 +36,15 @@ export function FavoriteButton({
         } finally {
             setChecking(false);
         }
-    };
+    }, [commoditySlug]);
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            checkFavoriteStatus();
+        } else if (status === "unauthenticated") {
+            setChecking(false);
+        }
+    }, [status, checkFavoriteStatus]);
 
     const toggleFavorite = async (e: React.MouseEvent) => {
         e.preventDefault();

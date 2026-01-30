@@ -167,15 +167,15 @@ Sistema de login para personalização e funcionalidades avançadas.
 
 ### Fase 2: Diferenciação (Médio Prazo)
 
-#### 2.1 Mapa de Calor
+#### 2.1 Mapa de Calor ✅ CONCLUÍDO
 **Prioridade:** Média | **Referência:** CME, USDA
 
-- [ ] Mapa do Brasil interativo
-- [ ] Cores por faixa de preço
-- [ ] Tooltip com detalhes por estado
-- [ ] Filtro por commodity
+- [x] Mapa do Brasil interativo
+- [x] Cores por faixa de preço
+- [x] Tooltip com detalhes por estado
+- [x] Filtro por commodity
 
-**Páginas:** `/mapa`
+**Páginas:** `/mapa` ✅
 
 #### 2.2 Previsão do Tempo ✅ CONCLUÍDO
 **Prioridade:** Média | **Referência:** Agroclima, Rural Clima, INMET
@@ -222,24 +222,24 @@ Agregador de notícias do setor agrícola com duas abordagens complementares.
 
 **Páginas:** `/noticias` ✅, seção em `/cotacoes/[slug]` ✅
 
-#### 2.4 Comparador
+#### 2.4 Comparador ✅ CONCLUÍDO
 **Prioridade:** Média | **Referência:** Agrolink
 
-- [ ] Comparar múltiplas commodities lado a lado
-- [ ] Comparar mesma commodity em diferentes praças
-- [ ] Gráfico de correlação
+- [x] Comparar múltiplas commodities lado a lado
+- [x] Comparar mesma commodity em diferentes praças
+- [x] Gráfico de correlação
 
-**Páginas:** `/comparar`
+**Páginas:** `/comparar` ✅
 
-#### 2.5 Calculadora de Rentabilidade
+#### 2.5 Calculadora de Rentabilidade ✅ CONCLUÍDO
 **Prioridade:** Média | **Referência:** Farmbrite, Tend
 
-- [ ] Input de custos de produção
-- [ ] Cálculo de margem por hectare
-- [ ] Simulação de cenários de preço
-- [ ] Ponto de equilíbrio
+- [x] Input de custos de produção
+- [x] Cálculo de margem por hectare
+- [x] Simulação de cenários de preço
+- [x] Ponto de equilíbrio
 
-**Páginas:** `/calculadora`
+**Páginas:** `/calculadora` ✅
 
 #### 2.6 IndicAgro IA - Inteligência Artificial
 **Prioridade:** ALTA | **Diferencial competitivo** | **Base da monetização**
@@ -472,8 +472,8 @@ src/
 | `/mapa` | Mapa de calor por região | 2 | Pendente |
 | `/clima` | Previsão do tempo agrícola | 2 | ✅ Concluído |
 | `/noticias` | Feed de notícias do agro | 2 | ✅ Concluído |
-| `/comparar` | Comparador de commodities | 2 | Pendente |
-| `/calculadora` | Calculadora de rentabilidade | 2 | Pendente |
+| `/comparar` | Comparador de commodities | 2 | ✅ Concluído |
+| `/calculadora` | Calculadora de rentabilidade | 2 | ✅ Concluído |
 | `/futuros` | Cotações B3/CME | 3 | Pendente |
 | `/api-docs` | Documentação da API pública | 3 | Pendente |
 | `/precos` | Página de planos e preços | 2 | Pendente |

@@ -7,6 +7,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 interface NewsItem {
+    slug: string;
     title: string;
     link: string;
     source: string;
@@ -28,31 +29,13 @@ export function NewsHero({ news }: NewsHeroProps) {
     const mainNews = news[0];
     const secondaryNews = news.slice(1, 5);
 
-    const handleNewsClick = async (item: NewsItem) => {
-        try {
-            await fetch('/api/news/click', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: item.link,
-                    title: item.title,
-                    source: item.source
-                })
-            });
-        } catch (error) {
-            console.error('Error tracking click:', error);
-        }
-    };
-
     return (
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
             {/* Main Featured News (Left - 7 cols) */}
             <div className="lg:col-span-7 group relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden shadow-lg border border-border/50">
                 <Link
-                    href={mainNews.link}
-                    target="_blank"
+                    href={`/noticias/${mainNews.slug}`}
                     className="block h-full w-full"
-                    onClick={() => handleNewsClick(mainNews)}
                 >
                     <Image
                         src={mainNews.imageUrl || '/placeholder-news.jpg'}
@@ -92,10 +75,8 @@ export function NewsHero({ news }: NewsHeroProps) {
                 {secondaryNews.map((item, index) => (
                     <Link
                         key={`${item.source}-${index}`}
-                        href={item.link}
-                        target="_blank"
+                        href={`/noticias/${item.slug}`}
                         className="group flex gap-4 bg-card hover:bg-muted/50 p-3 rounded-lg border transition-all h-[115px] overflow-hidden"
-                        onClick={() => handleNewsClick(item)}
                     >
                         <div className="relative w-[120px] h-full shrink-0 rounded-md overflow-hidden">
                             <Image

@@ -79,11 +79,21 @@ src/lib/ai/
 └── rag/
     └── context-builder.ts # Construtor de contexto RAG
 
+src/lib/ml/predictions/    # Previsões de preço (TypeScript puro, sem LLM)
+├── index.ts               # Exports principais
+├── moving-average.ts      # SMA e EMA
+├── trend-analysis.ts      # Regressão linear
+├── volatility.ts          # Análise de volatilidade
+└── price-predictor.ts     # Ensemble (combina todos os modelos)
+
 src/components/ai/
-└── ChatWidget.tsx         # Widget flutuante do chat
+├── ChatWidget.tsx         # Widget flutuante do chat
+└── PredictionCard.tsx     # Card de previsão de preços
 
 src/app/api/ai/
 ├── chat/route.ts          # API do chatbot
+├── predictions/
+│   └── [slug]/route.ts    # Previsão de preço por commodity
 └── reports/
     ├── daily/route.ts     # Relatório diário do mercado
     └── commodity/
@@ -96,6 +106,7 @@ src/app/api/ai/
 |---------|------|-----|----------|
 | Chat msgs/dia | 10 | 100 | Ilimitado |
 | Relatórios/dia | 3 | 20 | Ilimitado |
+| Previsões/dia | 5 | 50 | Ilimitado |
 | Tokens/dia | 10k | 100k | Ilimitado |
 
 ### Variável de Ambiente
@@ -110,7 +121,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 ### Fase 2 - IndicAgro IA (em andamento)
 1. ~~Chatbot/Assistente especializado~~ ✅
 2. ~~Relatórios automáticos (LLM)~~ ✅
-3. Previsões de preço (TypeScript - SMA/EMA/Regressão)
+3. ~~Previsões de preço (TypeScript - SMA/EMA/Regressão)~~ ✅
 4. Análise de sentimento de notícias
 5. Detecção de anomalias
 
@@ -195,5 +206,13 @@ docker-compose up -d
   - Página /relatorios com interface completa
   - Relatórios de commodity são exclusivos para planos Pro/Business
   - Usando Claude Sonnet para qualidade nos relatórios
+- **28/01/2026**: Implementado sistema de previsão de preços (TypeScript puro, sem LLM):
+  - Algoritmos: SMA (Média Móvel Simples), EMA (Exponencial), Regressão Linear
+  - Ensemble combina os 3 modelos com pesos dinâmicos baseados em R² e volatilidade
+  - Cálculo de confiança baseado em concordância entre modelos
+  - API: GET /api/ai/predictions/[slug]?horizon=7|14|30
+  - Componente PredictionCard integrado na página de detalhes da commodity
+  - Rate limiting: 5/dia (free), 50/dia (pro), ilimitado (business)
+  - Disclaimer obrigatório: "Não é recomendação de investimento"
 
 ---

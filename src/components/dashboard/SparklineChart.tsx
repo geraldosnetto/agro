@@ -57,7 +57,7 @@ export const SparklineChart = memo(function SparklineChart({ slug, isPositive }:
     const fillColor = isPositive ? "#22c55e" : "#ef4444"; // emerald-500 / red-500
 
     return (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <AreaChart data={data}>
                 <defs>
                     <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">

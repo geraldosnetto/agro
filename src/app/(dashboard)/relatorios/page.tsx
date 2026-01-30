@@ -54,7 +54,7 @@ interface CommodityReport {
 }
 
 export default function RelatoriosPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
   const [commodities, setCommodities] = useState<CommodityInfo[]>([]);
   const [selectedCommodity, setSelectedCommodity] = useState<string | null>(null);
@@ -144,16 +144,6 @@ export default function RelatoriosPage() {
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const formatTimeAgo = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
@@ -240,7 +230,7 @@ export default function RelatoriosPage() {
               {!dailyReport && !isLoadingDaily && !error && (
                 <div className="text-center py-12 text-muted-foreground">
                   <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Clique em "Gerar Relatório" para criar o resumo do dia</p>
+                  <p>Clique em &quot;Gerar Relatório&quot; para criar o resumo do dia</p>
                   <p className="text-xs mt-2">O relatório será cacheado por 6 horas</p>
                 </div>
               )}

@@ -1,11 +1,11 @@
 
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { type ProfitabilityResult } from '@/lib/calculators/profitability';
-import { TrendingUp, TrendingDown, DollarSign, Scale, AlertCircle } from 'lucide-react';
+import { DollarSign, Scale, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -30,7 +30,6 @@ export function CalculatorResults({ result }: CalculatorResultsProps) {
         totalCost,
         grossMargin,
         grossMarginPercent,
-        costPerBag,
         breakevenYield,
         breakevenPrice
     } = result;

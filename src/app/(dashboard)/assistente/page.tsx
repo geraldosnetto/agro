@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Loader2, Bot, User, Sparkles, MessageSquare, Trash2 } from 'lucide-react';
+import { Send, Loader2, Bot, User, Sparkles, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
@@ -36,7 +35,7 @@ const SUGGESTED_QUESTIONS = [
 ];
 
 export default function AssistentePage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [input, setInput] = useState('');

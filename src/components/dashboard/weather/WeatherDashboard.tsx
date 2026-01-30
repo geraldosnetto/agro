@@ -1,10 +1,9 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWeather } from '@/contexts/WeatherContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Wind, Droplets, Thermometer, Calendar } from 'lucide-react';
 import { type WeatherData, getWeatherDescription } from '@/lib/data-sources/weather';
 import { ForecastChart } from './ForecastChart';
@@ -17,7 +16,7 @@ export function WeatherDashboard() {
     const [weather, setWeather] = useState<WeatherData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const fetchWeatherData = async () => {
+    const fetchWeatherData = useCallback(async () => {
         setLoading(true);
         try {
             const res = await fetch(`/api/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}`);
@@ -30,11 +29,11 @@ export function WeatherDashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedCity.lat, selectedCity.lon]);
 
     useEffect(() => {
         fetchWeatherData();
-    }, [selectedCity]);
+    }, [fetchWeatherData]);
 
     if (!weather && !loading) {
         return (

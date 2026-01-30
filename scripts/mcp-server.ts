@@ -54,7 +54,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 
     if (!tableName) throw new Error("Table name not found");
 
-    // @ts-ignore - Dynamic access hack
+    // @ts-expect-error - Dynamic access for Prisma model delegates
     const delegate = prisma[tableName.charAt(0).toLowerCase() + tableName.slice(1)];
 
     if (!delegate) throw new Error(`Table ${tableName} not found in Prisma Client`);
@@ -110,9 +110,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             return {
                 content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
             };
-        } catch (error: any) {
+        } catch (error) {
             return {
-                content: [{ type: "text", text: `Error: ${error.message}` }],
+                content: [{ type: "text", text: `Error: ${error instanceof Error ? error.message : String(error)}` }],
                 isError: true,
             };
         }

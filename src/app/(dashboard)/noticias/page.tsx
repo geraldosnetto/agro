@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description: 'Feed de notícias atualizado do agronegócio brasileiro, principais commodities e análises de mercado.',
 };
 
-export const revalidate = 3600; // 1 hora
+export const dynamic = 'force-dynamic';
 
 export default async function NoticiasPage() {
     const news = await fetchAllNews(50);

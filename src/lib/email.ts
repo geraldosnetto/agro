@@ -54,7 +54,6 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
       return { success: false, error };
     }
 
-    console.log('[EMAIL] Enviado com sucesso:', data?.id);
     return { success: true, id: data?.id };
   } catch (err) {
     console.error('[EMAIL] Exceção ao enviar:', err);

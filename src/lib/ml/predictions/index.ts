@@ -1,0 +1,30 @@
+/**
+ * Price Prediction Module
+ *
+ * Provides statistical price predictions for agricultural commodities
+ * using Moving Averages, Linear Regression, and Ensemble methods.
+ */
+
+export { predictPrice, predictMultipleHorizons } from './price-predictor';
+export type { PredictionResult, DataPoint } from './price-predictor';
+
+export {
+  calculateSMA,
+  calculateEMA,
+  analyzeMovingAverages,
+  projectPriceWithEMA,
+} from './moving-average';
+
+export {
+  linearRegression,
+  projectPrice,
+  analyzeTrends,
+  calculateROC,
+} from './trend-analysis';
+
+export {
+  analyzeVolatility,
+  calculateStandardDeviation,
+  calculateCoefficientOfVariation,
+  calculatePredictionBounds,
+} from './volatility';

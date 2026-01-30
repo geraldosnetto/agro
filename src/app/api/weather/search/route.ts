@@ -11,14 +11,11 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const query = searchParams.get('q');
 
-        console.log('[API Search] Query received:', query);
-
         if (!query) {
             return NextResponse.json({ results: [] });
         }
 
         const results = await searchCities(query);
-        console.log('[API Search] Results found:', results.length);
 
         return NextResponse.json({
             success: true,

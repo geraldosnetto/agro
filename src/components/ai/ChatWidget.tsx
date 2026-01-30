@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Loader2, Minimize2, Bot, User, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Minimize2, Bot, User, Sparkles } from 'lucide-react';
+import { TypingIndicator } from './TypingIndicator';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -242,7 +243,7 @@ export function ChatWidget() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="bg-background border shadow-sm rounded-lg px-4 py-3">
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      <TypingIndicator />
                     </div>
                   </div>
                 )}

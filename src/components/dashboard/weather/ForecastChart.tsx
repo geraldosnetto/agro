@@ -1,8 +1,7 @@
 
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line, Bar } from 'recharts';
+import { ResponsiveContainer, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line, Bar } from 'recharts';
 import { WeatherData } from '@/lib/data-sources/weather';
 
 interface ForecastChartProps {

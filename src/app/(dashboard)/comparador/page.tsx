@@ -34,7 +34,7 @@ export default async function ComparadorPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Comparador de Preços</h1>
                 <p className="text-muted-foreground mt-2">
-                    Selecione commodities para comparar a evolução histórica. Use a "Variação %" para comparar tendências de produtos com preços muito diferentes.
+                    Selecione commodities para comparar a evolução histórica. Use a &quot;Variação %&quot; para comparar tendências de produtos com preços muito diferentes.
                 </p>
             </div>
 

@@ -68,6 +68,12 @@ export function Header() {
             Comparador
           </Link>
           <Link
+            href="/mapa"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Mapa
+          </Link>
+          <Link
             href="/relatorios"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
@@ -114,6 +120,9 @@ export function Header() {
                 </Link>
                 <Link href="/comparador" className="text-lg font-medium">
                   Comparador
+                </Link>
+                <Link href="/mapa" className="text-lg font-medium">
+                  Mapa
                 </Link>
                 <Link href="/relatorios" className="text-lg font-medium">
                   Relatórios

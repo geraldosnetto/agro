@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PriceChartWithPraca } from "@/components/dashboard/PriceChartWithPraca";
 import { CommodityStats } from "@/components/dashboard/CommodityStats";
+import { PredictionCard } from "@/components/ai/PredictionCard";
+import { SentimentWidget } from "@/components/ai/SentimentWidget";
 import { ChevronLeft, Bell, Share2 } from "lucide-react";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ExportButton } from "@/components/ExportButton";
@@ -191,10 +193,22 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                 />
             </div>
 
-            {/* Statistics Section */}
-            <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">Estatísticas</h2>
-                <CommodityStats slug={slug} />
+            {/* Statistics and AI Section */}
+            <div className="grid lg:grid-cols-[1fr_350px] gap-6 mb-8">
+                <div>
+                    <h2 className="text-xl font-semibold mb-4">Estatísticas</h2>
+                    <CommodityStats slug={slug} />
+                </div>
+                <div className="space-y-6">
+                    <div>
+                        <h2 className="text-xl font-semibold mb-4">Previsão IA</h2>
+                        <PredictionCard slug={slug} />
+                    </div>
+                    <SentimentWidget
+                        commoditySlug={slug}
+                        commodityName={commodity.nome}
+                    />
+                </div>
             </div>
 
             {/* News Section */}

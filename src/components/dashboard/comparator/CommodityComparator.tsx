@@ -21,6 +21,17 @@ interface ChartDataPoint {
     [key: string]: number | string;
 }
 
+interface RawDataPoint {
+    date: string;
+    value: number;
+}
+
+interface RawSeries {
+    id: string;
+    name: string;
+    data: RawDataPoint[];
+}
+
 const COLORS = [
     "#2563eb", // blue-600
     "#16a34a", // green-600
@@ -37,7 +48,7 @@ export function CommodityComparator({
     const [days, setDays] = useState("30");
     const [normalized, setNormalized] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [rawData, setRawData] = useState<any[]>([]);
+    const [rawData, setRawData] = useState<RawSeries[]>([]);
 
     // Carregar dados quando a seleção ou período mudar
     useEffect(() => {
@@ -74,16 +85,16 @@ export function CommodityComparator({
 
         // 1. Coletar todas as datas únicas
         const allDates = new Set<string>();
-        rawData.forEach((series: any) => {
-            series.data.forEach((point: any) => allDates.add(point.date));
+        rawData.forEach((series) => {
+            series.data.forEach((point) => allDates.add(point.date));
         });
         const sortedDates = Array.from(allDates).sort();
 
         // 2. Criar pontos de dados unificados
         const chartData: ChartDataPoint[] = sortedDates.map((date) => {
             const point: ChartDataPoint = { date };
-            rawData.forEach((series: any) => {
-                const entry = series.data.find((d: any) => d.date === date);
+            rawData.forEach((series) => {
+                const entry = series.data.find((d) => d.date === date);
                 if (entry) {
                     point[series.id] = entry.value;
                 }
@@ -98,7 +109,7 @@ export function CommodityComparator({
 
             // Varrer dados cronologicamente para achar o primeiro valor não nulo de cada id
             chartData.forEach(point => {
-                rawData.forEach((series: any) => {
+                rawData.forEach((series) => {
                     const val = point[series.id];
                     if (initialValues[series.id] === undefined && typeof val === 'number') {
                         initialValues[series.id] = val;
@@ -108,7 +119,7 @@ export function CommodityComparator({
 
             return chartData.map((point) => {
                 const newPoint = { ...point };
-                rawData.forEach((series: any) => {
+                rawData.forEach((series) => {
                     const val = point[series.id];
                     const initial = initialValues[series.id];
                     if (typeof val === "number" && initial) {

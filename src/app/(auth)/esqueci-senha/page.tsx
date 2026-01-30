@@ -34,7 +34,7 @@ export default function EsqueciSenhaPage() {
             }
 
             setSent(true);
-        } catch (err) {
+        } catch {
             setError('Erro de conexão. Tente novamente.');
         } finally {
             setLoading(false);

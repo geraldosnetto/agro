@@ -194,6 +194,7 @@ export async function GET(request: Request) {
             message: "Verificação concluída",
             checked: alertsChecked,
             triggered: alertsTriggered,
+            emailsSent,
             triggeredAlerts: alertsToTrigger.map((a) => ({
                 email: a.email,
                 commodity: a.commodityName,

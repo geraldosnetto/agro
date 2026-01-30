@@ -12,10 +12,10 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Sun, CloudSun, Cloud, AlignJustify, CloudDrizzle, CloudRain, Snowflake, CloudLightning, HelpCircle, Loader2 } from 'lucide-react';
+import { Sun, CloudSun, Cloud, AlignJustify, CloudDrizzle, CloudRain, Snowflake, CloudLightning, HelpCircle, type LucideIcon } from 'lucide-react';
 
 // Mapa de Componentes de Ícones para renderização
-const IconMap: Record<string, any> = {
+const IconMap: Record<string, LucideIcon> = {
     Sun, CloudSun, Cloud, AlignJustify, CloudDrizzle, CloudRain, Snowflake, CloudLightning, HelpCircle
 };
 
