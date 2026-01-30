@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
-import ReactMarkdown from 'react-markdown';
+import { ReportRenderer } from '@/components/ai/ReportRenderer';
 
 interface DailyReport {
   id: string;
@@ -257,9 +257,7 @@ export default function RelatoriosPage() {
                     )}
                   </div>
 
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <ReactMarkdown>{dailyReport.content}</ReactMarkdown>
-                  </div>
+                  <ReportRenderer content={dailyReport.content} title={dailyReport.title} />
                 </div>
               )}
             </CardContent>
@@ -385,9 +383,7 @@ export default function RelatoriosPage() {
                       )}
                     </div>
 
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown>{commodityReport.content}</ReactMarkdown>
-                    </div>
+                    <ReportRenderer content={commodityReport.content} title={commodityReport.title} />
                   </div>
                 )}
               </CardContent>

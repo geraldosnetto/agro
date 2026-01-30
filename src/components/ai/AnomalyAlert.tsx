@@ -53,20 +53,21 @@ const TYPE_CONFIG: Record<AnomalyType, { icon: typeof AlertTriangle; label: stri
   HISTORICAL_LOW: { icon: ArrowDownRight, label: 'Mínima' },
 };
 
+// Usando design system: destructive para alta, chart-2 (laranja) para média, chart-4 (azul) para baixa
 const SEVERITY_CONFIG: Record<Severity, { color: string; bgColor: string; label: string }> = {
   HIGH: {
-    color: 'text-red-600 dark:text-red-400',
-    bgColor: 'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-800',
+    color: 'text-destructive',
+    bgColor: 'bg-destructive/10 border-destructive/30',
     label: 'Alta',
   },
   MEDIUM: {
-    color: 'text-amber-600 dark:text-amber-400',
-    bgColor: 'bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800',
+    color: 'text-chart-2',
+    bgColor: 'bg-chart-2/10 border-chart-2/30',
     label: 'Média',
   },
   LOW: {
-    color: 'text-blue-600 dark:text-blue-400',
-    bgColor: 'bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800',
+    color: 'text-chart-4',
+    bgColor: 'bg-chart-4/10 border-chart-4/30',
     label: 'Baixa',
   },
 };

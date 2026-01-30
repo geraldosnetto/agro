@@ -4,6 +4,13 @@ import { fetchAllNews } from "@/lib/data-sources/news";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 
+// Verifica se a URL é uma imagem válida (não YouTube, não embed, etc)
+function isValidImageUrl(url: string | null | undefined): boolean {
+    if (!url) return false;
+    const invalidPatterns = ['youtube.com', 'youtu.be', '/embed/', 'vimeo.com'];
+    return !invalidPatterns.some(pattern => url.includes(pattern));
+}
+
 export async function RelatedNews({ currentSlug }: { currentSlug: string }) {
     const allNews = await fetchAllNews(6); // Busca um pouco mais para garantir que tenhamos 3 diferentes
     const related = allNews.filter(n => n.slug !== currentSlug).slice(0, 3);
@@ -15,10 +22,10 @@ export async function RelatedNews({ currentSlug }: { currentSlug: string }) {
                 {related.map((item) => (
                     <Link key={item.slug} href={`/noticias/${item.slug}`} className="group">
                         <Card className="h-full overflow-hidden border-none shadow-none bg-transparent hover:bg-muted/30 transition-colors">
-                            {item.imageUrl && (
+                            {isValidImageUrl(item.imageUrl) && (
                                 <div className="aspect-video relative overflow-hidden rounded-lg mb-3">
                                     <img
-                                        src={item.imageUrl}
+                                        src={item.imageUrl!}
                                         alt={item.title}
                                         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                                     />

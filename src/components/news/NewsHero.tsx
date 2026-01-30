@@ -6,6 +6,17 @@ import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+// Verifica se a URL é uma imagem válida (não YouTube, não embed, etc)
+function isValidImageUrl(url: string | null | undefined): boolean {
+    if (!url) return false;
+    const invalidPatterns = ['youtube.com', 'youtu.be', '/embed/', 'vimeo.com'];
+    return !invalidPatterns.some(pattern => url.includes(pattern));
+}
+
+function getImageSrc(url: string | null | undefined): string {
+    return isValidImageUrl(url) ? url! : '/placeholder-news.jpg';
+}
+
 interface NewsItem {
     slug: string;
     title: string;
@@ -38,7 +49,7 @@ export function NewsHero({ news }: NewsHeroProps) {
                     className="block h-full w-full"
                 >
                     <Image
-                        src={mainNews.imageUrl || '/placeholder-news.jpg'}
+                        src={getImageSrc(mainNews.imageUrl)}
                         alt={mainNews.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -80,7 +91,7 @@ export function NewsHero({ news }: NewsHeroProps) {
                     >
                         <div className="relative w-[120px] h-full shrink-0 rounded-md overflow-hidden">
                             <Image
-                                src={item.imageUrl || '/placeholder-news.jpg'}
+                                src={getImageSrc(item.imageUrl)}
                                 alt={item.title}
                                 fill
                                 className="object-cover transition-transform duration-300 group-hover:scale-110"

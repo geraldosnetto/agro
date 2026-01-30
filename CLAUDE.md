@@ -140,26 +140,28 @@ ANTHROPIC_API_KEY=sk-ant-...
 4. **Nunca usar `any`, `any[]` ou `as any`**. TypeScript é para segurança. Use type narrowing/guards.
 5. **Nunca "esconder" erros**. Nada de `try/catch` vazio, `.passthrough()` em Zod, ou ignorar validações.
 6. **Nunca assumir caminhos de produção** (ex: `/opt/`). Verificar o ambiente real sempre.
+7. **Nunca usar cores hardcoded** (ex: `blue-500`, `green-600`). SEMPRE consultar `globals.css` e usar tokens do design system (`primary`, `destructive`, `chart-1`, `muted`, etc). Cores semânticas garantem consistência e suporte a dark mode.
 
 ### ✅ Processo & Metodologia
-7. **Preview Visual Obrigatório:** Sempre conferir no browser se o que foi codado realmente funciona visualmente.
-8. **Planejamento Antes de Código:** Pensar, desenhar e planejar passo a passo antes de digitar.
-9. **Divisão de Tarefas:** Quebrar problemas grandes em etapas menores e testáveis.
-10. **Schema-First:** Definir contratos (Zod/Interfaces) ANTES da lógica. Backend e Frontend devem concordar no contrato primeiro.
-11. **Server is Source of Truth:** O Backend dita a estrutura. O Frontend se adapta.
+8. **Preview Visual Obrigatório:** Sempre conferir no browser se o que foi codado realmente funciona visualmente.
+9. **Planejamento Antes de Código:** Pensar, desenhar e planejar passo a passo antes de digitar.
+10. **Divisão de Tarefas:** Quebrar problemas grandes em etapas menores e testáveis.
+11. **Schema-First:** Definir contratos (Zod/Interfaces) ANTES da lógica. Backend e Frontend devem concordar no contrato primeiro.
+12. **Server is Source of Truth:** O Backend dita a estrutura. O Frontend se adapta.
+13. **Reiniciar Dev Server:** Ao terminar uma tarefa que modifica código, sempre reiniciar o servidor de desenvolvimento (`npm run dev`) para garantir que as mudanças estão funcionando.
 
 ### 🛠️ Engenharia & Qualidade
-12. **Fix Priority (Bugs de Dados):**
+14. **Fix Priority (Bugs de Dados):**
     1. Logar erro detalhado (identificar campos).
     2. Corrigir origem (Backend).
     3. Atualizar Schema.
     4. *Jamais* relaxar validação no cliente.
-13. **Logging Detalhado:** Em falhas de validação, logar *quais* campos falharam e *por quê*.
-14. **Perguntar Sempre:** Na dúvida, pergunte. Não assuma.
+15. **Logging Detalhado:** Em falhas de validação, logar *quais* campos falharam e *por quê*.
+16. **Perguntar Sempre:** Na dúvida, pergunte. Não assuma.
 
 ### 🔄 Melhoria Contínua
-15. **Refactoring (Boy Scout Rule):** Deixar o código sempre melhor do que encontrou.
-16. **Atomicidade e Limpeza:** Manter commits/tarefas focados. Código limpo é responsabilidade de todos.
+17. **Refactoring (Boy Scout Rule):** Deixar o código sempre melhor do que encontrou.
+18. **Atomicidade e Limpeza:** Manter commits/tarefas focados. Código limpo é responsabilidade de todos.
 
 ---
 

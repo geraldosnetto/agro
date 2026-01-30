@@ -11,6 +11,13 @@ import { ExternalLink, Search, Filter, Newspaper, Calendar } from 'lucide-react'
 
 import { type NewsItem } from '@/lib/data-sources/news';
 
+// Verifica se a URL é uma imagem válida (não YouTube, não embed, etc)
+function isValidImageUrl(url: string | null | undefined): boolean {
+    if (!url) return false;
+    const invalidPatterns = ['youtube.com', 'youtu.be', '/embed/', 'vimeo.com'];
+    return !invalidPatterns.some(pattern => url.includes(pattern));
+}
+
 
 interface NewsListProps {
     initialNews: NewsItem[];
@@ -104,10 +111,10 @@ export function NewsList({ initialNews }: NewsListProps) {
                                 <div className="flex justify-between items-start gap-4 h-full flex-col">
                                     <div className="space-y-2 flex-1 relative">
                                         <div className="flex gap-4">
-                                            {item.imageUrl && (
+                                            {isValidImageUrl(item.imageUrl) && (
                                                 <div className="relative w-24 h-24 shrink-0 rounded-md overflow-hidden bg-muted hidden sm:block">
                                                     <img
-                                                        src={item.imageUrl}
+                                                        src={item.imageUrl!}
                                                         alt=""
                                                         className="object-cover w-full h-full transform transition-transform group-hover:scale-105"
                                                         onError={(e) => {

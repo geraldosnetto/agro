@@ -14,10 +14,11 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
+    // Converter null para undefined (Zod .optional() não aceita null)
     const parsed = QuerySchema.safeParse({
-      commodity: searchParams.get('commodity'),
-      severity: searchParams.get('severity'),
-      acknowledged: searchParams.get('acknowledged'),
+      commodity: searchParams.get('commodity') ?? undefined,
+      severity: searchParams.get('severity') ?? undefined,
+      acknowledged: searchParams.get('acknowledged') ?? undefined,
       limit: searchParams.get('limit') || '10',
     });
 
