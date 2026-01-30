@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { getCommodityReport } from '@/lib/ai/generators/commodity-report';
+import {
+  getLatestCommodityReport,
+  listCommodityReportDates,
+  generateCommodityReport,
+} from '@/lib/ai/generators/commodity-report';
 import { checkAIUsage, incrementAIUsage } from '@/lib/ai/rate-limit-ai';
 import { UserPlan } from '@/lib/schemas/ai';
 import prisma from '@/lib/prisma';
@@ -23,15 +27,23 @@ export async function GET(request: Request, { params }: RouteParams) {
     }
 
     const userId = session.user.id;
+    const { searchParams } = new URL(request.url);
 
-    // 2. Buscar plano do usuário
+    // 2. Verificar se é requisição de listar datas
+    const listDates = searchParams.get('list') === 'true';
+    if (listDates) {
+      const dates = await listCommodityReportDates(slug, 12);
+      return NextResponse.json({ dates });
+    }
+
+    // 3. Buscar plano do usuário
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { plan: true },
     });
     const plan = (user?.plan || 'free') as UserPlan;
 
-    // 3. Relatórios de commodity são exclusivos para Pro/Business
+    // 4. Relatórios de commodity são exclusivos para Pro/Business
     if (plan === 'free') {
       return NextResponse.json(
         {
@@ -42,7 +54,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       );
     }
 
-    // 4. Verificar rate limit
+    // 5. Verificar rate limit
     const usageCheck = await checkAIUsage(userId, plan, 'report');
     if (!usageCheck.allowed) {
       return NextResponse.json(
@@ -56,35 +68,47 @@ export async function GET(request: Request, { params }: RouteParams) {
       );
     }
 
-    // 5. Verificar se quer forçar regeneração
-    const { searchParams } = new URL(request.url);
+    // 6. Verificar se quer forçar regeneração
     const forceRegenerate = searchParams.get('force') === 'true';
 
-    // 6. Obter relatório
-    const report = await getCommodityReport(slug, forceRegenerate);
+    let report;
+
+    if (forceRegenerate) {
+      // Forçar geração de novo relatório
+      report = await generateCommodityReport(slug);
+      if (report && !report.cached) {
+        await incrementAIUsage(userId, 'report', report.tokensUsed);
+      }
+    } else {
+      // Buscar o mais recente
+      report = await getLatestCommodityReport(slug);
+    }
 
     if (!report) {
       return NextResponse.json(
-        { error: 'Commodity não encontrada', code: 'NOT_FOUND' },
+        {
+          error: 'Nenhum relatório disponível para esta commodity',
+          code: 'NO_REPORTS',
+          message: 'O relatório semanal será gerado automaticamente pelo sistema.',
+        },
         { status: 404 }
       );
     }
 
-    // 7. Incrementar uso apenas se não foi do cache
-    if (!report.cached) {
-      await incrementAIUsage(userId, 'report', report.tokensUsed);
-    }
+    // 7. Buscar datas disponíveis para histórico
+    const availableDates = await listCommodityReportDates(slug, 12);
 
     return NextResponse.json({
       report,
+      availableDates,
       usage: {
-        remaining: usageCheck.remaining.reports - (report.cached ? 0 : 1),
+        remaining: usageCheck.remaining.reports,
       },
     });
   } catch (error) {
     console.error('Commodity report error:', error);
     return NextResponse.json(
-      { error: 'Erro ao gerar relatório da commodity', code: 'API_ERROR' },
+      { error: 'Erro ao buscar relatório da commodity', code: 'API_ERROR' },
       { status: 500 }
     );
   }

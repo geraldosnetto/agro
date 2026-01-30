@@ -1,6 +1,6 @@
 
 import { AgroInsight } from "@/lib/agro-analyzers";
-import { AlertTriangle, CheckCircle, XCircle, Droplets, Tractor, Bug, Syringe, Sun } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle, Droplets, Tractor, Bug, Syringe, Sun, Snowflake, CloudOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface AgroInsightsProps {
@@ -16,6 +16,9 @@ export function AgroInsights({ insights }: AgroInsightsProps) {
             case 'fungus': return <Bug className="h-5 w-5" />;
             case 'tractor': return <Tractor className="h-5 w-5" />;
             case 'sun': return <Sun className="h-5 w-5" />;
+            case 'frost': return <Snowflake className="h-5 w-5" />;
+            case 'drought': return <CloudOff className="h-5 w-5" />;
+            case 'water': return <Droplets className="h-5 w-5" />;
             default: return <AlertTriangle className="h-5 w-5" />;
         }
     };

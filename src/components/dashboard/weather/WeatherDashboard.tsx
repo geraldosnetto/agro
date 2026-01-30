@@ -11,6 +11,10 @@ import { CitySearch } from './CitySearch';
 import { Button } from '@/components/ui/button';
 import { analyzeWeatherConditions } from '@/lib/agro-analyzers';
 import { AgroInsights } from './AgroInsights';
+import { WeatherRadarMap } from './WeatherRadarMap';
+import { CurrentWeatherHero } from './CurrentWeatherHero';
+import { RainfallAccumulation } from './RainfallAccumulation';
+import { RegionalComparison } from './RegionalComparison';
 
 export function WeatherDashboard() {
     // Agora usa o Contexto Global em vez de estado local
@@ -74,65 +78,29 @@ export function WeatherDashboard() {
                 </div>
             ) : weather && (
                 <>
-                    {/* Insights Inteligentes (Pulverização, Doenças, etc) */}
-                    <AgroInsights insights={insights} />
+                    {/* Hero Card - Temperatura Principal */}
+                    <div className="grid gap-6 lg:grid-cols-3">
+                        <CurrentWeatherHero
+                            weather={weather}
+                            cityName={`${selectedCity.name}, ${selectedCity.state}`}
+                            className="lg:col-span-1"
+                        />
 
-                    {/* Cards de Condição Atual */}
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Temperatura</CardTitle>
-                                <Thermometer className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{weather.current.temperature}°C</div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {currentCondition.label}
-                                </p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Umidade</CardTitle>
-                                <Droplets className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{weather.current.humidity}%</div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Relativa do ar
-                                </p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Vento</CardTitle>
-                                <Wind className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{weather.current.windSpeed} km/h</div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Velocidade média
-                                </p>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Chuva Hoje</CardTitle>
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">
-                                    {weather.daily.precipitationSum[0]} mm
-                                </div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    Probabilidade: {weather.daily.precipitationProb[0]}%
-                                </p>
-                            </CardContent>
-                        </Card>
+                        {/* Cards Secundários */}
+                        <div className="lg:col-span-2 grid gap-4 sm:grid-cols-2">
+                            <RainfallAccumulation weather={weather} />
+                            <RegionalComparison />
+                        </div>
+                    </div>
+
+                    {/* Insights Inteligentes (Pulverização, Doenças, Geada, Seca, etc) */}
+                    <div>
+                        <h3 className="text-lg font-semibold mb-4">🧠 Inteligência Agronômica</h3>
+                        <AgroInsights insights={insights} />
                     </div>
 
                     {/* Gráfico de Previsão */}
-                    <Card className="col-span-4">
+                    <Card>
                         <CardHeader>
                             <CardTitle>Previsão 7 Dias</CardTitle>
                             <CardDescription>
@@ -144,8 +112,11 @@ export function WeatherDashboard() {
                         </CardContent>
                     </Card>
 
+                    {/* Radar Meteorológico */}
+                    <WeatherRadarMap />
+
                     <p className="text-center text-xs text-muted-foreground opacity-50">
-                        Dados fornecidos por OpenMeteo.com
+                        Dados fornecidos por OpenMeteo.com e RainViewer.com
                     </p>
                 </>
             )}

@@ -243,10 +243,15 @@ model AIReport {
   generatedAt   DateTime @default(now())
   validUntil    DateTime // Quando o relatório expira
 
+  // Data de referência do relatório (para histórico)
+  reportDate    DateTime @db.Date // Data do relatório (ex: 2026-01-30)
+
   // Cache control
   dataHash      String?  // Hash dos dados usados (para invalidação)
 
+  @@unique([type, reportDate, commodityId]) // Um relatório por tipo/data/commodity
   @@index([type, generatedAt])
+  @@index([type, reportDate])
   @@index([commodityId])
 }
 
