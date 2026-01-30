@@ -9,6 +9,8 @@ import { type WeatherData, getWeatherDescription } from '@/lib/data-sources/weat
 import { ForecastChart } from './ForecastChart';
 import { CitySearch } from './CitySearch';
 import { Button } from '@/components/ui/button';
+import { analyzeWeatherConditions } from '@/lib/agro-analyzers';
+import { AgroInsights } from './AgroInsights';
 
 export function WeatherDashboard() {
     // Agora usa o Contexto Global em vez de estado local
@@ -45,6 +47,7 @@ export function WeatherDashboard() {
     }
 
     const currentCondition = weather ? getWeatherDescription(weather.current.conditionCode) : { label: '...', icon: '' };
+    const insights = weather ? analyzeWeatherConditions(weather) : [];
 
     return (
         <div className="space-y-6">
@@ -71,6 +74,9 @@ export function WeatherDashboard() {
                 </div>
             ) : weather && (
                 <>
+                    {/* Insights Inteligentes (Pulverização, Doenças, etc) */}
+                    <AgroInsights insights={insights} />
+
                     {/* Cards de Condição Atual */}
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                         <Card>

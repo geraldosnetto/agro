@@ -477,10 +477,10 @@ src/
 | `/futuros` | Cotações B3/CME | 3 | Pendente |
 | `/api-docs` | Documentação da API pública | 3 | Pendente |
 | `/precos` | Página de planos e preços | 2 | Pendente |
-| `/ia` | Hub de ferramentas de IA | 2 | ⭐ PRÓXIMO |
-| `/ia/previsoes` | Previsões de preço por IA | 2 | Pendente |
-| `/ia/relatorios` | Relatórios automáticos | 2 | Pendente |
-| `/ia/assistente` | Chatbot especializado | 2 | Pendente |
+| `/ia` | Hub de ferramentas de IA | 2 | ✅ Concluído |
+| `/ia/previsoes` | Previsões de preço por IA | 2 | ✅ Concluído |
+| `/ia/relatorios` | Relatórios automáticos | 2 | ✅ Concluído |
+| `/ia/assistente` | Chatbot especializado | 2 | ✅ Concluído |
 
 ---
 

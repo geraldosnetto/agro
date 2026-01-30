@@ -92,7 +92,7 @@ export function Footer() {
                     </div>
 
                     {/* Legal */}
-                    <div>
+                    <div className="space-y-4">
                         <h4 className="font-semibold mb-3">Legal</h4>
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             <li>
@@ -114,14 +114,22 @@ export function Footer() {
                     </div>
                 </div>
 
-                {/* Bottom */}
-                <div className="mt-8 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-sm text-muted-foreground">
-                        © {new Date().getFullYear()} IndicAgro. Todos os direitos reservados.
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                        Dados fornecidos sem garantia. Consulte as fontes oficiais.
-                    </p>
+                {/* Disclaimer e Copyright */}
+                <div className="mt-12 border-t pt-8">
+                    <div className="bg-muted/50 p-6 rounded-lg text-sm text-muted-foreground mb-8 text-justify leading-relaxed border border-border/50">
+                        <strong className="text-foreground block mb-2">AVISO LEGAL IMPORTANTE:</strong>
+                        Todo o conteúdo disponibilizado no IndicAgro (preços, gráficos, notícias e análises) possui caráter exclusivamente <strong>informativo e educacional</strong>.
+                        Não somos uma instituição financeira, corretora ou consultoria de investimentos credenciada pela CVM.
+                        As informações não constituem recomendação de compra ou venda de ativos. O mercado agropecuário e financeiro envolve riscos.
+                        Rentabilidade passada não é garantia de resultados futuros. Tome suas decisões com base em múltiplas fontes e consulte um profissional especializado.
+                    </div>
+
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+                        <p>© {new Date().getFullYear()} IndicAgro. Todos os direitos reservados.</p>
+                        <div className="flex items-center gap-4">
+                            <span>Feito com ❤️ para o Agro Brasileiro</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </footer>

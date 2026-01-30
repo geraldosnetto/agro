@@ -10,12 +10,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function CadastroPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -33,6 +35,12 @@ export default function CadastroPage() {
 
         if (password.length < 6) {
             setErrorMessage("A senha deve ter pelo menos 6 caracteres");
+            setIsLoading(false);
+            return;
+        }
+
+        if (!acceptedTerms) {
+            setErrorMessage("Você precisa concordar com os Termos de Uso");
             setIsLoading(false);
             return;
         }
@@ -218,22 +226,30 @@ export default function CadastroPage() {
                             />
                         </div>
 
+                        <div className="flex items-start space-x-2 py-2">
+                            <Checkbox
+                                id="terms"
+                                checked={acceptedTerms}
+                                onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                            />
+                            <div className="grid gap-1.5 leading-none">
+                                <label
+                                    htmlFor="terms"
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                    Li e concordo com os Termos
+                                </label>
+                                <p className="text-muted-foreground text-xs">
+                                    Concordo com os <Link href="/termos" className="text-primary hover:underline">Termos de Uso</Link> e <Link href="/privacidade" className="text-primary hover:underline">Política de Privacidade</Link>.
+                                </p>
+                            </div>
+                        </div>
+
                         <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Criar Conta
                         </Button>
                     </form>
-
-                    <p className="text-xs text-muted-foreground text-center">
-                        Ao criar uma conta, você concorda com nossos{" "}
-                        <Link href="/termos" className="text-primary hover:underline">
-                            Termos de Uso
-                        </Link>{" "}
-                        e{" "}
-                        <Link href="/privacidade" className="text-primary hover:underline">
-                            Política de Privacidade
-                        </Link>
-                    </p>
                 </CardContent>
 
                 <CardFooter className="flex justify-center">
