@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ExternalLink, Search, Filter, Newspaper, Calendar } from 'lucide-react';
@@ -16,6 +15,29 @@ function isValidImageUrl(url: string | null | undefined): boolean {
     if (!url) return false;
     const invalidPatterns = ['youtube.com', 'youtu.be', '/embed/', 'vimeo.com'];
     return !invalidPatterns.some(pattern => url.includes(pattern));
+}
+
+// Converte HTTP para HTTPS e retorna a URL
+function getImageSrc(url: string | null | undefined): string {
+    if (!isValidImageUrl(url)) return '';
+    return url!.replace(/^http:\/\//i, 'https://');
+}
+
+// Limpa HTML e trunca o conteúdo para resumo
+function getSummary(content: string | undefined, maxLength: number = 300): string {
+    if (!content) return '';
+    // Remove tags HTML
+    let text = content.replace(/<[^>]*>/g, '').trim();
+    // Remove créditos de foto (Foto: ..., Crédito: ..., Imagem: ...)
+    text = text.replace(/^(Foto|Crédito|Imagem|Créditos?|Reprodução|Divulgação)\s*:\s*[^.]+\.\s*/gi, '');
+    text = text.replace(/\(Foto\s*:\s*[^)]+\)\s*/gi, '');
+    // Remove espaços extras
+    text = text.replace(/\s+/g, ' ').trim();
+    if (text.length <= maxLength) return text;
+    // Trunca no último espaço antes do limite
+    const truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
 }
 
 
@@ -39,7 +61,8 @@ export function NewsList({ initialNews }: NewsListProps) {
         if (search) {
             const searchLower = search.toLowerCase();
             filtered = filtered.filter(item =>
-                item.title.toLowerCase().includes(searchLower)
+                item.title.toLowerCase().includes(searchLower) ||
+                (item.content && item.content.toLowerCase().includes(searchLower))
             );
         }
 
@@ -106,15 +129,22 @@ export function NewsList({ initialNews }: NewsListProps) {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filteredNews.map((item, index) => (
-                        <Card key={index} className="group relative hover:bg-muted/50 transition-colors border-l-4 border-l-primary/0 hover:border-l-primary">
-                            <CardContent className="p-5">
-                                <div className="flex justify-between items-start gap-4 h-full flex-col">
-                                    <div className="space-y-2 flex-1 relative">
+                        <a
+                            key={index}
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block group"
+                        >
+                            <Card className="h-full hover:bg-muted/50 transition-colors border-l-4 border-l-primary/0 hover:border-l-primary">
+                                <CardContent className="p-5">
+                                    <div className="flex flex-col gap-3">
+                                        {/* Header com imagem e meta */}
                                         <div className="flex gap-4">
                                             {isValidImageUrl(item.imageUrl) && (
                                                 <div className="relative w-24 h-24 shrink-0 rounded-md overflow-hidden bg-muted hidden sm:block">
                                                     <img
-                                                        src={item.imageUrl!}
+                                                        src={getImageSrc(item.imageUrl)}
                                                         alt=""
                                                         className="object-cover w-full h-full transform transition-transform group-hover:scale-105"
                                                         onError={(e) => {
@@ -133,26 +163,29 @@ export function NewsList({ initialNews }: NewsListProps) {
                                                         {item.timeAgo}
                                                     </span>
                                                 </div>
-                                                <h3 className="font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-3">
-                                                    <a
-                                                        href={`/noticias/${item.slug}`}
-                                                        className="focus:outline-none"
-                                                    >
-                                                        {item.title}
-                                                        <span className="absolute inset-0" aria-hidden="true" />
-                                                    </a>
+                                                <h3 className="font-semibold leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                                                    {item.title}
                                                 </h3>
                                             </div>
                                         </div>
+
+                                        {/* Resumo do conteúdo */}
+                                        {item.content && (
+                                            <p className="text-sm text-muted-foreground line-clamp-3">
+                                                {getSummary(item.content, 300)}
+                                            </p>
+                                        )}
+
+                                        {/* Footer */}
+                                        <div className="flex justify-end items-center pt-2 mt-auto border-t border-border/50">
+                                            <span className="text-xs text-muted-foreground group-hover:text-primary flex items-center gap-1 transition-colors">
+                                                Ler na fonte <ExternalLink className="h-3 w-3" />
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center w-full pt-2 mt-auto">
-                                        <Button variant="ghost" size="sm" className="ml-auto text-xs h-8 items-center gap-1 pointer-events-none group-hover:bg-primary group-hover:text-primary-foreground">
-                                            Ler notícia <ExternalLink className="h-3 w-3" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        </a>
                     ))}
                 </div>
             )}

@@ -13,6 +13,21 @@ const nextConfig: NextConfig = {
       // Agrolink
       { protocol: "https", hostname: "www.agrolink.com.br" },
       { protocol: "https", hostname: "*.agrolink.com.br" },
+      // AgroNotícia
+      { protocol: "https", hostname: "agronoticia.com.br" },
+      { protocol: "https", hostname: "*.agronoticia.com.br" },
+      // Portal DBO
+      { protocol: "https", hostname: "portaldbo.com.br" },
+      { protocol: "https", hostname: "*.portaldbo.com.br" },
+      // RPA News
+      { protocol: "https", hostname: "revistarpanews.com.br" },
+      { protocol: "https", hostname: "*.revistarpanews.com.br" },
+      // Revista Cafeicultura
+      { protocol: "https", hostname: "revistacafeicultura.com.br" },
+      { protocol: "https", hostname: "*.revistacafeicultura.com.br" },
+      // JornalCana
+      { protocol: "https", hostname: "jornalcana.com.br" },
+      { protocol: "https", hostname: "*.jornalcana.com.br" },
       // Globo Rural
       { protocol: "https", hostname: "*.globo.com" },
       { protocol: "https", hostname: "*.glbimg.com" },

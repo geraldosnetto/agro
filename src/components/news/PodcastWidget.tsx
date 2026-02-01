@@ -41,7 +41,8 @@ export function PodcastWidget() {
             </div>
             {/* Decorative elements */}
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-green-500/20 rounded-full blur-3xl" />
-            <div className="absolute top-0 right-0 w-full h-full bg-[url('https://grain-texture.png')] opacity-20 mix-blend-overlay" />
+            {/* Grain texture overlay - using CSS noise pattern instead */}
+            <div className="absolute top-0 right-0 w-full h-full opacity-10 mix-blend-overlay bg-noise" />
         </div>
     );
 }

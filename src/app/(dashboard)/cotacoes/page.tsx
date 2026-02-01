@@ -4,7 +4,7 @@ import { CotacaoCard, CotacaoCategoria } from "@/components/dashboard/CotacaoCar
 import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import { PriceChartSelector } from "@/components/dashboard/PriceChartSelector";
 import { AnomalyAlert } from "@/components/ai/AnomalyAlert";
-import { SentimentWidget } from "@/components/ai/SentimentWidget";
+import { SentimentSelector } from "@/components/ai/SentimentSelector";
 import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
@@ -138,10 +138,10 @@ export default async function CotacoesPage() {
                     <h3 className="text-lg font-semibold">Alertas de Preço</h3>
                     <AnomalyAlert limit={3} />
                 </div>
-                <div className="space-y-6">
-                    <h3 className="text-lg font-semibold">Termômetro do Mercado (Soja)</h3>
-                    <SentimentWidget commoditySlug="soja" commodityName="Soja" className="h-full" />
-                </div>
+                <SentimentSelector
+                    commodities={commoditiesData.map(c => ({ slug: c.slug, nome: c.nome }))}
+                    defaultSlug="soja"
+                />
             </div>
 
             {/* Tabs de categoria */}

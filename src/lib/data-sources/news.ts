@@ -58,17 +58,47 @@ interface CustomFeed {
     items: CustomItem[];
 }
 
-// Fontes RSS públicas
+// Fontes RSS públicas (verificadas e funcionando)
 const RSS_SOURCES = [
+    {
+        name: 'Globo Rural',
+        url: 'https://g1.globo.com/rss/g1/economia/agronegocios/',
+        baseUrl: 'https://g1.globo.com/economia/agronegocios'
+    },
     {
         name: 'Canal Rural',
         url: 'https://www.canalrural.com.br/feed/',
         baseUrl: 'https://www.canalrural.com.br'
     },
     {
-        name: 'Agrolink',
-        url: 'https://www.agrolink.com.br/rss/',
-        baseUrl: 'https://www.agrolink.com.br'
+        name: 'Beef Point',
+        url: 'https://www.beefpoint.com.br/feed/',
+        baseUrl: 'https://www.beefpoint.com.br'
+    },
+    {
+        name: 'AgroNoticia',
+        url: 'https://www.agronoticia.com.br/feed/',
+        baseUrl: 'https://www.agronoticia.com.br'
+    },
+    {
+        name: 'Portal DBO',
+        url: 'https://www.portaldbo.com.br/feed/',
+        baseUrl: 'https://www.portaldbo.com.br'
+    },
+    {
+        name: 'RPA News',
+        url: 'https://revistarpanews.com.br/feed/',
+        baseUrl: 'https://revistarpanews.com.br'
+    },
+    {
+        name: 'Revista Cafeicultura',
+        url: 'https://revistacafeicultura.com.br/feed/',
+        baseUrl: 'https://revistacafeicultura.com.br'
+    },
+    {
+        name: 'JornalCana',
+        url: 'https://www.jornalcana.com.br/feed/',
+        baseUrl: 'https://www.jornalcana.com.br'
     },
 ];
 
@@ -95,6 +125,59 @@ const COMMODITY_KEYWORDS: Record<string, string[]> = {
 // Cache em memória simples (1 hora)
 const cache: Map<string, { data: NewsItem[]; timestamp: number }> = new Map();
 const CACHE_TTL = 60 * 60 * 1000; // 1 hora
+
+// Palavras-chave para bloquear notícias fora do tema agro
+const BLOCKED_KEYWORDS = [
+    // Entretenimento
+    'música', 'musica', 'show', 'carnaval', 'sertanejo', 'cantora', 'cantor',
+    'marília mendonça', 'gusttavo lima', 'rodeio show', 'sofrência',
+    // Esportes
+    'futebol', 'campeonato', 'corinthians', 'palmeiras', 'flamengo',
+    // Política genérica (não agro)
+    'eleições municipais', 'vereador', 'prefeito',
+    // Outros
+    'horóscopo', 'signo', 'astrologia', 'celebridade', 'fofoca',
+    'big brother', 'bbb', 'novela', 'reality',
+];
+
+/**
+ * Verifica se a notícia deve ser bloqueada por conter palavras fora do tema
+ */
+function shouldBlockNews(title: string, content?: string): boolean {
+    const textToCheck = `${title} ${content || ''}`.toLowerCase();
+    return BLOCKED_KEYWORDS.some(keyword => textToCheck.includes(keyword.toLowerCase()));
+}
+
+// Limite de caracteres para snippet (legal: apenas resumo, não conteúdo completo)
+const SNIPPET_MAX_CHARS = 300;
+
+/**
+ * Remove tags HTML e cria um snippet limitado
+ * Isso é importante para conformidade legal - não copiar conteúdo completo
+ */
+function createSnippet(htmlContent: string | undefined, maxChars = SNIPPET_MAX_CHARS): string {
+    if (!htmlContent) return '';
+
+    // Remove tags HTML
+    const textOnly = htmlContent
+        .replace(/<[^>]*>/g, ' ')  // Remove tags
+        .replace(/&nbsp;/g, ' ')   // Remove &nbsp;
+        .replace(/&amp;/g, '&')    // Decode &amp;
+        .replace(/&lt;/g, '<')     // Decode &lt;
+        .replace(/&gt;/g, '>')     // Decode &gt;
+        .replace(/&quot;/g, '"')   // Decode &quot;
+        .replace(/\s+/g, ' ')      // Normaliza espaços
+        .trim();
+
+    // Limita ao tamanho máximo
+    if (textOnly.length <= maxChars) return textOnly;
+
+    // Corta na última palavra completa
+    const truncated = textOnly.substring(0, maxChars);
+    const lastSpace = truncated.lastIndexOf(' ');
+
+    return (lastSpace > maxChars * 0.7 ? truncated.substring(0, lastSpace) : truncated) + '...';
+}
 
 /**
  * Calcula tempo relativo (ex: "Há 2 horas")
@@ -181,6 +264,8 @@ async function fetchFromSource(source: typeof RSS_SOURCES[0]): Promise<NewsItem[
                     .replace(/<p>\s*<\/p>/gi, '');
             }
 
+            const contentSnippet = createSnippet(typeof content === 'string' ? content : undefined);
+
             return {
                 slug,
                 title,
@@ -190,9 +275,10 @@ async function fetchFromSource(source: typeof RSS_SOURCES[0]): Promise<NewsItem[
                 pubDate: item.pubDate || new Date().toISOString(),
                 timeAgo: getTimeAgo(item.pubDate || new Date().toISOString()),
                 imageUrl: imageUrl,
-                content: content
+                // Snippet limitado para conformidade legal - não copia conteúdo completo
+                content: contentSnippet
             };
-        });
+        }).filter(news => !shouldBlockNews(news.title, news.content));
     } catch (error) {
         console.error(`Erro ao buscar RSS de ${source.name}:`, error);
         return [];

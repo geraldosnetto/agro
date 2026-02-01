@@ -4,17 +4,25 @@ import { useState, useEffect } from 'react';
 import {
   FileText,
   Loader2,
-  RefreshCw,
   Clock,
   TrendingUp,
   Lock,
   ChevronRight,
   Sparkles,
+  Calendar,
+  ChevronLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { ReportRenderer } from '@/components/ai/ReportRenderer';
@@ -24,6 +32,7 @@ interface DailyReport {
   title: string;
   content: string;
   summary: string;
+  reportDate: string;
   generatedAt: string;
   validUntil: string;
   tokensUsed: number;
@@ -36,6 +45,7 @@ interface CommodityInfo {
   commodityName: string;
   hasReport: boolean;
   reportId: string | null;
+  reportDate: string | null;
   generatedAt: string | null;
 }
 
@@ -46,6 +56,7 @@ interface CommodityReport {
   title: string;
   content: string;
   summary: string;
+  reportDate: string;
   generatedAt: string;
   validUntil: string;
   tokensUsed: number;
@@ -56,6 +67,8 @@ interface CommodityReport {
 export default function RelatoriosPage() {
   const { status } = useSession();
   const [dailyReport, setDailyReport] = useState<DailyReport | null>(null);
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [commodities, setCommodities] = useState<CommodityInfo[]>([]);
   const [selectedCommodity, setSelectedCommodity] = useState<string | null>(null);
   const [commodityReport, setCommodityReport] = useState<CommodityReport | null>(null);
@@ -64,6 +77,7 @@ export default function RelatoriosPage() {
   const [isLoadingList, setIsLoadingList] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userPlan, setUserPlan] = useState<string>('free');
+  const [noReportsYet, setNoReportsYet] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -71,9 +85,11 @@ export default function RelatoriosPage() {
     }
   }, [status]);
 
+  // Auto-load daily report on page mount
   useEffect(() => {
     if (status === 'authenticated') {
       loadCommoditiesList();
+      loadDailyReport();
     }
   }, [status]);
 
@@ -92,20 +108,32 @@ export default function RelatoriosPage() {
     }
   };
 
-  const loadDailyReport = async (force = false) => {
+  const loadDailyReport = async (date?: string) => {
     try {
       setIsLoadingDaily(true);
       setError(null);
+      setNoReportsYet(false);
 
-      const url = force ? '/api/ai/reports/daily?force=true' : '/api/ai/reports/daily';
+      const url = date
+        ? `/api/ai/reports/daily?date=${date}`
+        : '/api/ai/reports/daily';
       const response = await fetch(url);
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.code === 'NO_REPORTS') {
+          setNoReportsYet(true);
+          setDailyReport(null);
+          return;
+        }
         throw new Error(data.error || 'Erro ao carregar relatório');
       }
 
       setDailyReport(data.report);
+      setAvailableDates(data.availableDates || []);
+      if (data.report?.reportDate) {
+        setSelectedDate(data.report.reportDate);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro desconhecido';
       setError(message);
@@ -114,15 +142,18 @@ export default function RelatoriosPage() {
     }
   };
 
-  const loadCommodityReport = async (slug: string, force = false) => {
+  const handleDateChange = (date: string) => {
+    setSelectedDate(date);
+    loadDailyReport(date);
+  };
+
+  const loadCommodityReport = async (slug: string) => {
     try {
       setIsLoadingCommodity(true);
       setError(null);
       setSelectedCommodity(slug);
 
-      const url = force
-        ? `/api/ai/reports/commodity/${slug}?force=true`
-        : `/api/ai/reports/commodity/${slug}`;
+      const url = `/api/ai/reports/commodity/${slug}`;
       const response = await fetch(url);
       const data = await response.json();
 
@@ -154,6 +185,27 @@ export default function RelatoriosPage() {
     if (diffMins < 60) return `há ${diffMins} min`;
     if (diffHours < 24) return `há ${diffHours}h`;
     return `há ${Math.floor(diffHours / 24)}d`;
+  };
+
+  const formatDateLabel = (dateStr: string) => {
+    const date = new Date(dateStr + 'T12:00:00');
+    const today = new Date();
+    today.setHours(12, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (dateStr === today.toISOString().split('T')[0]) {
+      return 'Hoje';
+    }
+    if (dateStr === yesterday.toISOString().split('T')[0]) {
+      return 'Ontem';
+    }
+
+    return date.toLocaleDateString('pt-BR', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
   };
 
   if (status === 'loading') {
@@ -199,60 +251,69 @@ export default function RelatoriosPage() {
         <TabsContent value="daily" className="space-y-4">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
                   <CardTitle>Resumo do Mercado</CardTitle>
                   <CardDescription>
                     Visão geral diária de todas as commodities agrícolas
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={() => loadDailyReport(false)}
-                  disabled={isLoadingDaily}
-                  variant={dailyReport ? 'outline' : 'default'}
-                >
-                  {isLoadingDaily ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                  )}
-                  {dailyReport ? 'Atualizar' : 'Gerar Relatório'}
-                </Button>
+
+                {/* Date selector for history */}
+                {availableDates.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <Select value={selectedDate || ''} onValueChange={handleDateChange}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Selecione a data" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableDates.map((date) => (
+                          <SelectItem key={date} value={date}>
+                            {formatDateLabel(date)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
             </CardHeader>
             <CardContent>
-              {error && !dailyReport && (
+              {error && !dailyReport && !noReportsYet && (
                 <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm">
                   {error}
                 </div>
               )}
 
-              {!dailyReport && !isLoadingDaily && !error && (
+              {noReportsYet && !isLoadingDaily && (
                 <div className="text-center py-12 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Clique em &quot;Gerar Relatório&quot; para criar o resumo do dia</p>
-                  <p className="text-xs mt-2">O relatório será cacheado por 6 horas</p>
+                  <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <h3 className="font-medium text-foreground mb-2">Relatório em preparação</h3>
+                  <p>O relatório diário é gerado automaticamente pelo sistema.</p>
+                  <p className="text-xs mt-2">
+                    Volte mais tarde para ver a análise do mercado de hoje.
+                  </p>
                 </div>
               )}
 
-              {isLoadingDaily && !dailyReport && (
+              {isLoadingDaily && (
                 <div className="text-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-                  <p className="text-muted-foreground">Gerando análise do mercado...</p>
-                  <p className="text-xs text-muted-foreground mt-2">Isso pode levar alguns segundos</p>
+                  <p className="text-muted-foreground">Carregando relatório...</p>
                 </div>
               )}
 
-              {dailyReport && (
+              {dailyReport && !isLoadingDaily && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       Gerado {formatTimeAgo(dailyReport.generatedAt)}
                     </span>
-                    {dailyReport.cached && (
+                    {availableDates.length > 1 && (
                       <Badge variant="outline" className="text-xs">
-                        Do cache
+                        {availableDates.length} dias de histórico
                       </Badge>
                     )}
                   </div>
@@ -292,9 +353,13 @@ export default function RelatoriosPage() {
                       >
                         <span className="font-medium">{c.commodityName}</span>
                         <div className="flex items-center gap-2">
-                          {c.hasReport && (
+                          {c.hasReport ? (
                             <Badge variant="secondary" className="text-xs">
-                              {formatTimeAgo(c.generatedAt!)}
+                              Sem. {c.reportDate?.split('-')[1]}/{c.reportDate?.split('-')[2]}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs text-muted-foreground">
+                              Em breve
                             </Badge>
                           )}
                           <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -318,20 +383,6 @@ export default function RelatoriosPage() {
                       Análise detalhada com tendências e perspectivas
                     </CardDescription>
                   </div>
-                  {commodityReport && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => loadCommodityReport(selectedCommodity!, true)}
-                      disabled={isLoadingCommodity}
-                    >
-                      {isLoadingCommodity ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-4 w-4" />
-                      )}
-                    </Button>
-                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -346,7 +397,18 @@ export default function RelatoriosPage() {
                   </div>
                 )}
 
-                {error && selectedCommodity && userPlan !== 'free' && (
+                {error && selectedCommodity && userPlan !== 'free' && error.includes('Nenhum relatório') && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <h3 className="font-medium text-foreground mb-2">Relatório em preparação</h3>
+                    <p>O relatório semanal é gerado automaticamente pelo sistema.</p>
+                    <p className="text-xs mt-2">
+                      Volte mais tarde para ver a análise desta commodity.
+                    </p>
+                  </div>
+                )}
+
+                {error && selectedCommodity && userPlan !== 'free' && !error.includes('Nenhum relatório') && (
                   <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm">
                     {error}
                   </div>
@@ -362,10 +424,7 @@ export default function RelatoriosPage() {
                 {isLoadingCommodity && (
                   <div className="text-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-                    <p className="text-muted-foreground">Gerando análise...</p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Isso pode levar alguns segundos
-                    </p>
+                    <p className="text-muted-foreground">Carregando análise...</p>
                   </div>
                 )}
 
@@ -376,11 +435,10 @@ export default function RelatoriosPage() {
                         <Clock className="h-4 w-4" />
                         Gerado {formatTimeAgo(commodityReport.generatedAt)}
                       </span>
-                      {commodityReport.cached && (
-                        <Badge variant="outline" className="text-xs">
-                          Do cache
-                        </Badge>
-                      )}
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        Semana de {new Date(commodityReport.reportDate + 'T12:00:00').toLocaleDateString('pt-BR')}
+                      </span>
                     </div>
 
                     <ReportRenderer content={commodityReport.content} title={commodityReport.title} />

@@ -29,6 +29,7 @@ export function VideoSection() {
                                     src={video.thumbnail}
                                     alt={video.title}
                                     fill
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                                     className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center">

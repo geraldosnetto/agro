@@ -1,14 +1,19 @@
 
-import Link from "next/link";
 import { fetchAllNews } from "@/lib/data-sources/news";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
+import { Calendar, ExternalLink } from "lucide-react";
 
 // Verifica se a URL é uma imagem válida (não YouTube, não embed, etc)
 function isValidImageUrl(url: string | null | undefined): boolean {
     if (!url) return false;
     const invalidPatterns = ['youtube.com', 'youtu.be', '/embed/', 'vimeo.com'];
     return !invalidPatterns.some(pattern => url.includes(pattern));
+}
+
+// Converte HTTP para HTTPS
+function getImageSrc(url: string | null | undefined): string {
+    if (!isValidImageUrl(url)) return '';
+    return url!.replace(/^http:\/\//i, 'https://');
 }
 
 export async function RelatedNews({ currentSlug }: { currentSlug: string }) {
@@ -20,12 +25,18 @@ export async function RelatedNews({ currentSlug }: { currentSlug: string }) {
             <h3 className="text-2xl font-bold mb-6">Leia também</h3>
             <div className="grid md:grid-cols-3 gap-6">
                 {related.map((item) => (
-                    <Link key={item.slug} href={`/noticias/${item.slug}`} className="group">
+                    <a
+                        key={item.slug}
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group"
+                    >
                         <Card className="h-full overflow-hidden border-none shadow-none bg-transparent hover:bg-muted/30 transition-colors">
                             {isValidImageUrl(item.imageUrl) && (
                                 <div className="aspect-video relative overflow-hidden rounded-lg mb-3">
                                     <img
-                                        src={item.imageUrl!}
+                                        src={getImageSrc(item.imageUrl)}
                                         alt={item.title}
                                         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                                     />
@@ -43,9 +54,12 @@ export async function RelatedNews({ currentSlug }: { currentSlug: string }) {
                                 <h4 className="font-bold leading-tight group-hover:text-primary transition-colors line-clamp-3">
                                     {item.title}
                                 </h4>
+                                <span className="text-xs text-muted-foreground mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Ler na fonte <ExternalLink className="h-3 w-3" />
+                                </span>
                             </CardContent>
                         </Card>
-                    </Link>
+                    </a>
                 ))}
             </div>
         </div>

@@ -46,6 +46,7 @@ src/
 
 ## Funcionalidades Implementadas
 
+### Core
 - [x] Dashboard com 16 commodities (CEPEA)
 - [x] Dólar PTAX (API BCB)
 - [x] Páginas detalhadas `/cotacoes/[slug]`
@@ -58,12 +59,21 @@ src/
 - [x] Feed de notícias `/noticias`
 - [x] Comparador de commodities `/comparar`
 - [x] Dark mode
+
+### Ferramentas
+- [x] **Mapa de Calor** `/mapa` - Visualização de preços por estado
+- [x] **Calculadora de Rentabilidade** `/calculadora` - Custos, margens e ponto de equilíbrio
+
+### Módulo de IA (100% Completo)
 - [x] **Chatbot IA** `/assistente` + Widget flutuante (Claude Haiku)
-- [x] **Relatórios IA** `/relatorios` - Resumo diário + Análises semanais por commodity (Claude Sonnet)
+- [x] **Relatórios IA** `/relatorios` - Resumo diário + Análises semanais (Claude Sonnet)
+- [x] **Previsões de Preço** - SMA, EMA, Regressão Linear (TypeScript puro)
+- [x] **Análise de Sentimento** - Classificação de notícias por IA
+- [x] **Detecção de Anomalias** - Alertas de preços atípicos (Z-score, volatilidade)
 
 ---
 
-## Módulo de IA (Implementado 28/01/2026)
+## Módulo de IA (100% Completo - 31/01/2026)
 
 ### Arquitetura
 ```
@@ -72,33 +82,45 @@ src/lib/ai/
 ├── rate-limit-ai.ts       # Rate limiting por plano
 ├── prompts/
 │   ├── chat-assistant.ts  # System prompt do chatbot
-│   └── market-report.ts   # Prompts para relatórios
+│   ├── market-report.ts   # Prompts para relatórios
+│   └── sentiment.ts       # Prompt análise de sentimento
 ├── generators/
-│   ├── daily-report.ts    # Gerador de resumo diário
-│   └── commodity-report.ts # Gerador de análise semanal por commodity
+│   ├── daily-report.ts    # Gerador de resumo diário (com histórico)
+│   └── commodity-report.ts # Gerador de análise semanal (com histórico)
 └── rag/
     └── context-builder.ts # Construtor de contexto RAG
 
-src/lib/ml/predictions/    # Previsões de preço (TypeScript puro, sem LLM)
-├── index.ts               # Exports principais
-├── moving-average.ts      # SMA e EMA
-├── trend-analysis.ts      # Regressão linear
-├── volatility.ts          # Análise de volatilidade
-└── price-predictor.ts     # Ensemble (combina todos os modelos)
+src/lib/ml/
+├── predictions/           # Previsões de preço (TypeScript puro)
+│   ├── index.ts
+│   ├── moving-average.ts  # SMA e EMA
+│   ├── trend-analysis.ts  # Regressão linear
+│   ├── volatility.ts      # Análise de volatilidade
+│   └── price-predictor.ts # Ensemble
+└── anomaly/
+    └── detector.ts        # Detecção de anomalias (Z-score, volatilidade)
 
 src/components/ai/
 ├── ChatWidget.tsx         # Widget flutuante do chat
-└── PredictionCard.tsx     # Card de previsão de preços
+├── PredictionCard.tsx     # Card de previsão de preços
+├── SentimentBadge.tsx     # Badge de sentimento
+├── SentimentWidget.tsx    # Widget de sentimento agregado
+├── AnomalyAlert.tsx       # Alertas de anomalias
+└── ReportRenderer.tsx     # Renderizador de relatórios markdown
 
 src/app/api/ai/
 ├── chat/route.ts          # API do chatbot
-├── predictions/
-│   └── [slug]/route.ts    # Previsão de preço por commodity
+├── predictions/[slug]/route.ts
+├── sentiment/route.ts     # Análise de sentimento (POST/GET)
+├── anomalies/route.ts     # Buscar/marcar anomalias (GET/PATCH)
 └── reports/
-    ├── daily/route.ts     # Relatório diário do mercado
-    └── commodity/
-        ├── route.ts       # Lista commodities disponíveis
-        └── [slug]/route.ts # Análise semanal por commodity
+    ├── daily/route.ts
+    └── commodity/[slug]/route.ts
+
+src/app/api/cron/          # Jobs agendados
+├── generate-daily-report/route.ts    # Cron diário (08:00)
+├── generate-weekly-reports/route.ts  # Cron semanal (seg 08:00)
+└── check-anomalies/route.ts          # Cron diário após cotações
 ```
 
 ### Rate Limits por Plano
@@ -116,18 +138,25 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 ---
 
-## Próximos Passos (Roadmap)
+## Roadmap
 
-### Fase 2 - IndicAgro IA (em andamento)
+### ✅ Fase 2 - IndicAgro IA (COMPLETO)
 1. ~~Chatbot/Assistente especializado~~ ✅
-2. ~~Relatórios automáticos (LLM)~~ ✅
+2. ~~Relatórios automáticos (LLM) com histórico~~ ✅
 3. ~~Previsões de preço (TypeScript - SMA/EMA/Regressão)~~ ✅
-4. Análise de sentimento de notícias
-5. Detecção de anomalias
+4. ~~Análise de sentimento de notícias~~ ✅
+5. ~~Detecção de anomalias~~ ✅
 
-### Outras Features Pendentes
-- Mapa de calor `/mapa`
-- Calculadora de rentabilidade `/calculadora`
+### ✅ Ferramentas (COMPLETO)
+- ~~Mapa de calor `/mapa`~~ ✅
+- ~~Calculadora de rentabilidade `/calculadora`~~ ✅
+
+### Próximas Features (Fase 3)
+- [ ] Notificações push (PWA)
+- [ ] App mobile (React Native ou PWA)
+- [ ] API pública para integrações
+- [ ] Exportação PDF dos relatórios
+- [ ] Dashboard customizável
 
 ---
 
@@ -216,5 +245,12 @@ docker-compose up -d
   - Componente PredictionCard integrado na página de detalhes da commodity
   - Rate limiting: 5/dia (free), 50/dia (pro), ilimitado (business)
   - Disclaimer obrigatório: "Não é recomendação de investimento"
+- **31/01/2026**: Verificação e atualização de status - **TODAS AS FEATURES COMPLETAS**:
+  - ✅ Análise de Sentimento: API `/api/ai/sentiment`, componentes SentimentBadge/SentimentWidget
+  - ✅ Detecção de Anomalias: detector.ts (Z-score, volatilidade), API `/api/ai/anomalies`, cron check-anomalies
+  - ✅ Relatórios automáticos: cron jobs para geração diária/semanal, histórico com seletor de datas
+  - ✅ Mapa de Calor `/mapa`: BrazilMap.tsx, HeatMapContainer.tsx
+  - ✅ Calculadora de Rentabilidade `/calculadora`: CalculatorForm.tsx, CalculatorResults.tsx, profitability.ts
+  - Módulo de IA 100% completo conforme plano original
 
 ---

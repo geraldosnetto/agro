@@ -16,22 +16,40 @@ export interface CepeaPracaData extends CepeaData {
 
 // Praça names per commodity (based on CEPEA table structure)
 const PRACA_NAMES: Record<string, string[]> = {
+    // Grãos
     'soja': ['Paranaguá/PR', 'Porto Base'],
     'milho': ['ESALQ/BM&FBovespa'],
+    'trigo': ['Paraná'],
+    'arroz': ['RS/IRGA'],
+    'feijao-carioca': ['São Paulo'],
+    'feijao-preto': ['São Paulo'],
+    // Pecuária
     'boi-gordo': ['Indicador CEPEA', 'Média SP', 'A Prazo'],
+    'bezerro': ['Mato Grosso do Sul', 'São Paulo'],
+    'suino': ['Regional (MG/PR/RS)', 'Carcaça SP'],
+    'frango': ['Congelado SP'],
+    'frango-resfriado': ['Resfriado SP'],
+    'leite': ['Brasil'],
+    'ovos': ['São Paulo'],
+    // Café
     'cafe-arabica': ['Indicador CEPEA'],
     'cafe-robusta': ['Indicador Robusta'],
-    'bezerro': ['Indicador CEPEA'],
+    // Açúcar
     'acucar-cristal': ['Cristal SP'],
+    'acucar-vhp': ['VHP Exportação'],
+    'acucar-refinado': ['Refinado Amorfo SP'],
+    'acucar-empacotado': ['Empacotado SP'],
+    // Etanol
     'etanol-hidratado': ['Hidratado SP'],
     'etanol-anidro': ['Anidro SP'],
-    'trigo': ['Paraná'],
-    'frango': ['Congelado'],
-    'suino': ['Regional (MG/PR/RS)', 'Carcaça SP'],
-    'algodao': ['Indicador CEPEA'],
-    'arroz': ['Indicador CEPEA'],
+    // Fibras
+    'algodao': ['À Vista'],
+    'algodao-8dias': ['Prazo 8 dias'],
+    'algodao-15dias': ['Prazo 15 dias'],
+    'algodao-30dias': ['Prazo 30 dias'],
+    // Outros
     'mandioca': ['Indicador CEPEA'],
-    'leite': ['Indicador CEPEA'],
+    'tilapia': ['São Paulo'],
 };
 
 interface CommodityConfig {
@@ -43,23 +61,46 @@ interface CommodityConfig {
 }
 
 const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
+    // === GRÃOS ===
     'soja': { url: 'https://www.cepea.org.br/br/indicador/soja.aspx' },
     'milho': { url: 'https://www.cepea.org.br/br/indicador/milho.aspx' },
+    'trigo': { url: 'https://www.cepea.org.br/br/indicador/trigo.aspx', keywords: ['Paraná', 'PR'] },
+    'arroz': { url: 'https://www.cepea.org.br/br/indicador/arroz.aspx' },
+    'feijao-carioca': { url: 'https://www.cepea.org.br/br/indicador/feijao.aspx', keywords: ['Carioca', 'peneira 12'] },
+    'feijao-preto': { url: 'https://www.cepea.org.br/br/indicador/feijao.aspx', keywords: ['Preto'], tableIndex: 2 },
+
+    // === PECUÁRIA ===
     'boi-gordo': { url: 'https://www.cepea.org.br/br/indicador/boi-gordo.aspx' },
-    'cafe-arabica': { url: 'https://www.cepea.org.br/br/indicador/cafe.aspx' },
     'bezerro': { url: 'https://www.cepea.org.br/br/indicador/bezerro.aspx' },
+    'suino': { url: 'https://www.cepea.org.br/br/indicador/suino.aspx', tableIndex: 1 },
+    'frango': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Congelado'] },
+    'frango-resfriado': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Resfriado'] },
+    'leite': { url: 'https://www.cepea.org.br/br/indicador/leite.aspx', priceColumnIndex: 2, varColumnIndex: -1 },
+    'ovos': { url: 'https://www.cepea.org.br/br/indicador/ovos.aspx' },
+
+    // === CAFÉ ===
+    'cafe-arabica': { url: 'https://www.cepea.org.br/br/indicador/cafe.aspx' },
+    'cafe-robusta': { url: 'https://www.cepea.org.br/br/indicador/cafe.aspx', tableIndex: 1, keywords: ['Robusta', 'ROBUSTA'] },
+
+    // === AÇÚCAR (todos os tipos) ===
     'acucar-cristal': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['Cristal', 'CRISTAL'] },
+    'acucar-vhp': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['VHP'] },
+    'acucar-refinado': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['Refinado', 'Amorfo'] },
+    'acucar-empacotado': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['Empacotado'] },
+
+    // === ETANOL ===
     'etanol-hidratado': { url: 'https://www.cepea.org.br/br/indicador/etanol.aspx', keywords: ['Hidratado', 'HIDRATADO'] },
     'etanol-anidro': { url: 'https://www.cepea.org.br/br/indicador/etanol.aspx', keywords: ['Anidro', 'ANIDRO'] },
-    'trigo': { url: 'https://www.cepea.org.br/br/indicador/trigo.aspx', keywords: ['Paraná', 'PR'] },
-    'frango': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Congelado'] },
-    'suino': { url: 'https://www.cepea.org.br/br/indicador/suino.aspx', tableIndex: 1 },
-    'algodao': { url: 'https://www.cepea.org.br/br/indicador/algodao.aspx' },
-    'arroz': { url: 'https://www.cepea.org.br/br/indicador/arroz.aspx' },
-    'cafe-robusta': { url: 'https://www.cepea.org.br/br/indicador/cafe.aspx', tableIndex: 1, keywords: ['Robusta', 'ROBUSTA'] },
+
+    // === FIBRAS (algodão com todos os prazos) ===
+    'algodao': { url: 'https://www.cepea.org.br/br/indicador/algodao.aspx', keywords: ['vista', 'À vista'] },
+    'algodao-8dias': { url: 'https://www.cepea.org.br/br/indicador/algodao.aspx', keywords: ['8 dias', 'Prazo de 8'] },
+    'algodao-15dias': { url: 'https://www.cepea.org.br/br/indicador/algodao.aspx', keywords: ['15 dias', 'Prazo de 15'] },
+    'algodao-30dias': { url: 'https://www.cepea.org.br/br/indicador/algodao.aspx', keywords: ['30 dias', 'Prazo de 30'] },
+
+    // === OUTROS ===
     'mandioca': { url: 'https://www.cepea.org.br/br/indicador/mandioca.aspx', priceColumnIndex: 2, varColumnIndex: -1 },
-    'leite': { url: 'https://www.cepea.org.br/br/indicador/leite.aspx', priceColumnIndex: 2, varColumnIndex: -1 },
-    // 'ovinos': { url: 'https://www.cepea.org.br/br/indicador/ovinos.aspx' }, // Tabela desconhecida ainda, manter
+    'tilapia': { url: 'https://www.cepea.org.br/br/indicador/tilapia.aspx' },
 };
 
 // Slugs válidos para validação

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { SparklineChart } from "./SparklineChart";
 import { FavoriteButton } from "@/components/FavoriteButton";
 
-export type CotacaoCategoria = "graos" | "pecuaria" | "sucroenergetico" | "fibras" | "outros";
+export type CotacaoCategoria = "graos" | "pecuaria" | "sucroenergetico" | "fibras" | "peixe" | "outros";
 
 interface CotacaoCardProps {
     slug: string;
@@ -36,6 +36,10 @@ const categoriaConfig: Record<CotacaoCategoria, { label: string; className: stri
     fibras: {
         label: "Fibras",
         className: "bg-chart-4/10 text-chart-4 border-chart-4/20",
+    },
+    peixe: {
+        label: "Peixe",
+        className: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
     },
     outros: {
         label: "Outros",

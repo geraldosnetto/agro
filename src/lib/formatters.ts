@@ -10,7 +10,9 @@ export function formatarUnidade(unidade: Unidade | string): string {
         'LITRO': 'L',
         'TONELADA': 'ton',
         'KG': 'kg',
-        'SACA_50KG': 'sc 50kg'
+        'SACA_50KG': 'sc 50kg',
+        'DUZIA': 'dz',
+        'CABECA': 'cab'
     };
     return map[unidade] || unidade;
 }

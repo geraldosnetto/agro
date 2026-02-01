@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo } from "react";
+import { memo, useMemo, useState, useEffect } from "react";
 import useSWR from "swr";
 import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts";
 
@@ -20,6 +20,12 @@ const fetcher = async (url: string): Promise<ChartData[]> => {
 };
 
 export const SparklineChart = memo(function SparklineChart({ slug, isPositive }: SparklineProps) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const { data, error, isLoading } = useSWR<ChartData[]>(
         `/api/cotacoes/${slug}/historico?days=14`,
         fetcher,
@@ -45,10 +51,10 @@ export const SparklineChart = memo(function SparklineChart({ slug, isPositive }:
     // Generate unique gradient ID per chart instance
     const gradientId = useMemo(() => `sparkline-${slug}-${isPositive ? 'pos' : 'neg'}`, [slug, isPositive]);
 
-    if (isLoading || error || !data?.length) {
+    if (!mounted || isLoading || error || !data?.length) {
         return (
             <div className="h-full w-full flex items-center justify-center text-[10px] text-muted-foreground/30 bg-muted/5">
-                {isLoading ? "..." : "-"}
+                {isLoading || !mounted ? "..." : "-"}
             </div>
         );
     }

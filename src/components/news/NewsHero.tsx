@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,7 +13,9 @@ function isValidImageUrl(url: string | null | undefined): boolean {
 }
 
 function getImageSrc(url: string | null | undefined): string {
-    return isValidImageUrl(url) ? url! : '/placeholder-news.jpg';
+    if (!isValidImageUrl(url)) return '/placeholder-news.jpg';
+    // Convert HTTP to HTTPS to avoid CSP violations
+    return url!.replace(/^http:\/\//i, 'https://');
 }
 
 interface NewsItem {
@@ -44,14 +45,17 @@ export function NewsHero({ news }: NewsHeroProps) {
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-12">
             {/* Main Featured News (Left - 7 cols) */}
             <div className="lg:col-span-7 group relative h-[400px] lg:h-[500px] rounded-xl overflow-hidden shadow-lg border border-border/50">
-                <Link
-                    href={`/noticias/${mainNews.slug}`}
+                <a
+                    href={mainNews.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="block h-full w-full"
                 >
                     <Image
                         src={getImageSrc(mainNews.imageUrl)}
                         alt={mainNews.title}
                         fill
+                        sizes="(max-width: 1024px) 100vw, 58vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         priority
                     />
@@ -78,15 +82,17 @@ export function NewsHero({ news }: NewsHeroProps) {
                             {formatDistanceToNow(new Date(mainNews.pubDate), { addSuffix: true, locale: ptBR })}
                         </p>
                     </div>
-                </Link>
+                </a>
             </div>
 
             {/* Secondary News Grid (Right - 5 cols) */}
             <div className="lg:col-span-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 lg:h-[500px]">
                 {secondaryNews.map((item, index) => (
-                    <Link
+                    <a
                         key={`${item.source}-${index}`}
-                        href={`/noticias/${item.slug}`}
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="group flex gap-4 bg-card hover:bg-muted/50 p-3 rounded-lg border transition-all h-[115px] overflow-hidden"
                     >
                         <div className="relative w-[120px] h-full shrink-0 rounded-md overflow-hidden">
@@ -94,6 +100,7 @@ export function NewsHero({ news }: NewsHeroProps) {
                                 src={getImageSrc(item.imageUrl)}
                                 alt={item.title}
                                 fill
+                                sizes="120px"
                                 className="object-cover transition-transform duration-300 group-hover:scale-110"
                             />
                         </div>
@@ -110,7 +117,7 @@ export function NewsHero({ news }: NewsHeroProps) {
                                 {formatDistanceToNow(new Date(item.pubDate), { addSuffix: true, locale: ptBR })}
                             </time>
                         </div>
-                    </Link>
+                    </a>
                 ))}
             </div>
         </section>

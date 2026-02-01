@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+// Fix: convert null to undefined for optional params
 import { getAnthropicClient, MODEL_CONFIG } from '@/lib/ai/anthropic';
 import { buildSentimentPrompt } from '@/lib/ai/prompts/sentiment';
 import { z } from 'zod';
@@ -14,7 +15,7 @@ const AnalyzeRequestSchema = z.object({
 });
 
 const QuerySchema = z.object({
-  commodity: z.string().optional(),
+  commodity: z.string().nullish(),
   limit: z.coerce.number().min(1).max(50).default(10),
 });
 
@@ -145,8 +146,9 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
+    const commodityParam = searchParams.get('commodity');
     const parsed = QuerySchema.safeParse({
-      commodity: searchParams.get('commodity'),
+      commodity: commodityParam || undefined,
       limit: searchParams.get('limit') || '10',
     });
 

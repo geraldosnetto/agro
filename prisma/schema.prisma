@@ -113,6 +113,7 @@ enum Categoria {
   PECUARIA
   SUCROENERGETICO
   FIBRAS
+  PEIXE           // Tilápia e outros
   OUTROS
 }
 
@@ -122,7 +123,9 @@ enum Unidade {
   ARROBA         // @ (boi gordo)
   LITRO          // litro (etanol)
   TONELADA       // ton (açúcar)
-  KG             // kg (café)
+  KG             // kg (café, frango, tilápia)
+  CABECA         // cabeça (bezerro)
+  DUZIA          // dúzia (ovos)
 }
 
 // Commodity (produto agrícola)
@@ -244,7 +247,7 @@ model AIReport {
   validUntil    DateTime // Quando o relatório expira
 
   // Data de referência do relatório (para histórico)
-  reportDate    DateTime @db.Date // Data do relatório (ex: 2026-01-30)
+  reportDate    DateTime @default(now()) @db.Date // Data do relatório (ex: 2026-01-30)
 
   // Cache control
   dataHash      String?  // Hash dos dados usados (para invalidação)
