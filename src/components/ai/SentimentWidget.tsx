@@ -4,8 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SentimentBadge, SentimentSummary } from './SentimentBadge';
-import { Brain, RefreshCw, ExternalLink } from 'lucide-react';
+import { EmotionIndicator, EmotionBadge } from './EmotionIndicator';
+import { MarketDrivers, DriverStats } from './MarketDrivers';
+import { getTimeframeLabel, type Emotion, type MarketDriver } from '@/lib/ai/prompts/sentiment';
+import { Brain, RefreshCw, ExternalLink, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface SentimentData {
   url: string;
@@ -13,6 +17,11 @@ interface SentimentData {
   sentiment: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
   score: number;
   impact: number;
+  emotion?: Emotion;
+  emotionIntensity?: number;
+  drivers?: MarketDriver[];
+  timeframe?: string;
+  reasoning?: string;
   analyzedAt: string;
 }
 
@@ -25,6 +34,8 @@ interface AggregateData {
     neutral: number;
   };
   totalAnalyzed: number;
+  predominantEmotion?: Emotion;
+  topDrivers?: MarketDriver[];
 }
 
 interface SentimentWidgetProps {
@@ -38,6 +49,7 @@ export function SentimentWidget({ commoditySlug, commodityName, className }: Sen
   const [sentiments, setSentiments] = useState<SentimentData[]>([]);
   const [aggregate, setAggregate] = useState<AggregateData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   const fetchSentiment = useCallback(async () => {
     setLoading(true);
@@ -123,34 +135,137 @@ export function SentimentWidget({ commoditySlug, commodityName, className }: Sen
       <CardContent className="space-y-4">
         <SentimentSummary aggregate={aggregate} />
 
+        {/* Emoção predominante */}
+        {aggregate.predominantEmotion && (
+          <div className="p-3 rounded-lg bg-muted/30 border">
+            <h4 className="text-xs font-medium text-muted-foreground mb-2">
+              Emoção Predominante
+            </h4>
+            <EmotionIndicator
+              emotion={aggregate.predominantEmotion}
+              intensity={0.7}
+              size="md"
+            />
+          </div>
+        )}
+
+        {/* Drivers principais */}
+        {aggregate.topDrivers && aggregate.topDrivers.length > 0 && (
+          <div>
+            <h4 className="text-xs font-medium text-muted-foreground mb-2">
+              Fatores de Mercado
+            </h4>
+            <MarketDrivers drivers={aggregate.topDrivers as MarketDriver[]} />
+          </div>
+        )}
+
         {/* Últimas notícias analisadas */}
         {sentiments.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-sm font-medium text-muted-foreground">Notícias Recentes</h4>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {sentiments.slice(0, 5).map((item) => (
-                <a
-                  key={item.url}
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-2 p-2 rounded-md hover:bg-muted/50 transition-colors group"
-                >
-                  <SentimentBadge sentiment={item.sentiment} size="sm" />
-                  <span className="text-sm flex-1 line-clamp-2 group-hover:text-primary transition-colors">
-                    {item.title}
-                  </span>
-                  <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 shrink-0 mt-1" />
-                </a>
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Notícias Recentes
+              </h4>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2"
+                onClick={() => setExpanded(!expanded)}
+              >
+                {expanded ? (
+                  <>
+                    <ChevronUp className="h-3 w-3 mr-1" />
+                    Menos
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-3 w-3 mr-1" />
+                    Mais
+                  </>
+                )}
+              </Button>
+            </div>
+            <div className={cn(
+              'space-y-2 overflow-hidden transition-all',
+              expanded ? 'max-h-96' : 'max-h-48'
+            )}>
+              {sentiments.slice(0, expanded ? 10 : 3).map((item) => (
+                <NewsItem key={item.url} item={item} />
               ))}
             </div>
           </div>
         )}
 
         <p className="text-xs text-muted-foreground text-center pt-2 border-t">
-          Análise por IA baseada em notícias recentes
+          Análise por IA baseada em {aggregate.totalAnalyzed} notícias recentes
         </p>
       </CardContent>
     </Card>
+  );
+}
+
+// Componente para item de notícia com informações avançadas
+function NewsItem({ item }: { item: SentimentData }) {
+  const [showDetails, setShowDetails] = useState(false);
+
+  return (
+    <div className="rounded-md border bg-card overflow-hidden">
+      <a
+        href={item.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-start gap-2 p-2 hover:bg-muted/50 transition-colors group"
+      >
+        <SentimentBadge sentiment={item.sentiment} size="sm" />
+        <span className="text-sm flex-1 line-clamp-2 group-hover:text-primary transition-colors">
+          {item.title}
+        </span>
+        <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 shrink-0 mt-1" />
+      </a>
+
+      {/* Detalhes expandidos */}
+      {(item.emotion || (item.drivers && item.drivers.length > 0)) && (
+        <>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setShowDetails(!showDetails);
+            }}
+            className="w-full px-2 py-1 text-xs text-muted-foreground hover:bg-muted/30 flex items-center justify-center gap-1 border-t"
+          >
+            {showDetails ? 'Menos detalhes' : 'Mais detalhes'}
+            {showDetails ? (
+              <ChevronUp className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3" />
+            )}
+          </button>
+
+          {showDetails && (
+            <div className="p-2 pt-0 space-y-2 border-t">
+              <div className="flex flex-wrap items-center gap-2">
+                {item.emotion && (
+                  <EmotionBadge emotion={item.emotion} />
+                )}
+                {item.timeframe && (
+                  <Badge variant="outline" className="text-xs">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {getTimeframeLabel(item.timeframe as 'IMEDIATO' | 'CURTO_PRAZO' | 'MEDIO_PRAZO' | 'LONGO_PRAZO')}
+                  </Badge>
+                )}
+              </div>
+              {item.drivers && item.drivers.length > 0 && (
+                <MarketDrivers drivers={item.drivers} showLabels={false} />
+              )}
+              {item.reasoning && (
+                <p className="text-xs text-muted-foreground italic">
+                  &ldquo;{item.reasoning}&rdquo;
+                </p>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }

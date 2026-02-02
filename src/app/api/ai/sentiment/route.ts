@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-// Fix: convert null to undefined for optional params
 import { getAnthropicClient, MODEL_CONFIG } from '@/lib/ai/anthropic';
-import { buildSentimentPrompt } from '@/lib/ai/prompts/sentiment';
+import {
+  buildSentimentPrompt,
+  type Emotion,
+  type MarketDriver,
+  type Timeframe,
+} from '@/lib/ai/prompts/sentiment';
 import { z } from 'zod';
 import logger from '@/lib/logger';
 
@@ -18,6 +22,19 @@ const QuerySchema = z.object({
   commodity: z.string().nullish(),
   limit: z.coerce.number().min(1).max(50).default(10),
 });
+
+// Tipos de resposta da IA
+interface SentimentAnalysis {
+  sentiment: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  score: number;
+  commodities: string[];
+  impact: number;
+  emotion?: Emotion;
+  emotionIntensity?: number;
+  drivers?: MarketDriver[];
+  timeframe?: Timeframe;
+  reasoning?: string;
+}
 
 // POST - Analisar sentimento de uma notícia
 export async function POST(request: Request) {
@@ -48,6 +65,11 @@ export async function POST(request: Request) {
             score: existing.score.toNumber(),
             commodities: existing.commodities,
             impact: existing.impactScore.toNumber(),
+            emotion: existing.emotion,
+            emotionIntensity: existing.emotionIntensity?.toNumber(),
+            drivers: existing.drivers,
+            timeframe: existing.timeframe,
+            reasoning: existing.reasoning,
           },
         });
       }
@@ -71,13 +93,7 @@ export async function POST(request: Request) {
       : '';
 
     // Parse da resposta JSON
-    let analysis: {
-      sentiment: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
-      score: number;
-      commodities: string[];
-      impact: number;
-      reasoning?: string;
-    };
+    let analysis: SentimentAnalysis;
 
     try {
       analysis = JSON.parse(responseText);
@@ -89,9 +105,12 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validar e limpar score
+    // Validar e limpar valores
     const score = Math.max(-1, Math.min(1, analysis.score));
     const impact = Math.max(0, Math.min(1, analysis.impact));
+    const emotionIntensity = analysis.emotionIntensity
+      ? Math.max(0, Math.min(1, analysis.emotionIntensity))
+      : null;
 
     // Salvar no banco
     const saved = await prisma.newsSentiment.upsert({
@@ -103,6 +122,12 @@ export async function POST(request: Request) {
         score,
         commodities: analysis.commodities || [],
         impactScore: impact,
+        // Campos avançados
+        emotion: analysis.emotion || null,
+        emotionIntensity,
+        drivers: analysis.drivers || [],
+        timeframe: analysis.timeframe || null,
+        reasoning: analysis.reasoning || null,
       },
       update: {
         newsTitle: title,
@@ -110,6 +135,12 @@ export async function POST(request: Request) {
         score,
         commodities: analysis.commodities || [],
         impactScore: impact,
+        // Campos avançados
+        emotion: analysis.emotion || null,
+        emotionIntensity,
+        drivers: analysis.drivers || [],
+        timeframe: analysis.timeframe || null,
+        reasoning: analysis.reasoning || null,
         analyzedAt: new Date(),
       },
     });
@@ -117,6 +148,7 @@ export async function POST(request: Request) {
     logger.info('Sentimento analisado', {
       url,
       sentiment: analysis.sentiment,
+      emotion: analysis.emotion,
       score,
       tokensUsed: response.usage.output_tokens
     });
@@ -128,7 +160,11 @@ export async function POST(request: Request) {
         score: saved.score.toNumber(),
         commodities: saved.commodities,
         impact: saved.impactScore.toNumber(),
-        reasoning: analysis.reasoning,
+        emotion: saved.emotion,
+        emotionIntensity: saved.emotionIntensity?.toNumber(),
+        drivers: saved.drivers,
+        timeframe: saved.timeframe,
+        reasoning: saved.reasoning,
       },
       tokensUsed: response.usage.output_tokens,
     });
@@ -181,6 +217,28 @@ export async function GET(request: Request) {
       const negativeCount = sentiments.filter(s => s.sentiment === 'NEGATIVE').length;
       const neutralCount = sentiments.filter(s => s.sentiment === 'NEUTRAL').length;
 
+      // Calcular emoção predominante
+      const emotions = sentiments
+        .filter(s => s.emotion)
+        .map(s => s.emotion as string);
+      const emotionCounts = emotions.reduce((acc, e) => {
+        acc[e] = (acc[e] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const predominantEmotion = Object.entries(emotionCounts)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+
+      // Calcular drivers mais comuns
+      const allDrivers = sentiments.flatMap(s => s.drivers || []);
+      const driverCounts = allDrivers.reduce((acc, d) => {
+        acc[d] = (acc[d] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const topDrivers = Object.entries(driverCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([driver]) => driver);
+
       aggregate = {
         averageScore: avgScore,
         sentiment: avgScore > 0.2 ? 'POSITIVE' : avgScore < -0.2 ? 'NEGATIVE' : 'NEUTRAL',
@@ -190,6 +248,9 @@ export async function GET(request: Request) {
           neutral: neutralCount,
         },
         totalAnalyzed: sentiments.length,
+        // Agregados avançados
+        predominantEmotion,
+        topDrivers,
       };
     }
 
@@ -201,6 +262,12 @@ export async function GET(request: Request) {
         score: s.score.toNumber(),
         commodities: s.commodities,
         impact: s.impactScore.toNumber(),
+        // Campos avançados
+        emotion: s.emotion,
+        emotionIntensity: s.emotionIntensity?.toNumber(),
+        drivers: s.drivers,
+        timeframe: s.timeframe,
+        reasoning: s.reasoning,
         analyzedAt: s.analyzedAt,
       })),
       aggregate,

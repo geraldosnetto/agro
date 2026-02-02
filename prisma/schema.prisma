@@ -326,7 +326,7 @@ model NewsSentiment {
   newsUrl      String   @unique
   newsTitle    String
 
-  // Análise
+  // Análise básica
   sentiment    String   // POSITIVE | NEGATIVE | NEUTRAL
   score        Decimal  @db.Decimal(3, 2) // -1.0 a 1.0
 
@@ -334,10 +334,18 @@ model NewsSentiment {
   commodities  String[] // Array de slugs
   impactScore  Decimal  @db.Decimal(3, 2) // 0-1 relevância
 
+  // Análise avançada (v2)
+  emotion          String?  // FEAR | GREED | UNCERTAINTY | CONFIDENCE | PANIC | EUPHORIA
+  emotionIntensity Decimal? @db.Decimal(3, 2) // 0-1 intensidade da emoção
+  drivers          String[] // CLIMA | DEMANDA | OFERTA | POLITICA | CAMBIO | LOGISTICA | PRAGA | TECNOLOGIA
+  timeframe        String?  // IMEDIATO | CURTO_PRAZO | MEDIO_PRAZO | LONGO_PRAZO
+  reasoning        String?  @db.Text // Explicação da análise
+
   analyzedAt   DateTime @default(now())
 
   @@index([sentiment])
   @@index([analyzedAt])
+  @@index([emotion])
 }
 
 // Anomalias detectadas
