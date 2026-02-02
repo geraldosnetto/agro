@@ -258,6 +258,44 @@ export function getInternationalTickerInfo(slug: string) {
 }
 
 /**
+ * Busca cotação atual do Dólar (USD/BRL)
+ */
+export async function fetchDollarRate(): Promise<number | null> {
+    const ticker = 'BRL=X';
+
+    // Verificar cache (reutilizando o map de cache geral, com chave diferente)
+    const cached = priceCache.get(ticker);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        return cached.data.price;
+    }
+
+    const quote = await fetchYahooQuote(ticker);
+    if (!quote) return null;
+
+    // Cachear resultado (adaptando para interface InternationalPrice para caber no cache)
+    const price: InternationalPrice = {
+        slug: 'dolar',
+        ticker: ticker,
+        name: 'USD/BRL',
+        exchange: 'FOREX',
+        price: quote.regularMarketPrice,
+        currency: 'BRL',
+        change: quote.regularMarketChange,
+        changePercent: quote.regularMarketChangePercent,
+        previousClose: quote.regularMarketPreviousClose,
+        open: quote.regularMarketOpen,
+        dayHigh: quote.regularMarketDayHigh,
+        dayLow: quote.regularMarketDayLow,
+        volume: quote.regularMarketVolume,
+        lastUpdated: new Date(quote.regularMarketTime * 1000),
+    };
+
+    priceCache.set(ticker, { data: price, timestamp: Date.now() });
+
+    return quote.regularMarketPrice;
+}
+
+/**
  * Limpa o cache de preços
  */
 export function clearPriceCache(): void {

@@ -287,7 +287,7 @@ export function TradingChart({
 
             <CardContent className="space-y-4">
                 {/* Main Price Chart */}
-                <div className="h-[300px]">
+                <div className="h-[300px] w-full min-w-0">
                     {loading ? (
                         <div className="h-full flex items-center justify-center text-muted-foreground">
                             Carregando...

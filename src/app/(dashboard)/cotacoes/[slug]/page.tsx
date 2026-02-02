@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TradingChart } from "@/components/dashboard/TradingChart";
+import { ParitySection } from "@/components/cotacoes/ParitySection";
 import { CommodityStats } from "@/components/dashboard/CommodityStats";
 import { PredictionCard } from "@/components/ai/PredictionCard";
 import { SentimentWidget } from "@/components/ai/SentimentWidget";
@@ -193,6 +194,13 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                     commodityName={commodity.nome}
                 />
             </div>
+
+            {/* Parity Calculator (Only for Soybeans) */}
+            <ParitySection
+                slug={slug}
+                currentPrice={valor}
+                state="MT"
+            />
 
             {/* Statistics and AI Section - Grid 2x2 */}
             <div className="grid md:grid-cols-2 gap-6 mb-8">
