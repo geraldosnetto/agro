@@ -6,7 +6,7 @@ import { formatarUnidade, formatarCategoria, formatarMoeda } from "@/lib/formatt
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PriceChartWithPraca } from "@/components/dashboard/PriceChartWithPraca";
+import { TradingChart } from "@/components/dashboard/TradingChart";
 import { CommodityStats } from "@/components/dashboard/CommodityStats";
 import { PredictionCard } from "@/components/ai/PredictionCard";
 import { SentimentWidget } from "@/components/ai/SentimentWidget";
@@ -186,9 +186,9 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                 </div>
             </div>
 
-            {/* Chart Section with Praça Selector */}
+            {/* Chart Section with Technical Indicators */}
             <div className="mb-8">
-                <PriceChartWithPraca
+                <TradingChart
                     commoditySlug={slug}
                     commodityName={commodity.nome}
                 />
@@ -197,10 +197,7 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
             {/* Statistics and AI Section - Grid 2x2 */}
             <div className="grid md:grid-cols-2 gap-6 mb-8">
                 {/* Linha 1: Estatísticas + Cotação Internacional */}
-                <div>
-                    <h2 className="text-xl font-semibold mb-4">Estatísticas</h2>
-                    <CommodityStats slug={slug} />
-                </div>
+                <CommodityStats slug={slug} layout="grid" />
                 <InternationalPriceCard
                     slug={slug}
                     cepeaPrice={valor}
@@ -208,10 +205,7 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                 />
 
                 {/* Linha 2: Previsão IA + Sentimento */}
-                <div>
-                    <h2 className="text-xl font-semibold mb-4">Previsão IA</h2>
-                    <PredictionCard slug={slug} />
-                </div>
+                <PredictionCard slug={slug} />
                 <SentimentWidget
                     commoditySlug={slug}
                     commodityName={commodity.nome}

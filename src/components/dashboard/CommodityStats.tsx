@@ -15,9 +15,10 @@ interface StatsData {
 
 interface CommodityStatsProps {
     slug: string;
+    layout?: 'horizontal' | 'grid';
 }
 
-export function CommodityStats({ slug }: CommodityStatsProps) {
+export function CommodityStats({ slug, layout = 'horizontal' }: CommodityStatsProps) {
     const [stats, setStats] = useState<StatsData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -40,14 +41,20 @@ export function CommodityStats({ slug }: CommodityStatsProps) {
         fetchStats();
     }, [slug]);
 
+    // Grid 2x2 para layout 'grid', horizontal 4 colunas para 'horizontal'
+    const gridClass = layout === 'grid'
+        ? "grid grid-cols-2 gap-3 h-full"
+        : "grid grid-cols-2 md:grid-cols-4 gap-4";
+
     if (loading) {
         return (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className={gridClass}>
                 {[...Array(4)].map((_, i) => (
                     <Card key={i} className="animate-pulse">
                         <CardContent className="p-4">
                             <div className="h-4 bg-muted rounded w-20 mb-2" />
-                            <div className="h-8 bg-muted rounded w-24" />
+                            <div className="h-7 bg-muted rounded w-24 mb-1" />
+                            <div className="h-3 bg-muted rounded w-16" />
                         </CardContent>
                     </Card>
                 ))}
@@ -57,7 +64,7 @@ export function CommodityStats({ slug }: CommodityStatsProps) {
 
     if (!stats) {
         return (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className={gridClass}>
                 <StatCard
                     icon={<TrendingDown className="h-4 w-4 text-rose-500" />}
                     label="Min 52 semanas"
@@ -87,7 +94,7 @@ export function CommodityStats({ slug }: CommodityStatsProps) {
     }
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className={gridClass}>
             <StatCard
                 icon={<TrendingDown className="h-4 w-4 text-rose-500" />}
                 label="Min 52 semanas"
@@ -125,8 +132,8 @@ interface StatCardProps {
 
 function StatCard({ icon, label, value, subtext }: StatCardProps) {
     return (
-        <Card>
-            <CardContent className="p-4">
+        <Card className="h-full">
+            <CardContent className="p-4 h-full flex flex-col justify-center">
                 <div className="flex items-center gap-2 mb-2">
                     {icon}
                     <span className="text-sm text-muted-foreground">{label}</span>
