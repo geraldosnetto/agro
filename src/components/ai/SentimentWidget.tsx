@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SentimentBadge, SentimentSummary } from './SentimentBadge';
+import { SentimentGauge } from './SentimentGauge';
 import { EmotionIndicator, EmotionBadge } from './EmotionIndicator';
 import { MarketDrivers, DriverStats } from './MarketDrivers';
 import { getTimeframeLabel, type Emotion, type MarketDriver } from '@/lib/ai/prompts/sentiment';
@@ -133,7 +134,19 @@ export function SentimentWidget({ commoditySlug, commodityName, className }: Sen
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <SentimentSummary aggregate={aggregate} />
+        <div className="flex flex-col items-center pb-4 border-b gap-4">
+          {aggregate ? (
+            <>
+              <SentimentGauge score={aggregate.averageScore} size={280} />
+              <div className="w-full px-4">
+                <p className="text-xs text-muted-foreground mb-2 font-medium">Distribuição (Comparativo):</p>
+                <SentimentSummary aggregate={aggregate} />
+              </div>
+            </>
+          ) : (
+            <SentimentSummary aggregate={aggregate} />
+          )}
+        </div>
 
         {/* Emoção predominante */}
         {aggregate.predominantEmotion && (

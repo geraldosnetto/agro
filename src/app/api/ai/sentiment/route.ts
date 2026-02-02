@@ -178,6 +178,10 @@ export async function POST(request: Request) {
 }
 
 // GET - Obter sentimentos por commodity ou lista de URLs
+// Pipeline Automático: Busca RSS -> Filtra Novos -> Analisa em Lote -> Salva -> Retorna
+import { fetchNewsForCommodity, type NewsItem } from '@/lib/data-sources/news';
+import { buildBatchSentimentPrompt } from '@/lib/ai/prompts/sentiment';
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -197,7 +201,97 @@ export async function GET(request: Request) {
 
     const { commodity, limit } = parsed.data;
 
-    // Buscar sentimentos
+    // 1. Se tiver commodity, tentar buscar notícias novas e analisar em background (ou on-the-fly se rápido)
+    if (commodity) {
+      try {
+        // a. Buscar últimas notícias do RSS (rápido, cacheado em memória)
+        const rssNews = await fetchNewsForCommodity(commodity, 10); // Busca top 10
+
+        if (rssNews.length > 0) {
+          const rssUrls = rssNews.map(n => n.link);
+
+          // b. Verificar quais já estão no banco
+          const existing = await prisma.newsSentiment.findMany({
+            where: { newsUrl: { in: rssUrls } },
+            select: { newsUrl: true }
+          });
+
+          const existingUrls = new Set(existing.map(e => e.newsUrl));
+          const missingAnalysis = rssNews.filter(n => !existingUrls.has(n.link));
+
+          // c. Se houver notícias faltando, analisar em lote
+          if (missingAnalysis.length > 0) {
+            logger.info(`Analise em lote iniciada: ${missingAnalysis.length} notícias de ${commodity}`);
+
+            // Limitar a 5 por vez para não estourar tokens/tempo
+            const toAnalyze = missingAnalysis.slice(0, 5);
+
+            const client = getAnthropicClient();
+            const config = MODEL_CONFIG.sentiment; // Usar modelo rápido (Haiku)
+
+            const prompt = buildBatchSentimentPrompt(toAnalyze.map((n, i) => ({
+              index: i,
+              title: `${n.title}\n${n.content || ''}`.trim()
+            })));
+
+            const response = await client.messages.create({
+              model: config.model,
+              max_tokens: 2000, // Maior buffer para array
+              temperature: 0.2, // Mais determinístico para JSON
+              messages: [{ role: 'user', content: prompt }]
+            });
+
+            const responseText = response.content[0].type === 'text'
+              ? response.content[0].text
+              : '[]';
+
+            // Parse e Salvar
+            try {
+              const batchResults = JSON.parse(responseText.match(/\[.*\]/s)?.[0] || '[]');
+
+              // Validar se é array
+              if (Array.isArray(batchResults)) {
+                // Salvar em transação ou loop
+                for (const result of batchResults) {
+                  const newsItem = toAnalyze[result.index];
+                  if (!newsItem) continue;
+
+                  // Validar dados básicos
+                  const score = Math.max(-1, Math.min(1, Number(result.score) || 0));
+                  const impact = Math.max(0, Math.min(1, Number(result.impact) || 0));
+
+                  await prisma.newsSentiment.upsert({
+                    where: { newsUrl: newsItem.link },
+                    create: {
+                      newsUrl: newsItem.link,
+                      newsTitle: newsItem.title,
+                      sentiment: result.sentiment || 'NEUTRAL',
+                      score,
+                      commodities: result.commodities || [commodity],
+                      impactScore: impact,
+                      emotion: result.emotion || null,
+                      emotionIntensity: result.emotionIntensity ? Number(result.emotionIntensity) : null,
+                      drivers: result.drivers || [],
+                      timeframe: result.timeframe || null,
+                      reasoning: result.reasoning || null, // Se a IA devolver reasoning no batch
+                    },
+                    update: {} // Se já existe (race condition), mantém
+                  });
+                }
+                logger.info(`Batch Analysis concluída para ${missingAnalysis.length} itens.`);
+              }
+            } catch (e) {
+              logger.error('Erro ao processar JSON do Batch Sentiment', { error: e });
+            }
+          }
+        }
+      } catch (rssError) {
+        logger.warn('Falha no pipeline automático de notícias RSS', { error: rssError });
+        // Não falha a request principal, apenas loga
+      }
+    }
+
+    // 2. Buscar sentimentos do banco (agora atualizados)
     const where = commodity
       ? { commodities: { has: commodity } }
       : {};
@@ -208,7 +302,7 @@ export async function GET(request: Request) {
       take: limit,
     });
 
-    // Calcular agregado se filtrou por commodity
+    // 3. Calcular agregado se filtrou por commodity
     let aggregate = null;
     if (commodity && sentiments.length > 0) {
       const scores = sentiments.map(s => s.score.toNumber());
@@ -271,6 +365,7 @@ export async function GET(request: Request) {
         analyzedAt: s.analyzedAt,
       })),
       aggregate,
+      source: 'live-updated' // Flag para debug
     });
 
   } catch (error) {
