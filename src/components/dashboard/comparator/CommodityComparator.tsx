@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ComparatorControls } from "./ComparatorControls";
 import { ComparatorChart } from "./ComparatorChart";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface CommodityOption {
     id: string;
@@ -135,6 +136,9 @@ export function CommodityComparator({
 
     const chartData = processData();
 
+    // Calcular correlação e spread se houver exatamente 2 selecionados
+    const stats = selectedIds.length === 2 ? calculateStats(rawData, selectedIds) : null;
+
     // Definir cores para as séries selecionadas
     const series = selectedIds.map((id, index) => {
         const raw = rawData.find((r) => r.id === id);
@@ -157,6 +161,56 @@ export function CommodityComparator({
                 onNormalizedChange={setNormalized}
             />
 
+            {/* Advanced Metrics Panel */}
+            {stats && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-card/50 border rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Correlação (Pearson)</p>
+                            <div className="flex items-baseline gap-2 mt-1">
+                                <span className={cn(
+                                    "text-2xl font-bold",
+                                    stats.correlation > 0.7 ? "text-green-500" :
+                                        stats.correlation < -0.7 ? "text-red-500" : "text-yellow-500"
+                                )}>
+                                    {stats.correlation.toFixed(2)}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                    {stats.correlation > 0.5 ? "Forte positiva" :
+                                        stats.correlation < -0.5 ? "Forte negativa" : "Fraca/Neutra"}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="h-2 w-24 bg-muted rounded-full overflow-hidden">
+                            <div
+                                className={cn("h-full",
+                                    stats.correlation > 0 ? "bg-green-500" : "bg-red-500"
+                                )}
+                                style={{ width: `${Math.abs(stats.correlation) * 100}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="bg-card/50 border rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Spread Atual (Diferença)</p>
+                            <div className="flex items-baseline gap-2 mt-1">
+                                <span className="text-2xl font-bold font-mono">
+                                    R$ {stats.spread.toFixed(2)}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                    {stats.lastDate}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-xs text-muted-foreground">Média do Período</p>
+                            <p className="font-mono font-medium">R$ {stats.avgSpread.toFixed(2)}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="relative">
                 {loading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10 rounded-lg">
@@ -171,4 +225,56 @@ export function CommodityComparator({
             </div>
         </div>
     );
+}
+
+// Helpers Mathematics
+function calculateStats(rawData: RawSeries[], ids: string[]) {
+    if (rawData.length < 2) return null;
+
+    // Alinhar dados por data
+    const mapA = new Map(rawData.find(r => r.id === ids[0])?.data.map(d => [d.date, d.value]));
+    const mapB = new Map(rawData.find(r => r.id === ids[1])?.data.map(d => [d.date, d.value]));
+
+    // Pegar apenas datas comuns
+    const commonDates = Array.from(mapA.keys()).filter(date => mapB.has(date)).sort();
+
+    if (commonDates.length === 0) return null;
+
+    const valuesA = commonDates.map(d => mapA.get(d)!);
+    const valuesB = commonDates.map(d => mapB.get(d)!);
+
+    // Pearson Correlation
+    const meanA = valuesA.reduce((sum, v) => sum + v, 0) / valuesA.length;
+    const meanB = valuesB.reduce((sum, v) => sum + v, 0) / valuesB.length;
+
+    let numerator = 0;
+    let denomA = 0;
+    let denomB = 0;
+
+    for (let i = 0; i < valuesA.length; i++) {
+        const diffA = valuesA[i] - meanA;
+        const diffB = valuesB[i] - meanB;
+        numerator += diffA * diffB;
+        denomA += diffA * diffA;
+        denomB += diffB * diffB;
+    }
+
+    const correlation = numerator / Math.sqrt(denomA * denomB);
+
+    // Spread
+    const lastIdx = valuesA.length - 1;
+    const spread = Math.abs(valuesA[lastIdx] - valuesB[lastIdx]);
+
+    const spreads = valuesA.map((v, i) => Math.abs(v - valuesB[i]));
+    const avgSpread = spreads.reduce((a, b) => a + b, 0) / spreads.length;
+
+    // Date formatting helper could be here or simple split
+    const lastDate = new Date(commonDates[lastIdx]).toLocaleDateString('pt-BR');
+
+    return {
+        correlation: isNaN(correlation) ? 0 : correlation,
+        spread,
+        avgSpread,
+        lastDate
+    };
 }

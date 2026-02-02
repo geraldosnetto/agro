@@ -9,9 +9,11 @@ import {
     Tooltip,
     Legend,
     ResponsiveContainer,
+    ReferenceLine
 } from "recharts";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface ChartDataPoint {
     date: string;
@@ -37,67 +39,138 @@ export function ComparatorChart({
 }: ComparatorChartProps) {
     if (!data || data.length === 0) {
         return (
-            <div className="flex h-[400px] w-full items-center justify-center rounded-lg border bg-muted/10">
-                <p className="text-muted-foreground">
-                    Selecione commodities para comparar
-                </p>
+            <div className="flex h-[450px] w-full items-center justify-center rounded-xl border border-dashed bg-muted/5">
+                <div className="text-center">
+                    <p className="text-muted-foreground font-medium">
+                        Selecione commodities para comparar
+                    </p>
+                    <p className="text-xs text-muted-foreground/60 mt-1">
+                        Escolha até 5 itens para visualizar o gráfico
+                    </p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="h-[400px] w-full rounded-lg border bg-card p-4">
-            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+        <div className="h-[450px] w-full rounded-xl border bg-card/50 p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+                <div>
+                    <h3 className="font-semibold text-lg leading-none tracking-tight">Comparativo de Performance</h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                        {normalized ? "Variação percentual no período" : "Valores nominais (R$)"}
+                    </p>
+                </div>
+            </div>
+
+            <ResponsiveContainer width="100%" height="90%" minWidth={0} minHeight={0}>
                 <LineChart
                     data={data}
                     margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
+                        top: 10,
+                        right: 10,
+                        left: 10,
+                        bottom: 0,
                     }}
                 >
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                        stroke="hsl(var(--border))"
+                        opacity={0.4}
+                    />
+
+                    {normalized && (
+                        <ReferenceLine y={0} stroke="hsl(var(--foreground))" strokeOpacity={0.2} />
+                    )}
+
                     <XAxis
                         dataKey="date"
                         tickFormatter={(value) =>
-                            format(parseISO(value), "dd/MM", { locale: ptBR })
+                            format(parseISO(value), "dd MMM", { locale: ptBR }).toUpperCase()
                         }
-                        className="text-xs text-muted-foreground"
-                        tick={{ fill: "currentColor" }}
-                        stroke="none"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                        dy={10}
+                        minTickGap={30}
                     />
+
                     <YAxis
-                        className="text-xs text-muted-foreground"
-                        tick={{ fill: "currentColor" }}
-                        stroke="none"
-                        unit={normalized ? "%" : ""}
-                        width={40}
-                    />
-                    <Tooltip
-                        contentStyle={{
-                            backgroundColor: "hsl(var(--card))",
-                            borderColor: "hsl(var(--border))",
-                            borderRadius: "var(--radius)",
-                        }}
-                        labelStyle={{ color: "hsl(var(--foreground))" }}
-                        labelFormatter={(value) =>
-                            format(parseISO(value as string), "dd 'de' MMMM, yyyy", {
-                                locale: ptBR,
-                            })
+                        className="text-xs font-mono"
+                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={(value) =>
+                            normalized
+                                ? `${value > 0 ? "+" : ""}${value}%`
+                                : `R$ ${value}`
                         }
-                        formatter={(value: number | string | undefined) => {
-                            if (value === undefined || value === null) return ["-", undefined];
-                            const val = Number(value);
-                            return [
-                                normalized
-                                    ? `${val > 0 ? "+" : ""}${val.toFixed(2)}%`
-                                    : `R$ ${val.toFixed(2)}`,
-                                undefined,
-                            ];
+                        width={normalized ? 50 : 60}
+                    />
+
+                    <Tooltip
+                        content={({ active, payload, label }) => {
+                            if (active && payload && payload.length) {
+                                return (
+                                    <div className="rounded-lg border bg-popover/95 px-3 py-2.5 shadow-xl backdrop-blur-sm ring-1 ring-border/50">
+                                        <p className="mb-2 text-xs font-semibold text-foreground/80 border-b pb-1">
+                                            {format(parseISO(label as string), "EEEE, dd 'de' MMMM", {
+                                                locale: ptBR,
+                                            })}
+                                        </p>
+                                        <div className="flex flex-col gap-1.5">
+                                            {payload.map((entry: any) => (
+                                                <div key={entry.name} className="flex items-center justify-between gap-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <div
+                                                            className="h-2 w-2 rounded-full"
+                                                            style={{ backgroundColor: entry.color }}
+                                                        />
+                                                        <span className="text-xs font-medium text-muted-foreground">
+                                                            {entry.name}
+                                                        </span>
+                                                    </div>
+                                                    <span className={cn(
+                                                        "text-xs font-bold font-mono",
+                                                        normalized
+                                                            ? (entry.value > 0 ? "text-green-500" : entry.value < 0 ? "text-red-500" : "text-foreground")
+                                                            : "text-foreground"
+                                                    )}>
+                                                        {normalized
+                                                            ? `${entry.value > 0 ? "+" : ""}${Number(entry.value).toFixed(2)}%`
+                                                            : `R$ ${Number(entry.value).toFixed(2)}`
+                                                        }
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            return null;
                         }}
                     />
-                    <Legend />
+
+                    <Legend
+                        verticalAlign="top"
+                        height={36}
+                        iconType="circle"
+                        content={({ payload }) => (
+                            <div className="flex flex-wrap gap-4 justify-end mb-4">
+                                {payload?.map((entry: any, index) => (
+                                    <div key={`item-${index}`} className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-accent/30 border border-transparent hover:border-border transition-colors cursor-pointer">
+                                        <div
+                                            className="h-2 w-2 rounded-full ring-2 ring-background"
+                                            style={{ backgroundColor: entry.color }}
+                                        />
+                                        <span className="text-xs font-medium text-foreground">{entry.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    />
+
                     {series.map((s) => (
                         <Line
                             key={s.id}
@@ -105,9 +178,15 @@ export function ComparatorChart({
                             dataKey={s.id}
                             name={s.name}
                             stroke={s.color}
-                            strokeWidth={2}
+                            strokeWidth={2.5}
                             dot={false}
-                            activeDot={{ r: 6 }}
+                            activeDot={{
+                                r: 6,
+                                strokeWidth: 0,
+                                fill: s.color,
+                                className: "animate-pulse"
+                            }}
+                            animationDuration={1000}
                         />
                     ))}
                 </LineChart>
