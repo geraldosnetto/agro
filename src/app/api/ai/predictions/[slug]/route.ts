@@ -70,15 +70,15 @@ export async function GET(request: Request, { params }: RouteParams) {
       );
     }
 
-    // 6. Buscar dados históricos (90 dias para boa previsão)
-    const ninetyDaysAgo = new Date();
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    // 6. Buscar dados históricos (120 dias para previsões de longo prazo)
+    const historicalDaysBack = new Date();
+    historicalDaysBack.setDate(historicalDaysBack.getDate() - 120);
 
     const historicalData = await prisma.cotacao.findMany({
       where: {
         commodityId: commodity.id,
         dataReferencia: {
-          gte: ninetyDaysAgo,
+          gte: historicalDaysBack,
         },
       },
       orderBy: {

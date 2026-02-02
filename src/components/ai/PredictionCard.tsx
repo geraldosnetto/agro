@@ -51,6 +51,8 @@ interface Prediction {
     sma: number;
     ema: number;
     linearRegression: number;
+    arima: number;
+    holtWinters: number;
     ensemble: number;
   };
   generatedAt: string;
@@ -66,7 +68,7 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [horizon, setHorizon] = useState<'7' | '14' | '30'>('7');
+  const [horizon, setHorizon] = useState<'7' | '14' | '30' | '60' | '90'>('7');
   const [showDetails, setShowDetails] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
 
@@ -97,7 +99,7 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
-  const handleHorizonChange = (newHorizon: '7' | '14' | '30') => {
+  const handleHorizonChange = (newHorizon: '7' | '14' | '30' | '60' | '90') => {
     setHorizon(newHorizon);
     loadPrediction(newHorizon);
   };
@@ -170,17 +172,19 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
           )}
         </div>
         <CardDescription className="text-xs">
-          Previsão estatística baseada em SMA, EMA e Regressão Linear
+          Modelo ensemble com 5 algoritmos: SMA, EMA, Regressão Linear, ARIMA e Holt-Winters
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* Horizon Selector */}
-        <Tabs value={horizon} onValueChange={(v) => handleHorizonChange(v as '7' | '14' | '30')}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="7" disabled={isLoading}>7 dias</TabsTrigger>
-            <TabsTrigger value="14" disabled={isLoading}>14 dias</TabsTrigger>
-            <TabsTrigger value="30" disabled={isLoading}>30 dias</TabsTrigger>
+        <Tabs value={horizon} onValueChange={(v) => handleHorizonChange(v as '7' | '14' | '30' | '60' | '90')}>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="7" disabled={isLoading} className="text-xs">7d</TabsTrigger>
+            <TabsTrigger value="14" disabled={isLoading} className="text-xs">14d</TabsTrigger>
+            <TabsTrigger value="30" disabled={isLoading} className="text-xs">30d</TabsTrigger>
+            <TabsTrigger value="60" disabled={isLoading} className="text-xs">60d</TabsTrigger>
+            <TabsTrigger value="90" disabled={isLoading} className="text-xs">90d</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -312,7 +316,7 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
                 {/* Model Predictions */}
                 <div>
                   <p className="text-xs font-medium mb-2">Previsão por modelo</p>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="grid grid-cols-3 gap-2 text-xs mb-2">
                     <div className="bg-muted/50 rounded p-2 text-center">
                       <p className="text-muted-foreground">SMA</p>
                       <p className="font-medium">{formatCurrency(prediction.models.sma)}</p>
@@ -324,6 +328,16 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
                     <div className="bg-muted/50 rounded p-2 text-center">
                       <p className="text-muted-foreground">Regressão</p>
                       <p className="font-medium">{formatCurrency(prediction.models.linearRegression)}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-primary/5 rounded p-2 text-center border border-primary/20">
+                      <p className="text-primary font-medium">ARIMA</p>
+                      <p className="font-medium">{formatCurrency(prediction.models.arima)}</p>
+                    </div>
+                    <div className="bg-primary/5 rounded p-2 text-center border border-primary/20">
+                      <p className="text-primary font-medium">Holt-Winters</p>
+                      <p className="font-medium">{formatCurrency(prediction.models.holtWinters)}</p>
                     </div>
                   </div>
                 </div>

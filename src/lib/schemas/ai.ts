@@ -107,7 +107,7 @@ export const WeeklyReportRequestSchema = z.object({
 
 // ==================== PREDICTION SCHEMAS ====================
 
-export const PredictionHorizonSchema = z.enum(['7', '14', '30']);
+export const PredictionHorizonSchema = z.enum(['7', '14', '30', '60', '90']);
 
 export const PredictionRequestSchema = z.object({
   horizon: PredictionHorizonSchema.default('7'),
