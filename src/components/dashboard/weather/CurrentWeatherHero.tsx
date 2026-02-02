@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { WeatherData } from '@/lib/data-sources/weather';
+import { WeatherData, getWeatherDescription } from '@/lib/data-sources/weather';
 import { Cloud, CloudRain, CloudSnow, Sun, CloudSun, Wind, Droplets, Thermometer, ArrowDown, ArrowUp } from 'lucide-react';
 
 interface CurrentWeatherHeroProps {
@@ -12,10 +12,11 @@ interface CurrentWeatherHeroProps {
 
 export function CurrentWeatherHero({ weather, cityName, className }: CurrentWeatherHeroProps) {
     const { current, daily } = weather;
+    const conditionDescription = getWeatherDescription(current.conditionCode);
 
     // Ícone baseado na descrição do tempo
     const getWeatherIcon = () => {
-        const desc = current.description?.toLowerCase() || '';
+        const desc = conditionDescription.label.toLowerCase();
         const iconClass = "h-12 w-12 text-primary";
 
         if (desc.includes('chuva') || desc.includes('rain')) {
@@ -49,7 +50,7 @@ export function CurrentWeatherHero({ weather, cityName, className }: CurrentWeat
                     <div>
                         <CardTitle className="text-lg">{cityName}</CardTitle>
                         <p className="text-sm text-muted-foreground capitalize">
-                            {current.description || 'Céu claro'}
+                            {conditionDescription.label}
                         </p>
                     </div>
                     {getWeatherIcon()}

@@ -63,6 +63,11 @@ export const MODEL_CONFIG = {
     maxTokens: 256,
     temperature: 0.1,
   },
+  climateAnalysis: {
+    model: CLAUDE_MODELS.SONNET,
+    maxTokens: 2000,
+    temperature: 0.3,
+  },
 } as const;
 
 export type ModelConfigKey = keyof typeof MODEL_CONFIG;

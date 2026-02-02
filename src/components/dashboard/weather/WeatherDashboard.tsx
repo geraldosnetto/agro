@@ -15,6 +15,8 @@ import { WeatherRadarMap } from './WeatherRadarMap';
 import { CurrentWeatherHero } from './CurrentWeatherHero';
 import { RainfallAccumulation } from './RainfallAccumulation';
 import { RegionalComparison } from './RegionalComparison';
+import { PrecipitationMap } from './PrecipitationMap';
+import { ClimateAnalysis } from './ClimateAnalysis';
 
 export function WeatherDashboard() {
     // Agora usa o Contexto Global em vez de estado local
@@ -112,11 +114,17 @@ export function WeatherDashboard() {
                         </CardContent>
                     </Card>
 
+                    {/* Mapa de Precipitação + Análise IA */}
+                    <div className="grid gap-6 lg:grid-cols-2">
+                        <PrecipitationMap />
+                        <ClimateAnalysis />
+                    </div>
+
                     {/* Radar Meteorológico */}
                     <WeatherRadarMap />
 
                     <p className="text-center text-xs text-muted-foreground opacity-50">
-                        Dados fornecidos por OpenMeteo.com e RainViewer.com
+                        Dados fornecidos por OpenMeteo.com, RainViewer.com e Claude AI
                     </p>
                 </>
             )}
