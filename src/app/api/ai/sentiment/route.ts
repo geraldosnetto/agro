@@ -247,7 +247,7 @@ export async function GET(request: Request) {
 
             // Parse e Salvar
             try {
-              const batchResults = JSON.parse(responseText.match(/\[.*\]/s)?.[0] || '[]');
+              const batchResults = JSON.parse(responseText.match(/\[[\s\S]*\]/)?.[0] || '[]');
 
               // Validar se é array
               if (Array.isArray(batchResults)) {
