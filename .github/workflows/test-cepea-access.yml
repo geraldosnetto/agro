@@ -1,0 +1,41 @@
+name: Test CEPEA Access
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-cepea:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test CEPEA access
+        run: |
+          echo "Testing CEPEA access from GitHub Actions..."
+          
+          HTTP_STATUS=$(curl -s -o response.html -w "%{http_code}" \
+            "https://www.cepea.org.br/br/indicador/soja.aspx" \
+            -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
+            -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" \
+            -H "Accept-Language: pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7" \
+            --max-time 30)
+          
+          echo "HTTP Status: $HTTP_STATUS"
+          
+          FILE_SIZE=$(wc -c < response.html)
+          echo "Response size: $FILE_SIZE bytes"
+          
+          HAS_TABLE=$(grep -c '<table' response.html || echo "0")
+          echo "Tables found: $HAS_TABLE"
+          
+          TITLE=$(grep -oP '<title>\K[^<]+' response.html || echo "N/A")
+          echo "Page title: $TITLE"
+          
+          if [ "$HTTP_STATUS" -eq 200 ] && [ "$HAS_TABLE" -gt 0 ]; then
+            echo "✅ SUCCESS: CEPEA is accessible from GitHub Actions!"
+            # Show first few data rows
+            grep -oP '<td>[^<]+</td>' response.html | head -20
+          elif echo "$TITLE" | grep -qi "moment"; then
+            echo "❌ BLOCKED: Cloudflare challenge detected"
+          else
+            echo "⚠️ UNEXPECTED: Status $HTTP_STATUS, investigate further"
+            head -50 response.html
+          fi
