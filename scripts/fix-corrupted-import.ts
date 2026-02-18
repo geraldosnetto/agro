@@ -252,7 +252,7 @@ async function main() {
 
     await loadCommodityCache();
 
-    const folder = '/mnt/e/SITES/agro/historico';
+    const folder = path.join(process.cwd(), 'historico');
     const files = fs.readdirSync(folder).filter(f => f.endsWith('.xls')).sort();
 
     console.log(`📁 Encontrados ${files.length} arquivos XLS\n`);

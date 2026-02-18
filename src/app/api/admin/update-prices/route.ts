@@ -52,48 +52,33 @@ export async function POST(request: Request) {
 
                 logger.info(`Processando ${commodity.nome}`, { totalRows: allPrices.length });
 
-                let insertedCount = 0;
-                let skippedCount = 0;
-
-                for (const data of allPrices) {
-                    const startOfDay = new Date(data.data);
-                    startOfDay.setHours(0, 0, 0, 0);
-                    const endOfDay = new Date(data.data);
-                    endOfDay.setHours(23, 59, 59, 999);
-
+                // Prepare data for bulk insert
+                const dataToInsert = allPrices.map(data => {
                     // Use the actual praça name from scraper
                     const pracaNome = data.pracaNome || 'Referência CEPEA';
 
-                    // Check if cotação already exists for this day AND praça
-                    const existing = await prisma.cotacao.findFirst({
-                        where: {
-                            commodityId: commodity.id,
-                            dataReferencia: {
-                                gte: startOfDay,
-                                lte: endOfDay
-                            },
-                            praca: pracaNome
-                        }
-                    });
+                    return {
+                        commodityId: commodity.id,
+                        valor: data.valor,
+                        valorAnterior: data.valor, // Histórico não tem valor anterior explícito
+                        variacao: data.variacaoDiaria ?? 0,
+                        praca: pracaNome,
+                        estado: 'BR', // Default, já que o scraper pega de tudo
+                        fonte: 'CEPEA',
+                        dataReferencia: data.data,
+                        createdAt: new Date(), // Explicitly set createdAt for createMany
+                    };
+                });
 
-                    if (!existing) {
-                        await prisma.cotacao.create({
-                            data: {
-                                commodityId: commodity.id,
-                                valor: data.valor,
-                                valorAnterior: data.valor,
-                                variacao: data.variacaoDiaria ?? 0,
-                                praca: pracaNome,
-                                estado: 'BR',
-                                fonte: 'CEPEA',
-                                dataReferencia: data.data
-                            }
-                        });
-                        insertedCount++;
-                    } else {
-                        skippedCount++;
-                    }
-                }
+                // Bulk insert with skipDuplicates
+                // This is MUCH faster than checking one by one
+                const result = await prisma.cotacao.createMany({
+                    data: dataToInsert,
+                    skipDuplicates: true,
+                });
+
+                const insertedCount = result.count;
+                const skippedCount = allPrices.length - insertedCount;
 
                 updates.push({
                     slug: commodity.slug,
@@ -101,7 +86,7 @@ export async function POST(request: Request) {
                     count: insertedCount
                 });
 
-                logger.info(`${commodity.nome}: ${insertedCount} inseridos, ${skippedCount} já existiam`);
+                logger.info(`${commodity.nome}: ${insertedCount} inseridos, ${skippedCount} já existiam (Ignorados)`);
 
             } catch (err) {
                 logger.error(`Falha ao processar ${commodity.slug}`, { error: err instanceof Error ? err.message : String(err) });

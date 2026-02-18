@@ -1,0 +1,2 @@
+src/components/dashboard/weather/CurrentWeatherHero.tsx(18,30): error TS2339: Property 'description' does not exist on type '{ temperature: number; humidity: number; windSpeed: number; conditionCode: number; isDay: boolean; }'.
+src/components/dashboard/weather/CurrentWeatherHero.tsx(52,38): error TS2339: Property 'description' does not exist on type '{ temperature: number; humidity: number; windSpeed: number; conditionCode: number; isDay: boolean; }'.

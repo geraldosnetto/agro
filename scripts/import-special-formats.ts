@@ -3,6 +3,7 @@
  * Execute com: npx tsx scripts/import-special-formats.ts
  */
 
+import * as path from 'path';
 import 'dotenv/config';
 import prisma from '../src/lib/prisma';
 import * as XLSX from 'xlsx';
@@ -31,7 +32,7 @@ async function importLeite() {
         return 0;
     }
 
-    const wb = XLSX.readFile('/mnt/e/SITES/agro/historico/CEPEA_20260131122823.xls');
+    const wb = XLSX.readFile(path.join(process.cwd(), 'historico', 'CEPEA_20260131122823.xls'));
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as (string | number)[][];
 
@@ -87,7 +88,7 @@ async function importSuinoMensal() {
         return 0;
     }
 
-    const wb = XLSX.readFile('/mnt/e/SITES/agro/historico/CEPEA_20260131123121.xls');
+    const wb = XLSX.readFile(path.join(process.cwd(), 'historico', 'CEPEA_20260131123121.xls'));
     const sheet = wb.Sheets[wb.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as (string | number)[][];
 
