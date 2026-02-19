@@ -26,6 +26,23 @@ interface CommoditySeries {
     color: string;
 }
 
+export // Interface auxiliar para os dados do tooltip do Recharts
+    interface TooltipPayload {
+    name: string;
+    value: number;
+    color: string;
+    payload?: any; // Dados originais
+}
+
+// Interface separada para o payload da legenda
+interface LegendItemPayload {
+    value: any;
+    id?: string;
+    type?: any;
+    color?: string;
+    payload?: any;
+}
+
 export interface ComparatorChartProps {
     data: ChartDataPoint[];
     series: CommoditySeries[];
@@ -120,7 +137,7 @@ export function ComparatorChart({
                                             })}
                                         </p>
                                         <div className="flex flex-col gap-1.5">
-                                            {payload.map((entry: any) => (
+                                            {payload.map((entry: TooltipPayload) => (
                                                 <div key={entry.name} className="flex items-center justify-between gap-4">
                                                     <div className="flex items-center gap-2">
                                                         <div
@@ -158,7 +175,7 @@ export function ComparatorChart({
                         iconType="circle"
                         content={({ payload }) => (
                             <div className="flex flex-wrap gap-4 justify-end mb-4">
-                                {payload?.map((entry: any, index) => (
+                                {payload?.map((entry: LegendItemPayload, index: number) => (
                                     <div key={`item-${index}`} className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-accent/30 border border-transparent hover:border-border transition-colors cursor-pointer">
                                         <div
                                             className="h-2 w-2 rounded-full ring-2 ring-background"

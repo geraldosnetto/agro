@@ -16,7 +16,8 @@ import {
   Map as MapIcon,
   FileText,
   Menu,
-  Leaf
+  Leaf,
+  LucideIcon
 } from "lucide-react";
 
 export function Header() {
@@ -108,7 +109,7 @@ function NavLinks() {
   );
 }
 
-function MobileNavLink({ href, icon: Icon, children }: { href: string; icon: any; children: React.ReactNode }) {
+function MobileNavLink({ href, icon: Icon, children }: { href: string; icon: LucideIcon; children: React.ReactNode }) {
   return (
     <Link
       href={href}

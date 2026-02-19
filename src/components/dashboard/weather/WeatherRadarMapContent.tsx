@@ -190,11 +190,10 @@ export function WeatherRadarMapContent({ className }: WeatherRadarMapContentProp
                     Radar de Chuva
                 </CardTitle>
                 <div className="flex items-center gap-2">
-                    <span className={`text-sm font-medium px-2 py-0.5 rounded ${
-                        frameType === 'past' ? 'bg-muted text-muted-foreground' :
-                        frameType === 'now' ? 'bg-primary/20 text-primary' :
-                        'bg-blue-500/20 text-blue-600'
-                    }`}>
+                    <span className={`text-sm font-medium px-2 py-0.5 rounded ${frameType === 'past' ? 'bg-muted text-muted-foreground' :
+                            frameType === 'now' ? 'bg-primary/20 text-primary' :
+                                'bg-blue-500/20 text-blue-600'
+                        }`}>
                         {frameTime}
                         {frameType === 'forecast' && ' (prev.)'}
                     </span>
@@ -239,7 +238,7 @@ export function WeatherRadarMapContent({ className }: WeatherRadarMapContentProp
                         <MapContainer
                             center={BRAZIL_CENTER}
                             zoom={DEFAULT_ZOOM}
-                            style={{ height: '100%', width: '100%' }}
+                            className="h-full w-full"
                             scrollWheelZoom={true}
                         >
                             {/* Mapa base escuro - CartoDB Dark Matter */}

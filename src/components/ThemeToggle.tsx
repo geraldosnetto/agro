@@ -2,15 +2,11 @@
 
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useMounted } from "@/hooks/use-mounted";
 
 export function ThemeToggle() {
     const { setTheme, resolvedTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-
-    // Evita hydration mismatch - padrão recomendado pelo next-themes
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    useEffect(() => setMounted(true), []);
+    const mounted = useMounted();
 
     if (!mounted) {
         return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   TrendingUp,
   TrendingDown,
@@ -67,17 +67,28 @@ interface PredictionCardProps {
 export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [horizon, setHorizon] = useState<'7' | '14' | '30' | '60' | '90'>('7');
   const [showDetails, setShowDetails] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
 
-  const loadPrediction = async (selectedHorizon: string = horizon) => {
+  const loadPrediction = useCallback(async (selectedHorizon: string = horizon) => {
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`/api/ai/predictions/${slug}?horizon=${selectedHorizon}`);
+      const response = await fetch(`/api/ai/predictions/${slug}?horizon=${selectedHorizon}`, {
+        signal: controller.signal
+      });
       const data = await response.json();
 
       if (!response.ok) {
@@ -87,17 +98,23 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
       setPrediction(data.prediction);
       setRemaining(data.usage?.remaining ?? null);
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return; // Ignore aborted requests
+      }
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
-      setIsLoading(false);
+      // Only clear loading if this is the current request
+      if (abortControllerRef.current === controller) {
+        setIsLoading(false);
+        abortControllerRef.current = null;
+      }
     }
-  };
+  }, [horizon, slug]);
 
   // Load on mount
   useEffect(() => {
     loadPrediction();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
+  }, [loadPrediction]);
 
   const handleHorizonChange = (newHorizon: '7' | '14' | '30' | '60' | '90') => {
     setHorizon(newHorizon);

@@ -8,6 +8,7 @@ import { SentimentSelector } from "@/components/ai/SentimentSelector";
 import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
+import { PRACA_NAMES } from "@/lib/commodities";
 
 // Força renderização dinâmica - evita erro de conexão Prisma durante build
 export const dynamic = 'force-dynamic';
@@ -46,14 +47,17 @@ export default async function CotacoesPage() {
         include: {
             cotacoes: {
                 orderBy: { dataReferencia: 'desc' },
-                take: 1
+                take: 5
             }
         }
     });
 
     // Mapeia para o formato de UI
     const cotacoes = commoditiesData.map(c => {
-        const ultima = c.cotacoes[0];
+        const preferredPracas = PRACA_NAMES[c.slug] || [];
+        const ultima = c.cotacoes.find(q => q.praca && preferredPracas.includes(q.praca))
+            || c.cotacoes[0];
+
         const valor = ultima?.valor?.toNumber() ?? 0;
         const valorAnterior = ultima?.valorAnterior?.toNumber() ?? 0;
         const variacao = ultima?.variacao?.toNumber() ??

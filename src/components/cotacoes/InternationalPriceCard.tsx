@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     TrendingUp,
     TrendingDown,
@@ -55,7 +55,7 @@ export function InternationalPriceCard({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchPrice = async () => {
+    const fetchPrice = useCallback(async () => {
         setLoading(true);
         setError(null);
 
@@ -78,12 +78,11 @@ export function InternationalPriceCard({
         } finally {
             setLoading(false);
         }
-    };
+    }, [slug]);
 
     useEffect(() => {
         fetchPrice();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [slug]);
+    }, [fetchPrice]);
 
     // Não mostrar card se commodity não tem preço internacional
     if (error === 'not-available') {

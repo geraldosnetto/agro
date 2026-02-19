@@ -1,5 +1,6 @@
 import { JSDOM } from 'jsdom';
 import logger from '@/lib/logger';
+import { PRACA_NAMES } from '@/lib/commodities';
 
 // FlareSolverr proxy URL (Docker container for Cloudflare bypass)
 const FLARESOLVERR_URL = process.env.FLARESOLVERR_URL || 'http://localhost:8191/v1';
@@ -74,44 +75,6 @@ export interface CepeaPracaData extends CepeaData {
     pracaIndex: number;
     pracaNome: string;
 }
-
-// Praça names per commodity (based on CEPEA table structure)
-const PRACA_NAMES: Record<string, string[]> = {
-    // Grãos
-    'soja': ['Paranaguá/PR', 'Porto Base'],
-    'milho': ['ESALQ/BM&FBovespa'],
-    'trigo': ['Paraná'],
-    'arroz': ['RS/IRGA'],
-    'feijao-carioca': ['São Paulo'],
-    'feijao-preto': ['São Paulo'],
-    // Pecuária
-    'boi-gordo': ['Indicador CEPEA', 'Média SP', 'A Prazo'],
-    'bezerro': ['Mato Grosso do Sul', 'São Paulo'],
-    'suino': ['Regional (MG/PR/RS)', 'Carcaça SP'],
-    'frango': ['Congelado SP'],
-    'frango-resfriado': ['Resfriado SP'],
-    'leite': ['Brasil'],
-    'ovos': ['São Paulo'],
-    // Café
-    'cafe-arabica': ['Indicador CEPEA'],
-    'cafe-robusta': ['Indicador Robusta'],
-    // Açúcar
-    'acucar-cristal': ['Cristal SP'],
-    'acucar-vhp': ['VHP Exportação'],
-    'acucar-refinado': ['Refinado Amorfo SP'],
-    'acucar-empacotado': ['Empacotado SP'],
-    // Etanol
-    'etanol-hidratado': ['Hidratado SP'],
-    'etanol-anidro': ['Anidro SP'],
-    // Fibras
-    'algodao': ['À Vista'],
-    'algodao-8dias': ['Prazo 8 dias'],
-    'algodao-15dias': ['Prazo 15 dias'],
-    'algodao-30dias': ['Prazo 30 dias'],
-    // Outros
-    'mandioca': ['Indicador CEPEA'],
-    'tilapia': ['São Paulo'],
-};
 
 interface CommodityConfig {
     url: string;

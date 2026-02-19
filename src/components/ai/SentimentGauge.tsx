@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-interface SentimentGaugeProps {
+export interface SentimentGaugeProps {
     score: number; // -1 a 1
     size?: number;
     className?: string;

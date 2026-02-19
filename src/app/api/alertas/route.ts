@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 
+import { PRACA_NAMES } from "@/lib/commodities";
+
 const createAlertaSchema = z.object({
     commodityId: z.string().min(1, "Commodity é obrigatória"),
     tipo: z.enum(["ACIMA", "ABAIXO", "VARIACAO"]),
@@ -45,27 +47,42 @@ export async function GET() {
                 unidade: true,
                 cotacoes: {
                     orderBy: { dataReferencia: "desc" },
-                    take: 1,
-                    select: { valor: true },
+                    take: 5, // Fetch more to find the preferred praca
+                    select: { valor: true, praca: true },
                 },
             },
         });
 
-        const commodityMap = new Map(commodities.map((c) => [c.id, c]));
+        type CommodityWithCotacoes = (typeof commodities)[0];
+        const commodityMap = new Map<string, CommodityWithCotacoes>(
+            commodities.map((c) => [c.id, c])
+        );
 
         const alertasComCommodity = alertas.map((alerta) => {
             const commodity = commodityMap.get(alerta.commodityId);
+            let precoAtual = 0;
+
+            if (commodity && commodity.cotacoes && commodity.cotacoes.length > 0) {
+                const preferredPracas = PRACA_NAMES[commodity.slug] || [];
+
+                // Try to find a quote from the preferred praca
+                const bestQuote = commodity.cotacoes.find(c => c.praca && preferredPracas.includes(c.praca))
+                    || commodity.cotacoes[0]; // Fallback to the latest one
+
+                precoAtual = bestQuote.valor?.toNumber() ?? 0;
+            }
+
             return {
                 ...alerta,
                 valorAlvo: alerta.valorAlvo?.toNumber() ?? null,
                 percentual: alerta.percentual?.toNumber() ?? null,
                 commodity: commodity
                     ? {
-                          nome: commodity.nome,
-                          slug: commodity.slug,
-                          unidade: commodity.unidade,
-                          precoAtual: commodity.cotacoes[0]?.valor?.toNumber() ?? 0,
-                      }
+                        nome: commodity.nome,
+                        slug: commodity.slug,
+                        unidade: commodity.unidade,
+                        precoAtual: precoAtual,
+                    }
                     : null,
             };
         });

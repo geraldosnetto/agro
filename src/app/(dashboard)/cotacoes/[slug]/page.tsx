@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { formatarUnidade, formatarCategoria, formatarMoeda } from "@/lib/formatters";
+import { PRACA_NAMES } from "@/lib/commodities";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +33,8 @@ export async function generateMetadata({ params }: CommodityPageProps): Promise<
         include: {
             cotacoes: {
                 orderBy: { dataReferencia: 'desc' },
-                take: 1
+                take: 5,
+                select: { valor: true, praca: true, valorAnterior: true, variacao: true, dataReferencia: true }
             }
         }
     });
@@ -43,7 +45,10 @@ export async function generateMetadata({ params }: CommodityPageProps): Promise<
         };
     }
 
-    const ultimaCotacao = commodity.cotacoes[0];
+    const preferredPracas = PRACA_NAMES[commodity.slug] || [];
+    const ultimaCotacao = commodity.cotacoes.find(c => c.praca && preferredPracas.includes(c.praca))
+        || commodity.cotacoes[0];
+
     const valor = ultimaCotacao?.valor?.toNumber() ?? 0;
     const unidade = formatarUnidade(commodity.unidade);
 
@@ -75,7 +80,10 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
         notFound();
     }
 
-    const ultimaCotacao = commodity.cotacoes[0];
+    const preferredPracas = PRACA_NAMES[commodity.slug] || [];
+    const ultimaCotacao = commodity.cotacoes.find(c => c.praca && preferredPracas.includes(c.praca))
+        || commodity.cotacoes[0];
+
     const valor = ultimaCotacao?.valor?.toNumber() ?? 0;
     const valorAnterior = ultimaCotacao?.valorAnterior?.toNumber() ?? 0;
     const variacaoDia = ultimaCotacao?.variacao?.toNumber() ??

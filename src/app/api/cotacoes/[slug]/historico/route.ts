@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { HistoricoQuerySchema, SlugSchema } from "@/lib/schemas/api";
 import logger from "@/lib/logger";
+import { PRACA_NAMES } from "@/lib/commodities";
 
 export async function GET(
     request: Request,
@@ -68,6 +69,12 @@ export async function GET(
                 if (pracaIndex < pracasResult.length) {
                     pracaFilter = pracasResult[pracaIndex].praca || undefined;
                 }
+            }
+        } else {
+            // Default to the preferred praca if no index provided
+            const preferredPracas = PRACA_NAMES[slug] || [];
+            if (preferredPracas.length > 0) {
+                pracaFilter = preferredPracas[0];
             }
         }
 
