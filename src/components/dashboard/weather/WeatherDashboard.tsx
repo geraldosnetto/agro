@@ -6,7 +6,7 @@ import { useWeather } from '@/contexts/WeatherContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Wind, Droplets, Thermometer, Calendar } from 'lucide-react';
 import { type WeatherData, getWeatherDescription } from '@/lib/data-sources/weather';
-import { ForecastChart } from './ForecastChart';
+import { ForecastChartWrapper as ForecastChart } from './ForecastChartWrapper';
 import { CitySearch } from './CitySearch';
 import { Button } from '@/components/ui/button';
 import { analyzeWeatherConditions } from '@/lib/agro-analyzers';

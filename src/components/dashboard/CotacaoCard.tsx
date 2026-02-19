@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { SparklineChart } from "./SparklineChart";
+import { SparklineChartWrapper as SparklineChart } from "./SparklineChartWrapper";
 import { FavoriteButton } from "@/components/FavoriteButton";
 
 export type CotacaoCategoria = "graos" | "pecuaria" | "sucroenergetico" | "fibras" | "peixe" | "outros";

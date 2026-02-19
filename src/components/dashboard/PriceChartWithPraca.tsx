@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PriceChart } from "./PriceChart";
+import { PriceChartWrapper as PriceChart } from "./PriceChartWrapper";
 import { PracaSelector } from "./PracaSelector";
 
 interface PriceChartWithPracaProps {

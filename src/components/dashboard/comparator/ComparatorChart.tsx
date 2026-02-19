@@ -26,7 +26,7 @@ interface CommoditySeries {
     color: string;
 }
 
-interface ComparatorChartProps {
+export interface ComparatorChartProps {
     data: ChartDataPoint[];
     series: CommoditySeries[];
     normalized?: boolean;

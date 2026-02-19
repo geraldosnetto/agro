@@ -4,7 +4,7 @@
 import { ResponsiveContainer, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line, Bar } from 'recharts';
 import { WeatherData } from '@/lib/data-sources/weather';
 
-interface ForecastChartProps {
+export interface ForecastChartProps {
     data: WeatherData['daily'];
 }
 

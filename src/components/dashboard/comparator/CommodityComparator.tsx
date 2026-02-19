@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ComparatorControls } from "./ComparatorControls";
-import { ComparatorChart } from "./ComparatorChart";
+import { ComparatorChartWrapper as ComparatorChart } from "./ComparatorChartWrapper";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

@@ -4,7 +4,7 @@ import { memo, useMemo, useState, useEffect } from "react";
 import useSWR from "swr";
 import { Area, AreaChart, ResponsiveContainer, YAxis } from "recharts";
 
-interface SparklineProps {
+export interface SparklineProps {
     slug: string;
     isPositive: boolean;
 }

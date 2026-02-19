@@ -25,7 +25,7 @@ interface ChartData {
     valor: number;
 }
 
-interface PriceChartProps {
+export interface PriceChartProps {
     commoditySlug?: string;
     commodityName?: string;
     praca?: number;

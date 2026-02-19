@@ -1,6 +1,67 @@
 import { JSDOM } from 'jsdom';
 import logger from '@/lib/logger';
 
+// FlareSolverr proxy URL (Docker container for Cloudflare bypass)
+const FLARESOLVERR_URL = process.env.FLARESOLVERR_URL || 'http://localhost:8191/v1';
+
+/**
+ * Fetch HTML via FlareSolverr to bypass Cloudflare protection.
+ * Falls back to direct fetch if FlareSolverr is unavailable.
+ */
+async function fetchHtmlViaFlare(url: string): Promise<string | null> {
+    // Try FlareSolverr first
+    try {
+        const flareResponse = await fetch(FLARESOLVERR_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cmd: 'request.get',
+                url,
+                maxTimeout: 60000,
+            }),
+            signal: AbortSignal.timeout(90000), // 90s timeout (FlareSolverr can be slow)
+        });
+
+        if (flareResponse.ok) {
+            const data = await flareResponse.json();
+            if (data.status === 'ok' && data.solution?.response) {
+                logger.info(`FlareSolverr: OK para ${url} (${data.solution.response.length} chars)`);
+                return data.solution.response;
+            }
+            logger.warn(`FlareSolverr: resposta inesperada`, { status: data.status });
+        }
+    } catch (flareError) {
+        logger.warn(`FlareSolverr indisponível, tentando fetch direto`, {
+            error: flareError instanceof Error ? flareError.message : String(flareError),
+        });
+    }
+
+    // Fallback: direct fetch (may fail with Cloudflare 403)
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+            },
+            signal: AbortSignal.timeout(30000),
+        });
+
+        if (!response.ok) {
+            logger.error(`Fetch direto falhou: HTTP ${response.status} para ${url}`);
+            return null;
+        }
+
+        return await response.text();
+    } catch (directError) {
+        logger.error(`Fetch direto falhou para ${url}`, {
+            error: directError instanceof Error ? directError.message : String(directError),
+        });
+        return null;
+    }
+}
+
 interface CepeaData {
     valor: number;
     data: Date;
@@ -116,23 +177,12 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
     const config = COMMODITY_CONFIG[slug];
 
     try {
-        // Usar fetch nativo em vez de exec (elimina command injection)
-        const response = await fetch(config.url, {
-            method: 'GET',
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-            },
-            signal: AbortSignal.timeout(30000), // 30s timeout
-        });
-
-        if (!response.ok) {
-            logger.error(`Erro HTTP ${response.status} ao buscar CEPEA para ${slug}`);
+        const html = await fetchHtmlViaFlare(config.url);
+        if (!html) {
+            logger.error(`Falha ao buscar HTML do CEPEA para ${slug}`);
             return null;
         }
 
-        const html = await response.text();
         const dom = new JSDOM(html);
         const doc = dom.window.document;
         const tables = doc.querySelectorAll('table');
@@ -246,22 +296,12 @@ export async function fetchAllCepeaPrices(slug: string): Promise<CepeaPracaData[
     const results: CepeaPracaData[] = [];
 
     try {
-        const response = await fetch(config.url, {
-            method: 'GET',
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-            },
-            signal: AbortSignal.timeout(30000),
-        });
-
-        if (!response.ok) {
-            logger.error(`Erro HTTP ${response.status} ao buscar CEPEA para ${slug}`);
+        const html = await fetchHtmlViaFlare(config.url);
+        if (!html) {
+            logger.error(`Falha ao buscar HTML do CEPEA para ${slug}`);
             return [];
         }
 
-        const html = await response.text();
         const dom = new JSDOM(html);
         const doc = dom.window.document;
         const tables = doc.querySelectorAll('table');

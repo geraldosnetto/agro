@@ -6,7 +6,7 @@ import { formatarUnidade, formatarCategoria, formatarMoeda } from "@/lib/formatt
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TradingChart } from "@/components/dashboard/TradingChart";
+import { TradingChartWrapper as TradingChart } from "@/components/dashboard/TradingChartWrapper";
 import { ParitySection } from "@/components/cotacoes/ParitySection";
 import { CommodityStats } from "@/components/dashboard/CommodityStats";
 import { PredictionCard } from "@/components/ai/PredictionCard";
