@@ -37,6 +37,13 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* Variation tokens */
+  --color-positive: var(--positive);
+  --color-positive-muted: var(--positive-muted);
+  --color-positive-subtle: var(--positive-subtle);
+  --color-negative: var(--negative);
+  --color-negative-muted: var(--negative-muted);
+  --color-negative-subtle: var(--negative-subtle);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -92,7 +99,11 @@
   --sucroenergetico: oklch(0.55 0.15 280);
   /* Variação de preços */
   --positive: oklch(0.55 0.18 145);
+  --positive-muted: oklch(0.95 0.04 145);
+  --positive-subtle: oklch(0.90 0.03 145);
   --negative: oklch(0.55 0.2 25);
+  --negative-muted: oklch(0.95 0.04 25);
+  --negative-subtle: oklch(0.90 0.03 25);
 }
 
 .dark {
@@ -127,6 +138,12 @@
   --sidebar-accent-foreground: oklch(0.96 0.01 160);
   --sidebar-border: oklch(0.30 0.03 160);
   --sidebar-ring: oklch(0.65 0.16 163);
+  --positive: oklch(0.70 0.16 150);
+  --positive-muted: oklch(0.25 0.06 150);
+  --positive-subtle: oklch(0.30 0.04 150);
+  --negative: oklch(0.70 0.18 25);
+  --negative-muted: oklch(0.25 0.06 25);
+  --negative-subtle: oklch(0.30 0.04 25);
 }
 
 @layer base {

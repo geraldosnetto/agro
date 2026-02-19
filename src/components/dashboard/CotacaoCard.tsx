@@ -7,7 +7,9 @@ import { cn } from "@/lib/utils";
 import { SparklineChartWrapper as SparklineChart } from "./SparklineChartWrapper";
 import { FavoriteButton } from "@/components/FavoriteButton";
 
-export type CotacaoCategoria = "graos" | "pecuaria" | "sucroenergetico" | "fibras" | "peixe" | "outros";
+import { CATEGORIA_CONFIG, type CategoriaKey } from '@/lib/categories';
+
+export type CotacaoCategoria = CategoriaKey;
 
 interface CotacaoCardProps {
     slug: string;
@@ -20,32 +22,6 @@ interface CotacaoCardProps {
     dataAtualizacao?: string;
 }
 
-const categoriaConfig: Record<CotacaoCategoria, { label: string; className: string }> = {
-    graos: {
-        label: "Grãos",
-        className: "bg-chart-1/10 text-chart-1 border-chart-1/20",
-    },
-    pecuaria: {
-        label: "Pecuária",
-        className: "bg-chart-2/10 text-chart-2 border-chart-2/20",
-    },
-    sucroenergetico: {
-        label: "Sucroenergetico",
-        className: "bg-chart-3/10 text-chart-3 border-chart-3/20",
-    },
-    fibras: {
-        label: "Fibras",
-        className: "bg-chart-4/10 text-chart-4 border-chart-4/20",
-    },
-    peixe: {
-        label: "Peixe",
-        className: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-    },
-    outros: {
-        label: "Outros",
-        className: "bg-chart-5/10 text-chart-5 border-chart-5/20",
-    },
-};
 
 export function CotacaoCard({
     slug,
@@ -58,7 +34,7 @@ export function CotacaoCard({
     dataAtualizacao,
 }: CotacaoCardProps) {
     const isPositive = variacao >= 0;
-    const config = categoriaConfig[categoria];
+    const config = CATEGORIA_CONFIG[categoria] ?? CATEGORIA_CONFIG.outros;
 
     return (
         <Link href={`/cotacoes/${slug}`} className="block">
@@ -73,11 +49,7 @@ export function CotacaoCard({
                 <div
                     className={cn(
                         "absolute top-0 left-0 right-0 h-1",
-                        categoria === "graos" && "bg-chart-1",
-                        categoria === "pecuaria" && "bg-chart-2",
-                        categoria === "sucroenergetico" && "bg-chart-3",
-                        categoria === "fibras" && "bg-chart-4",
-                        categoria === "outros" && "bg-chart-5"
+                        config.accentClassName
                     )}
                 />
 
@@ -93,7 +65,7 @@ export function CotacaoCard({
                         </div>
                         <div className="flex items-center gap-1">
                             <FavoriteButton commoditySlug={slug} size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <Badge variant="outline" className={cn("text-xs", config.className)}>
+                            <Badge variant="outline" className={cn("text-xs", config.badgeClassName)}>
                                 {config.label}
                             </Badge>
                         </div>
@@ -115,8 +87,8 @@ export function CotacaoCard({
                             className={cn(
                                 "flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border",
                                 isPositive
-                                    ? "text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900"
-                                    : "text-rose-600 bg-rose-50 border-rose-100 dark:bg-rose-950/20 dark:border-rose-900"
+                                    ? "text-positive bg-positive-muted border-positive-subtle"
+                                    : "text-negative bg-negative-muted border-negative-subtle"
                             )}
                         >
                             {isPositive ? (

@@ -90,6 +90,16 @@ export default async function CotacoesPage() {
     const pecuaria = sortedCotacoes.filter((c) => c.categoria === "pecuaria");
     const sucroenergetico = sortedCotacoes.filter((c) => c.categoria === "sucroenergetico");
 
+    // Calcula timestamp real da última atualização
+    const latestDate = commoditiesData.reduce((latest, c) => {
+        const d = c.cotacoes[0]?.dataReferencia;
+        if (d && (!latest || d > latest)) return d;
+        return latest;
+    }, null as Date | null);
+    const ultimaAtualizacao = latestDate
+        ? latestDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+        : new Date().toLocaleDateString('pt-BR');
+
     return (
         <div className="container px-4 py-6 md:py-8">
             {/* Header da página */}
@@ -219,7 +229,7 @@ export default async function CotacoesPage() {
                 <p className="text-sm text-muted-foreground text-center">
                     Dados de referência. Fontes: CEPEA/ESALQ, CONAB, Banco Central.
                     <br />
-                    Última atualização: Hoje às 14:30
+                    Última atualização: {ultimaAtualizacao}
                 </p>
             </div>
         </div >

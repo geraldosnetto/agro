@@ -178,13 +178,13 @@ export default function AlertasPage() {
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3">
                                     {alerta.tipo === "ACIMA" && (
-                                        <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                                            <TrendingUp className="h-5 w-5 text-emerald-600" />
+                                        <div className="p-2 rounded-full bg-positive-muted">
+                                            <TrendingUp className="h-5 w-5 text-positive" />
                                         </div>
                                     )}
                                     {alerta.tipo === "ABAIXO" && (
-                                        <div className="p-2 rounded-full bg-rose-100 dark:bg-rose-900/30">
-                                            <TrendingDown className="h-5 w-5 text-rose-600" />
+                                        <div className="p-2 rounded-full bg-negative-muted">
+                                            <TrendingDown className="h-5 w-5 text-negative" />
                                         </div>
                                     )}
                                     {alerta.tipo === "VARIACAO" && (
@@ -248,8 +248,8 @@ export default function AlertasPage() {
                                                             ? "Atingido!"
                                                             : `faltam R$ ${(alerta.valorAlvo - alerta.commodity.precoAtual).toFixed(2)}`
                                                         : alerta.commodity.precoAtual <= alerta.valorAlvo
-                                                        ? "Atingido!"
-                                                        : `faltam R$ ${(alerta.commodity.precoAtual - alerta.valorAlvo).toFixed(2)}`}
+                                                            ? "Atingido!"
+                                                            : `faltam R$ ${(alerta.commodity.precoAtual - alerta.valorAlvo).toFixed(2)}`}
                                                     )
                                                 </span>
                                             )}

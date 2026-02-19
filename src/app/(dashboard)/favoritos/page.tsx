@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Heart, Trash2, TrendingUp, TrendingDown, Bell, ExternalLink } from "lucide-react";
 import { formatarUnidade, formatarCategoria, formatarMoeda } from "@/lib/formatters";
+import { getCategoriaConfig, getCategoriaLabel } from '@/lib/categories';
 
 interface Favorito {
     id: string;
@@ -101,23 +102,6 @@ export default function FavoritosPage() {
         return null;
     }
 
-    // Category colors
-    const categoriaColors: Record<string, string> = {
-        graos: "bg-chart-1/10 text-chart-1 border-chart-1/20",
-        pecuaria: "bg-chart-2/10 text-chart-2 border-chart-2/20",
-        sucroenergetico: "bg-chart-3/10 text-chart-3 border-chart-3/20",
-        fibras: "bg-chart-4/10 text-chart-4 border-chart-4/20",
-        outros: "bg-chart-5/10 text-chart-5 border-chart-5/20",
-    };
-
-    const categoriaLabels: Record<string, string> = {
-        GRAOS: "Graos",
-        PECUARIA: "Pecuaria",
-        SUCROENERGETICO: "Sucroenergetico",
-        FIBRAS: "Fibras",
-        OUTROS: "Outros",
-    };
-
     return (
         <div className="container px-4 py-8 max-w-4xl">
             {/* Header */}
@@ -133,7 +117,7 @@ export default function FavoritosPage() {
                 </div>
                 <Link href="/cotacoes">
                     <Button variant="outline">
-                        Ver Todas as Cotacoes
+                        Ver Todas as Cotações
                     </Button>
                 </Link>
             </div>
@@ -145,11 +129,11 @@ export default function FavoritosPage() {
                         <Heart className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                         <h2 className="text-xl font-semibold mb-2">Nenhum favorito ainda</h2>
                         <p className="text-muted-foreground mb-6">
-                            Adicione commodities aos favoritos para acompanha-las mais facilmente.
+                            Adicione commodities aos favoritos para acompanhá-las mais facilmente.
                         </p>
                         <Link href="/cotacoes">
                             <Button>
-                                Explorar Cotacoes
+                                Explorar Cotações
                             </Button>
                         </Link>
                     </CardContent>
@@ -170,8 +154,8 @@ export default function FavoritosPage() {
                             <CardContent className="p-4">
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                        <Badge variant="outline" className={categoriaColors[categoria]}>
-                                            {categoriaLabels[commodity.categoria] || commodity.categoria}
+                                        <Badge variant="outline" className={getCategoriaConfig(categoria).badgeClassName}>
+                                            {getCategoriaLabel(commodity.categoria)}
                                         </Badge>
                                     </div>
                                     <AlertDialog>
@@ -188,7 +172,7 @@ export default function FavoritosPage() {
                                             <AlertDialogHeader>
                                                 <AlertDialogTitle>Remover dos favoritos?</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    {commodity.nome} sera removida da sua lista de favoritos.
+                                                    {commodity.nome} será removida da sua lista de favoritos.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
@@ -220,11 +204,10 @@ export default function FavoritosPage() {
 
                                     <div className="flex items-center gap-2">
                                         <span
-                                            className={`flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border ${
-                                                isPositive
-                                                    ? "text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900"
-                                                    : "text-rose-600 bg-rose-50 border-rose-100 dark:bg-rose-950/20 dark:border-rose-900"
-                                            }`}
+                                            className={`flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border ${isPositive
+                                                ? "text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900"
+                                                : "text-rose-600 bg-rose-50 border-rose-100 dark:bg-rose-950/20 dark:border-rose-900"
+                                                }`}
                                         >
                                             {isPositive ? (
                                                 <TrendingUp className="h-3 w-3" />
@@ -261,8 +244,8 @@ export default function FavoritosPage() {
                 <Card className="mt-8 bg-muted/50">
                     <CardContent className="pt-6">
                         <p className="text-sm text-muted-foreground">
-                            <strong>Dica:</strong> Seus favoritos sao sincronizados automaticamente entre dispositivos.
-                            Voce tambem pode criar alertas de preco para receber notificacoes.
+                            <strong>Dica:</strong> Seus favoritos são sincronizados automaticamente entre dispositivos.
+                            Você também pode criar alertas de preço para receber notificações.
                         </p>
                     </CardContent>
                 </Card>

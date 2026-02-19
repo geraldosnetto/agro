@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Leaf } from "lucide-react";
 
 export function Footer() {
     return (
@@ -9,19 +10,7 @@ export function Footer() {
                     <div className="col-span-2 md:col-span-1">
                         <Link href="/" className="flex items-center gap-2 mb-4">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                                <svg
-                                    className="h-5 w-5 text-primary-foreground"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                                    />
-                                </svg>
+                                <Leaf className="h-5 w-5 text-primary-foreground" />
                             </div>
                             <span className="text-lg font-bold">
                                 Indic<span className="text-primary">Agro</span>
@@ -48,7 +37,7 @@ export function Footer() {
                             </li>
                             <li>
                                 <Link href="/sucroenergetico" className="hover:text-foreground transition-colors">
-                                    Sucroenergetico
+                                    Sucroenergético
                                 </Link>
                             </li>
                         </ul>

@@ -14,6 +14,7 @@ import { PredictionCard } from "@/components/ai/PredictionCard";
 import { SentimentWidget } from "@/components/ai/SentimentWidget";
 import { InternationalPriceCard } from "@/components/cotacoes/InternationalPriceCard";
 import { ChevronLeft, Bell, Share2 } from "lucide-react";
+import { getCategoriaConfig } from '@/lib/categories';
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ExportButton } from "@/components/ExportButton";
 import { NewsFeed } from "@/components/dashboard/NewsFeed";
@@ -116,21 +117,7 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
         : 'N/A';
 
     // Category colors
-    const categoriaColors: Record<string, string> = {
-        graos: "bg-chart-1/10 text-chart-1 border-chart-1/20",
-        pecuaria: "bg-chart-2/10 text-chart-2 border-chart-2/20",
-        sucroenergetico: "bg-chart-3/10 text-chart-3 border-chart-3/20",
-        fibras: "bg-chart-4/10 text-chart-4 border-chart-4/20",
-        outros: "bg-chart-5/10 text-chart-5 border-chart-5/20",
-    };
-
-    const categoriaLabels: Record<string, string> = {
-        graos: "Grãos",
-        pecuaria: "Pecuária",
-        sucroenergetico: "Sucroenergetico",
-        fibras: "Fibras",
-        outros: "Outros",
-    };
+    const categoriaConfig = getCategoriaConfig(categoria);
 
     return (
         <div className="container px-4 py-6 md:py-8 max-w-6xl">
@@ -150,8 +137,8 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                     {/* Title and Category */}
                     <div className="flex items-center gap-3">
                         <h1 className="text-3xl md:text-4xl font-bold">{commodity.nome}</h1>
-                        <Badge variant="outline" className={categoriaColors[categoria]}>
-                            {categoriaLabels[categoria]}
+                        <Badge variant="outline" className={categoriaConfig.badgeClassName}>
+                            {categoriaConfig.label}
                         </Badge>
                     </div>
 
@@ -247,7 +234,7 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Categoria</p>
-                            <p className="font-medium">{categoriaLabels[categoria]}</p>
+                            <p className="font-medium">{categoriaConfig.label}</p>
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Fonte</p>
@@ -282,8 +269,8 @@ function VariationBadge({ label, value }: { label: string; value: number }) {
             <span className="text-sm text-muted-foreground">{label}:</span>
             <span
                 className={`flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border ${isPositive
-                    ? "text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900"
-                    : "text-rose-600 bg-rose-50 border-rose-100 dark:bg-rose-950/20 dark:border-rose-900"
+                    ? "text-positive bg-positive-muted border-positive-subtle"
+                    : "text-negative bg-negative-muted border-negative-subtle"
                     }`}
             >
                 {isPositive ? (

@@ -207,12 +207,11 @@ function NovoAlertaForm() {
                                 className="grid grid-cols-1 gap-3"
                             >
                                 <label
-                                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                                        tipo === "ACIMA" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
-                                    }`}
+                                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${tipo === "ACIMA" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+                                        }`}
                                 >
                                     <RadioGroupItem value="ACIMA" id="acima" />
-                                    <TrendingUp className="h-5 w-5 text-emerald-600" />
+                                    <TrendingUp className="h-5 w-5 text-positive" />
                                     <div>
                                         <p className="font-medium">Preço Acima de</p>
                                         <p className="text-sm text-muted-foreground">
@@ -222,12 +221,11 @@ function NovoAlertaForm() {
                                 </label>
 
                                 <label
-                                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                                        tipo === "ABAIXO" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
-                                    }`}
+                                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${tipo === "ABAIXO" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+                                        }`}
                                 >
                                     <RadioGroupItem value="ABAIXO" id="abaixo" />
-                                    <TrendingDown className="h-5 w-5 text-rose-600" />
+                                    <TrendingDown className="h-5 w-5 text-negative" />
                                     <div>
                                         <p className="font-medium">Preço Abaixo de</p>
                                         <p className="text-sm text-muted-foreground">
@@ -237,9 +235,8 @@ function NovoAlertaForm() {
                                 </label>
 
                                 <label
-                                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
-                                        tipo === "VARIACAO" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
-                                    }`}
+                                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${tipo === "VARIACAO" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+                                        }`}
                                 >
                                     <RadioGroupItem value="VARIACAO" id="variacao" />
                                     <Percent className="h-5 w-5 text-blue-600" />
