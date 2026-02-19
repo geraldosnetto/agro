@@ -29,14 +29,14 @@ const SENTIMENT_CONFIG: Record<Sentiment, {
   POSITIVE: {
     label: 'Positivo',
     icon: TrendingUp,
-    colors: 'text-green-600 dark:text-green-400',
-    bgColors: 'bg-green-100 dark:bg-green-900/30 border-green-200 dark:border-green-800',
+    colors: 'text-positive',
+    bgColors: 'bg-positive-muted border-positive-subtle',
   },
   NEGATIVE: {
     label: 'Negativo',
     icon: TrendingDown,
-    colors: 'text-red-600 dark:text-red-400',
-    bgColors: 'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-800',
+    colors: 'text-negative',
+    bgColors: 'bg-negative-muted border-negative-subtle',
   },
   NEUTRAL: {
     label: 'Neutro',
@@ -159,7 +159,7 @@ export function SentimentSummary({ aggregate, className }: SentimentSummaryProps
       <div className="w-full h-2 rounded-full bg-muted overflow-hidden flex">
         {positive > 0 && (
           <div
-            className="h-full bg-green-500"
+            className="h-full bg-positive"
             style={{ width: `${(positive / total) * 100}%` }}
           />
         )}
@@ -171,16 +171,16 @@ export function SentimentSummary({ aggregate, className }: SentimentSummaryProps
         )}
         {negative > 0 && (
           <div
-            className="h-full bg-red-500"
+            className="h-full bg-negative"
             style={{ width: `${(negative / total) * 100}%` }}
           />
         )}
       </div>
 
       <div className="flex justify-between text-xs text-muted-foreground">
-        <span className="text-green-600">{positive} positiva{positive !== 1 ? 's' : ''}</span>
+        <span className="text-positive">{positive} positiva{positive !== 1 ? 's' : ''}</span>
         <span>{neutral} neutra{neutral !== 1 ? 's' : ''}</span>
-        <span className="text-red-600">{negative} negativa{negative !== 1 ? 's' : ''}</span>
+        <span className="text-negative">{negative} negativa{negative !== 1 ? 's' : ''}</span>
       </div>
     </div>
   );

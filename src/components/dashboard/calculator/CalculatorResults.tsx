@@ -45,7 +45,7 @@ export function CalculatorResults({ result }: CalculatorResultsProps) {
                         <CardTitle className="text-sm font-medium text-muted-foreground">Margem Bruta (R$)</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className={cn("text-2xl font-bold", isPositive ? "text-green-600" : "text-red-500")}>
+                        <div className={cn("text-2xl font-bold", isPositive ? "text-positive" : "text-negative")}>
                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(grossMargin)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">

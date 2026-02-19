@@ -170,8 +170,8 @@ export function TradingChart({
                                     className={cn(
                                         "flex items-center gap-1",
                                         change >= 0
-                                            ? "text-emerald-600 border-emerald-200 bg-emerald-50"
-                                            : "text-red-600 border-red-200 bg-red-50"
+                                            ? "text-positive border-positive-subtle bg-positive-muted"
+                                            : "text-negative border-negative-subtle bg-negative-muted"
                                     )}
                                 >
                                     {change >= 0 ? (

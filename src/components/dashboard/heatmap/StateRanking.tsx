@@ -46,7 +46,7 @@ export function StateRanking({ data, onStateClick, selectedState }: StateRanking
             <Card>
                 <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-emerald-500" />
+                        <TrendingUp className="h-4 w-4 text-positive" />
                         Maiores Altas
                     </CardTitle>
                 </CardHeader>
@@ -70,7 +70,7 @@ export function StateRanking({ data, onStateClick, selectedState }: StateRanking
             <Card>
                 <CardHeader className="pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
-                        <TrendingDown className="h-4 w-4 text-red-500" />
+                        <TrendingDown className="h-4 w-4 text-negative" />
                         Maiores Quedas
                     </CardTitle>
                 </CardHeader>
@@ -117,8 +117,8 @@ function StateRow({
             {/* Posição */}
             <div className={cn(
                 "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold",
-                rank === 1 && isPositive && "bg-emerald-100 text-emerald-700",
-                rank === 1 && !isPositive && "bg-red-100 text-red-700",
+                rank === 1 && isPositive && "bg-positive-muted text-positive",
+                rank === 1 && !isPositive && "bg-negative-muted text-negative",
                 rank !== 1 && "bg-muted text-muted-foreground"
             )}>
                 {rank === 1 ? <Trophy className="h-3 w-3" /> : rank}
@@ -144,8 +144,8 @@ function StateRow({
                     className={cn(
                         "text-xs px-1.5",
                         state.variation >= 0
-                            ? "text-emerald-600 border-emerald-200"
-                            : "text-red-600 border-red-200"
+                            ? "text-positive border-positive-subtle"
+                            : "text-negative border-negative-subtle"
                     )}
                 >
                     {state.variation >= 0 ? (
@@ -200,7 +200,7 @@ export function StateTable({ data, onStateClick }: StateTableProps) {
                                     </td>
                                     <td className={cn(
                                         "px-4 py-2 text-right font-medium",
-                                        state.variation >= 0 ? "text-emerald-600" : "text-red-600"
+                                        state.variation >= 0 ? "text-positive" : "text-negative"
                                     )}>
                                         {state.variation >= 0 ? "+" : ""}{state.variation.toFixed(2)}%
                                     </td>

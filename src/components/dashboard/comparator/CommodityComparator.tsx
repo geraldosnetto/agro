@@ -170,8 +170,8 @@ export function CommodityComparator({
                             <div className="flex items-baseline gap-2 mt-1">
                                 <span className={cn(
                                     "text-2xl font-bold",
-                                    stats.correlation > 0.7 ? "text-green-500" :
-                                        stats.correlation < -0.7 ? "text-red-500" : "text-yellow-500"
+                                    stats.correlation > 0.7 ? "text-positive" :
+                                        stats.correlation < -0.7 ? "text-negative" : "text-yellow-500"
                                 )}>
                                     {stats.correlation.toFixed(2)}
                                 </span>

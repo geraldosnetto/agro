@@ -129,7 +129,7 @@ const BrazilMap = ({
                                                             <span className="text-muted-foreground">Variação:</span>
                                                             <span className={cn(
                                                                 "font-medium",
-                                                                cur.variation >= 0 ? 'text-green-500' : 'text-red-500'
+                                                                cur.variation >= 0 ? 'text-positive' : 'text-negative'
                                                             )}>
                                                                 {cur.variation > 0 ? '+' : ''}{cur.variation}%
                                                             </span>

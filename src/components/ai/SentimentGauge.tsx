@@ -51,11 +51,11 @@ export function SentimentGauge({
 
     if (score > 0.2) {
         label = 'Positivo';
-        colorClass = 'text-green-500';
+        colorClass = 'text-positive';
         Icon = TrendingUp;
     } else if (score < -0.2) {
         label = 'Negativo';
-        colorClass = 'text-red-500';
+        colorClass = 'text-negative';
         Icon = TrendingDown;
     }
 

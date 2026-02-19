@@ -103,14 +103,14 @@ export function InternationalPriceCard({
     };
 
     const getChangeIcon = (change: number) => {
-        if (change > 0) return <TrendingUp className="h-4 w-4 text-green-500" />;
-        if (change < 0) return <TrendingDown className="h-4 w-4 text-red-500" />;
+        if (change > 0) return <TrendingUp className="h-4 w-4 text-positive" />;
+        if (change < 0) return <TrendingDown className="h-4 w-4 text-negative" />;
         return <Minus className="h-4 w-4 text-muted-foreground" />;
     };
 
     const getChangeColor = (change: number) => {
-        if (change > 0) return 'text-green-500';
-        if (change < 0) return 'text-red-500';
+        if (change > 0) return 'text-positive';
+        if (change < 0) return 'text-negative';
         return 'text-muted-foreground';
     };
 

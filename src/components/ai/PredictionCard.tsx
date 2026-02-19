@@ -138,9 +138,9 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
   const getDirectionIcon = (direction: 'UP' | 'DOWN' | 'STABLE') => {
     switch (direction) {
       case 'UP':
-        return <TrendingUp className="h-5 w-5 text-green-500" />;
+        return <TrendingUp className="h-5 w-5 text-positive" />;
       case 'DOWN':
-        return <TrendingDown className="h-5 w-5 text-red-500" />;
+        return <TrendingDown className="h-5 w-5 text-negative" />;
       default:
         return <Minus className="h-5 w-5 text-muted-foreground" />;
     }
@@ -149,26 +149,26 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
   const getDirectionColor = (direction: 'UP' | 'DOWN' | 'STABLE') => {
     switch (direction) {
       case 'UP':
-        return 'text-green-500';
+        return 'text-positive';
       case 'DOWN':
-        return 'text-red-500';
+        return 'text-negative';
       default:
         return 'text-muted-foreground';
     }
   };
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 70) return 'bg-green-500/10 text-green-600 border-green-500/30';
+    if (confidence >= 70) return 'bg-positive/10 text-positive border-positive/30';
     if (confidence >= 50) return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30';
-    return 'bg-red-500/10 text-red-600 border-red-500/30';
+    return 'bg-negative/10 text-negative border-negative/30';
   };
 
   const getImpactBadge = (impact: 'positive' | 'negative' | 'neutral') => {
     switch (impact) {
       case 'positive':
-        return <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/30">Alta</Badge>;
+        return <Badge variant="outline" className="bg-positive/10 text-positive border-positive/30">Alta</Badge>;
       case 'negative':
-        return <Badge variant="outline" className="bg-red-500/10 text-red-600 border-red-500/30">Baixa</Badge>;
+        return <Badge variant="outline" className="bg-negative/10 text-negative border-negative/30">Baixa</Badge>;
       default:
         return <Badge variant="outline" className="bg-gray-500/10 text-gray-600 border-gray-500/30">Neutro</Badge>;
     }
@@ -281,9 +281,9 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
               <div className="mt-3 pt-3 border-t border-border/50">
                 <p className="text-xs text-muted-foreground mb-1">Intervalo esperado (95%)</p>
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-red-500">{formatCurrency(prediction.bounds.lower)}</span>
-                  <div className="flex-1 h-1 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full" />
-                  <span className="text-green-500">{formatCurrency(prediction.bounds.upper)}</span>
+                  <span className="text-negative">{formatCurrency(prediction.bounds.lower)}</span>
+                  <div className="flex-1 h-1 bg-gradient-to-r from-negative via-yellow-500 to-positive rounded-full" />
+                  <span className="text-positive">{formatCurrency(prediction.bounds.upper)}</span>
                 </div>
               </div>
             </div>

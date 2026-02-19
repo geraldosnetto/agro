@@ -205,8 +205,8 @@ export default function FavoritosPage() {
                                     <div className="flex items-center gap-2">
                                         <span
                                             className={`flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border ${isPositive
-                                                ? "text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900"
-                                                : "text-rose-600 bg-rose-50 border-rose-100 dark:bg-rose-950/20 dark:border-rose-900"
+                                                ? "text-positive bg-positive-muted border-positive-subtle"
+                                                : "text-negative bg-negative-muted border-negative-subtle"
                                                 }`}
                                         >
                                             {isPositive ? (

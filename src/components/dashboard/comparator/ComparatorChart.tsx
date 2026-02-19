@@ -151,7 +151,7 @@ export function ComparatorChart({
                                                     <span className={cn(
                                                         "text-xs font-bold font-mono",
                                                         normalized
-                                                            ? (entry.value > 0 ? "text-green-500" : entry.value < 0 ? "text-red-500" : "text-foreground")
+                                                            ? (entry.value > 0 ? "text-positive" : entry.value < 0 ? "text-negative" : "text-foreground")
                                                             : "text-foreground"
                                                     )}>
                                                         {normalized

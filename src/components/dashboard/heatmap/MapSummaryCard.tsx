@@ -63,8 +63,8 @@ export function MapSummaryCard({ data, commodityName, unit }: MapSummaryCardProp
                         className={cn(
                             "mt-2",
                             avgVariation >= 0
-                                ? "text-emerald-600 border-emerald-200 bg-emerald-50"
-                                : "text-red-600 border-red-200 bg-red-50"
+                                ? "text-positive border-positive-subtle bg-positive-muted"
+                                : "text-negative border-negative-subtle bg-negative-muted"
                         )}
                     >
                         {avgVariation >= 0 ? (
@@ -86,13 +86,13 @@ export function MapSummaryCard({ data, commodityName, unit }: MapSummaryCardProp
                         <p className="text-xs text-muted-foreground">Praças</p>
                         <p className="font-semibold">{totalCities}</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                        <p className="text-xs text-emerald-600">Em Alta</p>
-                        <p className="font-semibold text-emerald-700">{positiveStates} estados</p>
+                    <div className="p-3 rounded-lg bg-positive-muted border border-positive-subtle">
+                        <p className="text-xs text-positive">Em Alta</p>
+                        <p className="font-semibold text-positive">{positiveStates} estados</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-red-50 border border-red-100">
-                        <p className="text-xs text-red-600">Em Queda</p>
-                        <p className="font-semibold text-red-700">{negativeStates} estados</p>
+                    <div className="p-3 rounded-lg bg-negative-muted border border-negative-subtle">
+                        <p className="text-xs text-negative">Em Queda</p>
+                        <p className="font-semibold text-negative">{negativeStates} estados</p>
                     </div>
                 </div>
 
