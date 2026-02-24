@@ -244,6 +244,24 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                             <p className="font-medium">{ultimaCotacao?.praca || 'Nacional'}</p>
                         </div>
                     </div>
+
+                    {/* SEO Links: Regional Pricing */}
+                    <div className="pt-6 mt-4 border-t">
+                        <p className="text-sm font-medium mb-3">Preços por Região (Praças)</p>
+                        <div className="flex flex-wrap gap-2">
+                            {Array.from(new Set(commodity.cotacoes.map(c => c.praca).filter(Boolean))).map(praca => {
+                                const pracaSlug = praca!.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '');
+                                if (praca === 'Seed History') return null;
+                                return (
+                                    <Link key={praca} href={`/cotacoes/${slug}/${pracaSlug}`}>
+                                        <Badge variant="outline" className="hover:bg-accent cursor-pointer transition-colors">
+                                            {praca}
+                                        </Badge>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 

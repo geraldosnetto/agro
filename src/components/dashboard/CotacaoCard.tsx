@@ -43,7 +43,7 @@ export function CotacaoCard({
                 className={cn(
                     "group relative overflow-hidden transition-all duration-300",
                     "hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1",
-                    "border-border/50 bg-card cursor-pointer"
+                    "border-border/50 cursor-pointer"
                 )}
             >
                 {/* Gradient accent bar */}

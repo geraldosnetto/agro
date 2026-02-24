@@ -304,7 +304,7 @@ export default function Home() {
                 <Link
                   key={feature.title}
                   href={feature.href}
-                  className="group relative p-5 rounded-xl border bg-card hover:shadow-lg hover:border-primary/50 transition-all duration-300"
+                  className="group relative p-5 rounded-xl border border-border/50 bg-card/60 backdrop-blur-md hover:shadow-lg hover:border-primary/50 transition-all duration-300 cursor-pointer"
                 >
                   {feature.badge && (
                     <Badge
@@ -330,7 +330,7 @@ export default function Home() {
         </section>
 
         {/* Highlights / Why Us */}
-        <section className="py-16 md:py-20 bg-muted/30">
+        < section className="py-16 md:py-20 bg-muted/30" >
           <div className="container px-4">
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12">
@@ -354,10 +354,10 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* Commodities List */}
-        <section className="py-16 md:py-20">
+        < section className="py-16 md:py-20" >
           <div className="container px-4">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold mb-4">
@@ -388,10 +388,10 @@ export default function Home() {
               </Button>
             </div>
           </div>
-        </section>
+        </section >
 
         {/* CTA */}
-        <section className="py-16 md:py-24 bg-primary text-primary-foreground">
+        < section className="py-16 md:py-24 bg-primary text-primary-foreground" >
           <div className="container px-4">
             <div className="max-w-3xl mx-auto text-center space-y-6">
               <h2 className="text-3xl md:text-4xl font-bold">
@@ -425,10 +425,10 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
-      </main>
+        </section >
+      </main >
 
       <Footer />
-    </div>
+    </div >
   );
 }

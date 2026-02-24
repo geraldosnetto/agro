@@ -70,7 +70,7 @@ export function ComparatorChart({
     }
 
     return (
-        <div className="h-[450px] w-full rounded-xl border bg-card/50 p-6 shadow-sm">
+        <div className="h-[450px] w-full rounded-xl border border-border/50 bg-card/50 backdrop-blur-md p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
                 <div>
                     <h3 className="font-semibold text-lg leading-none tracking-tight">Comparativo de Performance</h3>

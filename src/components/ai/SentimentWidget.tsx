@@ -222,7 +222,7 @@ function NewsItem({ item }: { item: SentimentData }) {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="rounded-md border bg-card overflow-hidden">
+    <div className="rounded-md border bg-background/50 overflow-hidden">
       <a
         href={item.url}
         target="_blank"
