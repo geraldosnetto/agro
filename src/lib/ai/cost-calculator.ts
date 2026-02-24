@@ -39,7 +39,7 @@ export async function calculateAICosts(startDate: Date, endDate: Date): Promise<
     // Sonnet: 3.00 / 15.00. Avg ~ 9.00
 
     for (const item of chatUsage) {
-        const model = item.model || 'claude-3-5-haiku-latest' // Default to Haiku
+        const model = item.model || 'claude-3-5-haiku-20241022' // Default to Haiku
         const tokens = item._sum.tokensUsed || 0
 
         let costPerM = 0

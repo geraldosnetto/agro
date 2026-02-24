@@ -22,7 +22,7 @@ export function getAnthropicClient(): Anthropic {
 // Modelos disponíveis
 export const CLAUDE_MODELS = {
   // Rápido e barato - para chat e análises simples
-  HAIKU: 'claude-3-5-haiku-latest',
+  HAIKU: 'claude-3-5-haiku-20241022',
   // Equilibrado - para relatórios
   SONNET: 'claude-sonnet-4-20250514',
   // Mais capaz - para análises complexas (usar com moderação)

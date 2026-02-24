@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker production
   output: "standalone",
+  serverExternalPackages: ["@prisma/client"],
 
   // Image optimization - restricted to known news sources
   images: {
