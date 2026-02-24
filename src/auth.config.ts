@@ -21,11 +21,16 @@ export const authConfig = {
         strategy: "jwt",
     },
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.id = user.id;
                 // @ts-ignore
                 token.role = user.role;
+                // @ts-ignore
+                token.plan = user.plan || "free";
+            }
+            if (trigger === "update" && session?.plan) {
+                token.plan = session.plan;
             }
             return token;
         },
@@ -34,6 +39,8 @@ export const authConfig = {
                 session.user.id = token.id as string;
                 // @ts-ignore
                 session.user.role = token.role as "USER" | "ADMIN";
+                // @ts-ignore
+                session.user.plan = (token.plan as string) || "free";
             }
             return session;
         },

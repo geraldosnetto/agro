@@ -222,3 +222,93 @@ export async function sendAlertNotificationEmail(
     html,
   });
 }
+
+/**
+ * Email de Resumo Semanal do Portfólio (Retenção)
+ */
+export async function sendWeeklyPortfolioSummaryEmail(
+  email: string,
+  name: string | undefined,
+  portfolioItems: Array<{
+    commodityName: string;
+    slug: string;
+    currentPrice: number;
+    priceChange: number;
+    priceChangePercent: number;
+  }>
+) {
+  const itemsHtml = portfolioItems.map(item => {
+    const isUp = item.priceChange >= 0;
+    const color = isUp ? '#16a34a' : '#dc2626';
+    const sign = isUp ? '+' : '';
+    const arrow = isUp ? '▲' : '▼';
+
+    return `
+      <div style="background: white; border: 1px solid #e4e4e7; border-radius: 8px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h3 style="margin: 0 0 4px 0; font-size: 16px; color: #18181b;">${item.commodityName}</h3>
+          <span style="font-size: 14px; font-weight: bold; color: #3f3f46;">R$ ${item.currentPrice.toFixed(2)}</span>
+        </div>
+        <div style="text-align: right;">
+          <div style="color: ${color}; font-weight: bold; font-size: 14px;">
+            ${arrow} ${sign}${item.priceChangePercent.toFixed(2)}%
+          </div>
+          <div style="color: #71717a; font-size: 12px; margin-top: 2px;">
+            ${sign}R$ ${item.priceChange.toFixed(2)} na semana
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f4f4f5; padding: 40px 20px; }
+        .container { max-width: 560px; margin: 0 auto; background: #fafafa; border-radius: 12px; padding: 32px; border: 1px solid #e4e4e7; }
+        .logo { font-size: 24px; font-weight: bold; color: #16a34a; margin-bottom: 24px; text-align: center; }
+        h1 { font-size: 22px; color: #18181b; margin-bottom: 8px; text-align: center; }
+        p { color: #52525b; line-height: 1.6; margin-bottom: 24px; text-align: center; font-size: 15px; }
+        .button-container { text-align: center; margin: 32px 0; }
+        .button { display: inline-block; background: #18181b; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500; }
+        .ai-teaser { background: linear-gradient(145deg, #16a34a15, #16a34a05); border: 1px dashed #16a34a40; padding: 16px; border-radius: 8px; margin-top: 24px; text-align: center; }
+        .ai-teaser p { margin: 0; color: #166534; font-size: 14px; }
+        .footer { margin-top: 32px; padding-top: 24px; border-top: 1px solid #e4e4e7; font-size: 12px; color: #71717a; text-align: center; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="logo">🌾 IndicAgro</div>
+        <h1>Resumo da sua Carteira</h1>
+        <p>Olá${name ? ` ${name}` : ''}, aqui está o fechamento da semana para as commodities que você acompanha:</p>
+        
+        <div>
+          ${itemsHtml}
+        </div>
+
+        <div class="ai-teaser">
+          <p>🤖 <strong>Dica da IA:</strong> Identificamos movimentações fora do padrão nesta semana. Veja o relatório completo para entender os principais fatores de mercado.</p>
+        </div>
+
+        <div class="button-container">
+          <a href="${APP_URL}/dashboard" class="button">Acessar o Painel IndicAgro</a>
+        </div>
+        
+        <div class="footer">
+          <p>Você está recebendo este email porque possui commodities nos seus Favoritos.</p>
+          <p><a href="${APP_URL}/dashboard">Gerenciar minha conta</a></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `📈 Resumo Semanal: Veja como o mercado se moveu`,
+    html,
+  });
+}

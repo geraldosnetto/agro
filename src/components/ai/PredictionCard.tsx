@@ -23,6 +23,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { Lock } from 'lucide-react';
 
 interface PredictionFactor {
   name: string;
@@ -59,12 +62,16 @@ interface Prediction {
   dataPointsUsed: number;
 }
 
+import { cn } from '@/lib/utils';
+
 interface PredictionCardProps {
   slug: string;
   className?: string;
 }
 
 export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
+  const { data: session } = useSession();
+  const isFreePlan = !session || session?.user?.plan === 'free';
   const [prediction, setPrediction] = useState<Prediction | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -193,7 +200,7 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 relative">
         {/* Horizon Selector */}
         <Tabs value={horizon} onValueChange={(v) => handleHorizonChange(v as '7' | '14' | '30' | '60' | '90')}>
           <TabsList className="grid w-full grid-cols-5">
@@ -278,7 +285,7 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
               </div>
 
               {/* Price Range */}
-              <div className="mt-3 pt-3 border-t border-border/50">
+              <div className={cn("mt-3 pt-3 border-t border-border/50 transition-all duration-300", isFreePlan && "blur-sm opacity-50 select-none")}>
                 <p className="text-xs text-muted-foreground mb-1">Intervalo esperado (95%)</p>
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-negative">{formatCurrency(prediction.bounds.lower)}</span>
@@ -287,6 +294,21 @@ export function PredictionCard({ slug, className = '' }: PredictionCardProps) {
                 </div>
               </div>
             </div>
+
+            {isFreePlan && (
+              <div className="mt-4 p-4 bg-muted/30 border border-primary/20 rounded-xl text-center space-y-3 shadow-sm relative z-10">
+                <Lock className="h-6 w-6 text-primary mx-auto" />
+                <h4 className="font-semibold text-sm">Acesso Limitado</h4>
+                <p className="text-xs text-muted-foreground">
+                  Faça upgrade para o plano <strong>Pro</strong> para ver o intervalo de confiança detalhado, os fatores de impacto do modelo e o comportamento dos algoritmos.
+                </p>
+                <Link href="/planos" className="block w-full">
+                  <Button size="sm" className="w-full text-xs">
+                    Desbloquear Análise Completa
+                  </Button>
+                </Link>
+              </div>
+            )}
 
             {/* Current Price Reference */}
             <div className="flex items-center justify-between text-sm">

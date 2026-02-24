@@ -8,9 +8,11 @@ import { SentimentGaugeWrapper as SentimentGauge } from './SentimentGaugeWrapper
 import { EmotionIndicator, EmotionBadge } from './EmotionIndicator';
 import { MarketDrivers, DriverStats } from './MarketDrivers';
 import { getTimeframeLabel, type Emotion, type MarketDriver } from '@/lib/ai/prompts/sentiment';
-import { Brain, RefreshCw, ExternalLink, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Brain, RefreshCw, ExternalLink, Clock, ChevronDown, ChevronUp, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 interface SentimentData {
   url: string;
@@ -46,6 +48,8 @@ interface SentimentWidgetProps {
 }
 
 export function SentimentWidget({ commoditySlug, commodityName, className }: SentimentWidgetProps) {
+  const { data: session } = useSession();
+  const isFreePlan = !session || session?.user?.plan === 'free';
   const [loading, setLoading] = useState(true);
   const [sentiments, setSentiments] = useState<SentimentData[]>([]);
   const [aggregate, setAggregate] = useState<AggregateData | null>(null);
@@ -121,12 +125,13 @@ export function SentimentWidget({ commoditySlug, commodityName, className }: Sen
   }
 
   return (
-    <Card className={className}>
+    <Card className={cn("relative overflow-hidden", className)}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
             <Brain className="h-5 w-5 text-primary" />
             Sentimento do Mercado
+            {isFreePlan && <Lock className="h-4 w-4 ml-2 text-muted-foreground" />}
           </CardTitle>
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={fetchSentiment}>
             <RefreshCw className="h-4 w-4" />
@@ -148,70 +153,91 @@ export function SentimentWidget({ commoditySlug, commodityName, className }: Sen
           )}
         </div>
 
-        {/* Emoção predominante */}
-        {aggregate.predominantEmotion && (
-          <div className="p-3 rounded-lg bg-muted/30 border">
-            <h4 className="text-xs font-medium text-muted-foreground mb-2">
-              Emoção Predominante
-            </h4>
-            <EmotionIndicator
-              emotion={aggregate.predominantEmotion}
-              intensity={0.7}
-              size="md"
-            />
-          </div>
-        )}
+        <div className="relative">
+          <div className={cn("space-y-4 transition-all duration-300", isFreePlan && "blur-sm opacity-50 select-none pointer-events-none")}>
+            {/* Emoção predominante */}
+            {aggregate.predominantEmotion && (
+              <div className="p-3 rounded-lg bg-muted/30 border">
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">
+                  Emoção Predominante
+                </h4>
+                <EmotionIndicator
+                  emotion={aggregate.predominantEmotion}
+                  intensity={0.7}
+                  size="md"
+                />
+              </div>
+            )}
 
-        {/* Drivers principais */}
-        {aggregate.topDrivers && aggregate.topDrivers.length > 0 && (
-          <div>
-            <h4 className="text-xs font-medium text-muted-foreground mb-2">
-              Fatores de Mercado
-            </h4>
-            <MarketDrivers drivers={aggregate.topDrivers as MarketDriver[]} />
-          </div>
-        )}
+            {/* Drivers principais */}
+            {aggregate.topDrivers && aggregate.topDrivers.length > 0 && (
+              <div>
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">
+                  Fatores de Mercado
+                </h4>
+                <MarketDrivers drivers={aggregate.topDrivers as MarketDriver[]} />
+              </div>
+            )}
 
-        {/* Últimas notícias analisadas */}
-        {sentiments.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-muted-foreground">
-                Notícias Recentes
-              </h4>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2"
-                onClick={() => setExpanded(!expanded)}
-              >
-                {expanded ? (
-                  <>
-                    <ChevronUp className="h-3 w-3 mr-1" />
-                    Menos
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-3 w-3 mr-1" />
-                    Mais
-                  </>
-                )}
-              </Button>
+            {/* Últimas notícias analisadas */}
+            {sentiments.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    Notícias Recentes
+                  </h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2"
+                    onClick={() => setExpanded(!expanded)}
+                  >
+                    {expanded ? (
+                      <>
+                        <ChevronUp className="h-3 w-3 mr-1" />
+                        Menos
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-3 w-3 mr-1" />
+                        Mais
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <div className={cn(
+                  'space-y-2 overflow-hidden transition-all',
+                  expanded ? 'max-h-96' : 'max-h-48'
+                )}>
+                  {sentiments.slice(0, expanded ? 10 : 3).map((item) => (
+                    <NewsItem key={item.url} item={item} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground text-center pt-2 border-t mt-4">
+              Análise por IA baseada em {aggregate.totalAnalyzed} notícias recentes
+            </p>
+          </div>
+
+          {isFreePlan && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-4 bg-gradient-to-t from-card via-card/60 to-transparent backdrop-blur-[1px]">
+              <div className="bg-card/90 backdrop-blur-xl border border-border/50 p-5 rounded-xl shadow-xl text-center w-full max-w-sm space-y-3 transform translate-y-2">
+                <Lock className="h-6 w-6 text-primary mx-auto mb-1" />
+                <h4 className="font-semibold text-sm">IA Avançada</h4>
+                <p className="text-xs text-muted-foreground">
+                  Assine o plano <strong>Pro</strong> para ver as emoções predominantes, os principais motivadores do mercado e detalhes das notícias consolidadas.
+                </p>
+                <Link href="/planos" className="block w-full">
+                  <Button size="sm" className="w-full text-xs">
+                    Fazer Upgrade para Pro
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <div className={cn(
-              'space-y-2 overflow-hidden transition-all',
-              expanded ? 'max-h-96' : 'max-h-48'
-            )}>
-              {sentiments.slice(0, expanded ? 10 : 3).map((item) => (
-                <NewsItem key={item.url} item={item} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <p className="text-xs text-muted-foreground text-center pt-2 border-t">
-          Análise por IA baseada em {aggregate.totalAnalyzed} notícias recentes
-        </p>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
