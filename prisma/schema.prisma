@@ -401,3 +401,20 @@ model AIUsage {
   @@unique([userId, date])
   @@index([userId, date])
 }
+
+// ==================== AGROCAST (PODCAST) ====================
+
+// Episódios do Podcast
+model PodcastEpisode {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  audioUrl    String   // URL do arquivo .mp3 gerado pelo NotebookLM
+  duration    Int?     // Duração em segundos (opcional)
+  publishedAt DateTime @default(now())
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([publishedAt(sort: Desc)])
+}

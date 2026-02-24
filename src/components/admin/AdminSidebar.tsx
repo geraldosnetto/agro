@@ -10,7 +10,8 @@ import {
     Activity,
     BrainCircuit,
     Settings,
-    Shield
+    Shield,
+    Podcast
 } from "lucide-react";
 
 const sidebarNavItems = [
@@ -28,6 +29,11 @@ const sidebarNavItems = [
         title: "Commodities",
         href: "/admin/commodities",
         icon: Package,
+    },
+    {
+        title: "AgroCast",
+        href: "/admin/podcast",
+        icon: Podcast,
     },
     {
         title: "Logs do Sistema",

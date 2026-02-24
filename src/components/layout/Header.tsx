@@ -18,7 +18,8 @@ import {
   Menu,
   Leaf,
   CreditCard,
-  LucideIcon
+  LucideIcon,
+  Headphones
 } from "lucide-react";
 
 export function Header() {
@@ -78,6 +79,7 @@ export function Header() {
                   <MobileNavLink href="/calculadora" icon={Calculator}>Calculadora</MobileNavLink>
                   <MobileNavLink href="/comparador" icon={ArrowLeftRight}>Comparador</MobileNavLink>
                   <MobileNavLink href="/mapa" icon={MapIcon}>Mapa</MobileNavLink>
+                  <MobileNavLink href="/podcast" icon={Headphones}>AgroCast</MobileNavLink>
                   <MobileNavLink href="/relatorios" icon={FileText}>Relatórios</MobileNavLink>
                   <MobileNavLink href="/planos" icon={CreditCard}>Planos e Assinatura</MobileNavLink>
                 </nav>
@@ -106,6 +108,7 @@ function NavLinks() {
       <Link href="/calculadora" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Calculadora</Link>
       <Link href="/comparador" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Comparador</Link>
       <Link href="/mapa" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Mapa</Link>
+      <Link href="/podcast" className="text-sm font-medium text-emerald-600 hover:text-emerald-500 transition-colors">AgroCast</Link>
       <Link href="/relatorios" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Relatórios</Link>
       <Link href="/planos" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">Planos</Link>
     </>
