@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { User, Mail, Calendar, Crown, Bell, Heart, Settings, CheckCircle, XCircle } from "lucide-react";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DeleteAccountButton } from "@/components/auth/DeleteAccountButton";
+import Link from "next/link";
+import { createCustomerPortal } from "../planos/actions";
 
 export const dynamic = 'force-dynamic';
 
@@ -91,10 +93,12 @@ export default async function PerfilPage() {
                                     </div>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm" disabled title="Em breve">
-                                <Settings className="h-4 w-4 mr-2" />
-                                Editar
-                            </Button>
+                            <Link href="/configuracoes">
+                                <Button variant="outline" size="sm">
+                                    <Settings className="h-4 w-4 mr-2" />
+                                    Editar
+                                </Button>
+                            </Link>
                         </div>
                     </CardHeader>
 
@@ -154,10 +158,18 @@ export default async function PerfilPage() {
                                             : "Todos os recursos + API"}
                                 </p>
                             </div>
-                            {userData.plan === "free" && (
-                                <Button disabled title="Em breve">
-                                    Fazer Upgrade
-                                </Button>
+                            {userData.plan === "free" ? (
+                                <Link href="/planos">
+                                    <Button>
+                                        Fazer Upgrade
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <form action={createCustomerPortal}>
+                                    <Button variant="outline">
+                                        Gerenciar Assinatura
+                                    </Button>
+                                </form>
                             )}
                         </div>
 

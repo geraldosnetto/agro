@@ -9,6 +9,11 @@ datasource db {
 
 // ==================== AUTH ====================
 
+enum Role {
+  USER
+  ADMIN
+}
+
 // Usuário
 model User {
   id            String    @id @default(cuid())
@@ -20,9 +25,16 @@ model User {
 
   // Plano do usuário
   plan          String    @default("free") // free, pro, business
+  role          Role      @default(USER)
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  // Stripe
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
 
   accounts      Account[]
   sessions      Session[]
@@ -340,6 +352,10 @@ model NewsSentiment {
   drivers          String[] // CLIMA | DEMANDA | OFERTA | POLITICA | CAMBIO | LOGISTICA | PRAGA | TECNOLOGIA
   timeframe        String?  // IMEDIATO | CURTO_PRAZO | MEDIO_PRAZO | LONGO_PRAZO
   reasoning        String?  @db.Text // Explicação da análise
+
+  // Metadados de Custo
+  tokensUsed       Int?     @default(0)
+  model            String?
 
   analyzedAt   DateTime @default(now())
 

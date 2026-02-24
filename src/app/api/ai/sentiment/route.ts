@@ -128,6 +128,9 @@ export async function POST(request: Request) {
         drivers: analysis.drivers || [],
         timeframe: analysis.timeframe || null,
         reasoning: analysis.reasoning || null,
+        // Custo
+        tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
+        model: config.model,
       },
       update: {
         newsTitle: title,
@@ -142,6 +145,9 @@ export async function POST(request: Request) {
         timeframe: analysis.timeframe || null,
         reasoning: analysis.reasoning || null,
         analyzedAt: new Date(),
+        // Atualizar custo na reanálise
+        tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
+        model: config.model,
       },
     });
 
@@ -260,6 +266,10 @@ export async function GET(request: Request) {
                   const score = Math.max(-1, Math.min(1, Number(result.score) || 0));
                   const impact = Math.max(0, Math.min(1, Number(result.impact) || 0));
 
+                  // Calculate pro-rated tokens per item
+                  const totalTokens = response.usage.input_tokens + response.usage.output_tokens;
+                  const tokensPerItem = Math.ceil(totalTokens / batchResults.length);
+
                   await prisma.newsSentiment.upsert({
                     where: { newsUrl: newsItem.link },
                     create: {
@@ -274,6 +284,9 @@ export async function GET(request: Request) {
                       drivers: result.drivers || [],
                       timeframe: result.timeframe || null,
                       reasoning: result.reasoning || null, // Se a IA devolver reasoning no batch
+                      // Custo Pro-rated
+                      tokensUsed: tokensPerItem,
+                      model: config.model,
                     },
                     update: {} // Se já existe (race condition), mantém
                   });

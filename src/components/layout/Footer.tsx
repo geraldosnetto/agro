@@ -30,16 +30,7 @@ export function Footer() {
                                     Grãos
                                 </Link>
                             </li>
-                            <li>
-                                <Link href="/pecuaria" className="hover:text-foreground transition-colors">
-                                    Pecuária
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/sucroenergetico" className="hover:text-foreground transition-colors">
-                                    Sucroenergético
-                                </Link>
-                            </li>
+                            {/* Pecuária e Sucro serão reativados quando tiverem páginas dedicadas */}
                         </ul>
                     </div>
 

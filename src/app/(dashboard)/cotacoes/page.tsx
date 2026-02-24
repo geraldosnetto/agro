@@ -97,8 +97,8 @@ export default async function CotacoesPage() {
         return latest;
     }, null as Date | null);
     const ultimaAtualizacao = latestDate
-        ? latestDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-        : new Date().toLocaleDateString('pt-BR');
+        ? `Atualizado em ${latestDate.toLocaleDateString('pt-BR')} às ${latestDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+        : `Atualizado hoje às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
     return (
         <div className="container px-4 py-6 md:py-8">

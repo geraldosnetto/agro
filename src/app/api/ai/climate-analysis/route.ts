@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 import { getAnthropicClient, MODEL_CONFIG } from '@/lib/ai/anthropic';
 import { fetchRegionalPrecipitation } from '@/lib/data-sources/precipitation';
 import { fetchWeather, getWeatherDescription, type City } from '@/lib/data-sources/weather';
@@ -116,12 +117,33 @@ export async function GET(request: NextRequest) {
 
         const generatedAt = new Date().toISOString();
 
-        // Salva no cache
+        // Salva cache
         analysisCache.set(cacheKey, {
             content: analysisContent,
             generatedAt,
             expiresAt: Date.now() + CACHE_TTL,
         });
+
+        // LOGGING DE CUSTO: Salvar como AIReport (transiente)
+        // Isso permite que o calculador de custos pegue esse uso
+        try {
+            await prisma.aIReport.create({
+                data: {
+                    type: 'CLIMATE_ANALYSIS',
+                    title: `Clima: ${city}`,
+                    content: analysisContent, // Opcional: pode truncar se não quiser gastar storage
+                    model: config.model,
+                    tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
+                    generatedAt: new Date(generatedAt),
+                    validUntil: new Date(Date.now() + CACHE_TTL),
+                    reportDate: new Date(),
+                    // Sem commodityId específico ou usar um genérico
+                }
+            });
+        } catch (logError) {
+            console.error('Falha ao logar custo de Climate Analysis:', logError);
+            // Não quebra a request principal
+        }
 
         return NextResponse.json({
             success: true,

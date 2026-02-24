@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Settings, LogOut, Heart, Bell } from "lucide-react";
+import { User, Settings, LogOut, Heart, Bell, CreditCard } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function UserMenu() {
@@ -76,6 +76,12 @@ export function UserMenu() {
                     <Link href="/favoritos" className="cursor-pointer">
                         <Heart className="mr-2 h-4 w-4" />
                         <span>Favoritos</span>
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/planos" className="cursor-pointer">
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        <span>Planos e Assinatura</span>
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

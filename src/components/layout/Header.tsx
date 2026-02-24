@@ -17,6 +17,7 @@ import {
   FileText,
   Menu,
   Leaf,
+  CreditCard,
   LucideIcon
 } from "lucide-react";
 
@@ -78,6 +79,7 @@ export function Header() {
                   <MobileNavLink href="/comparador" icon={ArrowLeftRight}>Comparador</MobileNavLink>
                   <MobileNavLink href="/mapa" icon={MapIcon}>Mapa</MobileNavLink>
                   <MobileNavLink href="/relatorios" icon={FileText}>Relatórios</MobileNavLink>
+                  <MobileNavLink href="/planos" icon={CreditCard}>Planos e Assinatura</MobileNavLink>
                 </nav>
               </div>
 
@@ -105,6 +107,7 @@ function NavLinks() {
       <Link href="/comparador" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Comparador</Link>
       <Link href="/mapa" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Mapa</Link>
       <Link href="/relatorios" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Relatórios</Link>
+      <Link href="/planos" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">Planos</Link>
     </>
   );
 }
