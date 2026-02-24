@@ -347,9 +347,8 @@ export default function RelatoriosPage() {
                       <button
                         key={c.commoditySlug}
                         onClick={() => loadCommodityReport(c.commoditySlug)}
-                        className={`w-full flex items-center justify-between p-2 rounded-lg text-sm transition-colors hover:bg-muted ${
-                          selectedCommodity === c.commoditySlug ? 'bg-muted' : ''
-                        }`}
+                        className={`w-full flex items-center justify-between p-2 rounded-lg text-sm transition-colors hover:bg-muted ${selectedCommodity === c.commoditySlug ? 'bg-muted' : ''
+                          }`}
                       >
                         <span className="font-medium">{c.commodityName}</span>
                         <div className="flex items-center gap-2">
@@ -393,7 +392,7 @@ export default function RelatoriosPage() {
                     <p className="text-sm text-muted-foreground mb-4">
                       Análises semanais por commodity estão disponíveis nos planos Pro e Business.
                     </p>
-                    <Button>Fazer Upgrade</Button>
+                    <Button disabled title="Em breve">Fazer Upgrade</Button>
                   </div>
                 )}
 

@@ -19,9 +19,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Heart, Trash2, TrendingUp, TrendingDown, Bell, ExternalLink } from "lucide-react";
+import { Heart, Trash2, Bell, ExternalLink } from "lucide-react";
 import { formatarUnidade, formatarCategoria, formatarMoeda } from "@/lib/formatters";
 import { getCategoriaConfig, getCategoriaLabel } from '@/lib/categories';
+import { VariationBadge } from "@/components/VariationBadge";
 
 interface Favorito {
     id: string;
@@ -203,19 +204,7 @@ export default function FavoritosPage() {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <span
-                                            className={`flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border ${isPositive
-                                                ? "text-positive bg-positive-muted border-positive-subtle"
-                                                : "text-negative bg-negative-muted border-negative-subtle"
-                                                }`}
-                                        >
-                                            {isPositive ? (
-                                                <TrendingUp className="h-3 w-3" />
-                                            ) : (
-                                                <TrendingDown className="h-3 w-3" />
-                                            )}
-                                            {isPositive ? "+" : ""}{commodity.variacao.toFixed(2)}%
-                                        </span>
+                                        <VariationBadge value={commodity.variacao} />
                                     </div>
                                 </Link>
 

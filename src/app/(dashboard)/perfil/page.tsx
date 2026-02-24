@@ -91,7 +91,7 @@ export default async function PerfilPage() {
                                     </div>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm" disabled>
+                            <Button variant="outline" size="sm" disabled title="Em breve">
                                 <Settings className="h-4 w-4 mr-2" />
                                 Editar
                             </Button>
@@ -155,7 +155,7 @@ export default async function PerfilPage() {
                                 </p>
                             </div>
                             {userData.plan === "free" && (
-                                <Button disabled>
+                                <Button disabled title="Em breve">
                                     Fazer Upgrade
                                 </Button>
                             )}

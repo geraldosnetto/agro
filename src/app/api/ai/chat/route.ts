@@ -62,14 +62,14 @@ export async function POST(request: Request) {
     // 5. Buscar ou criar conversa
     let conversation = conversationId
       ? await prisma.chatConversation.findFirst({
-          where: { id: conversationId, userId },
-          include: {
-            messages: {
-              orderBy: { createdAt: 'asc' },
-              take: 20, // Últimas 20 mensagens para contexto
-            },
+        where: { id: conversationId, userId },
+        include: {
+          messages: {
+            orderBy: { createdAt: 'asc' },
+            take: 20, // Últimas 20 mensagens para contexto
           },
-        })
+        },
+      })
       : null;
 
     if (!conversation) {
@@ -174,8 +174,8 @@ export async function POST(request: Request) {
   }
 }
 
-// GET - Buscar histórico de conversas
-export async function GET() {
+// GET - Buscar histórico de conversas ou mensagens de uma conversa
+export async function GET(request: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
@@ -185,6 +185,46 @@ export async function GET() {
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const conversationId = searchParams.get('conversationId');
+
+    // If conversationId is provided, return messages for that conversation
+    if (conversationId) {
+      const conversation = await prisma.chatConversation.findFirst({
+        where: { id: conversationId, userId: session.user.id },
+        include: {
+          messages: {
+            orderBy: { createdAt: 'asc' },
+            select: {
+              id: true,
+              role: true,
+              content: true,
+              createdAt: true,
+            },
+          },
+        },
+      });
+
+      if (!conversation) {
+        return NextResponse.json(
+          { error: 'Conversa não encontrada', code: 'NOT_FOUND' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        conversationId: conversation.id,
+        title: conversation.title,
+        messages: conversation.messages.map((m) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          createdAt: m.createdAt.toISOString(),
+        })),
+      });
+    }
+
+    // Otherwise, return conversation list
     const conversations = await prisma.chatConversation.findMany({
       where: { userId: session.user.id },
       orderBy: { updatedAt: 'desc' },

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -13,10 +14,12 @@ import { CommodityStats } from "@/components/dashboard/CommodityStats";
 import { PredictionCard } from "@/components/ai/PredictionCard";
 import { SentimentWidget } from "@/components/ai/SentimentWidget";
 import { InternationalPriceCard } from "@/components/cotacoes/InternationalPriceCard";
-import { ChevronLeft, Bell, Share2 } from "lucide-react";
+import { ChevronLeft, Bell } from "lucide-react";
 import { getCategoriaConfig } from '@/lib/categories';
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ExportButton } from "@/components/ExportButton";
+import { ShareButton } from "@/components/ShareButton";
+import { VariationBadge } from "@/components/VariationBadge";
 import { NewsFeed } from "@/components/dashboard/NewsFeed";
 
 export const dynamic = 'force-dynamic';
@@ -25,20 +28,23 @@ interface CommodityPageProps {
     params: Promise<{ slug: string }>;
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({ params }: CommodityPageProps): Promise<Metadata> {
-    const { slug } = await params;
-
-    const commodity = await prisma.commodity.findUnique({
+// Deduplicated query — React cache() automatically memoizes within a request lifecycle
+const getCommodity = cache(async (slug: string) => {
+    return prisma.commodity.findUnique({
         where: { slug },
         include: {
             cotacoes: {
                 orderBy: { dataReferencia: 'desc' },
-                take: 5,
-                select: { valor: true, praca: true, valorAnterior: true, variacao: true, dataReferencia: true }
+                take: 30
             }
         }
     });
+});
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: CommodityPageProps): Promise<Metadata> {
+    const { slug } = await params;
+    const commodity = await getCommodity(slug);
 
     if (!commodity) {
         return {
@@ -66,16 +72,8 @@ export async function generateMetadata({ params }: CommodityPageProps): Promise<
 export default async function CommodityPage({ params }: CommodityPageProps) {
     const { slug } = await params;
 
-    // Fetch commodity with latest quote
-    const commodity = await prisma.commodity.findUnique({
-        where: { slug },
-        include: {
-            cotacoes: {
-                orderBy: { dataReferencia: 'desc' },
-                take: 30 // Get last 30 for calculations
-            }
-        }
-    });
+    // Uses cached query — same result as generateMetadata, no duplicate DB call
+    const commodity = await getCommodity(slug);
 
     if (!commodity) {
         notFound();
@@ -175,10 +173,11 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                         </Button>
                     </Link>
                     <ExportButton commoditySlug={slug} size="sm" />
-                    <Button variant="outline" size="sm" disabled>
-                        <Share2 className="h-4 w-4 mr-2" />
-                        Compartilhar
-                    </Button>
+                    <ShareButton
+                        title={`${commodity.nome} — IndicAgro`}
+                        text={`${commodity.nome}: R$ ${valor.toFixed(2)} (${variacaoDia >= 0 ? '+' : ''}${variacaoDia.toFixed(2)}%)`}
+                        size="sm"
+                    />
                 </div>
             </div>
 
@@ -260,30 +259,3 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
     );
 }
 
-// Variation Badge Component
-function VariationBadge({ label, value }: { label: string; value: number }) {
-    const isPositive = value >= 0;
-
-    return (
-        <div className="flex items-center gap-1.5">
-            <span className="text-sm text-muted-foreground">{label}:</span>
-            <span
-                className={`flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border ${isPositive
-                    ? "text-positive bg-positive-muted border-positive-subtle"
-                    : "text-negative bg-negative-muted border-negative-subtle"
-                    }`}
-            >
-                {isPositive ? (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                    </svg>
-                ) : (
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                    </svg>
-                )}
-                {isPositive ? "+" : ""}{value.toFixed(2)}%
-            </span>
-        </div>
-    );
-}

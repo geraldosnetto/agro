@@ -53,17 +53,7 @@ export default function AssistentePage() {
     }
   }, [status]);
 
-  // Load conversations on mount
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  // Auto-scroll
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       const response = await fetch('/api/ai/chat');
       if (response.ok) {
@@ -73,7 +63,35 @@ export default function AssistentePage() {
     } catch (err) {
       console.error('Error loading conversations:', err);
     }
-  };
+  }, []);
+
+  const loadConversation = useCallback(async (convId: string) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/ai/chat?conversationId=${convId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages || []);
+        setConversationId(convId);
+        setError(null);
+      }
+    } catch (err) {
+      console.error('Error loading conversation:', err);
+      setError('Erro ao carregar conversa');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Load conversations on mount
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendMessage = useCallback(async () => {
     if (!input.trim() || isLoading) return;
@@ -190,12 +208,10 @@ export default function AssistentePage() {
                 {conversations.map((conv) => (
                   <button
                     key={conv.id}
-                    className={`w-full text-left p-2 rounded-lg text-sm hover:bg-muted transition-colors ${
-                      conversationId === conv.id ? 'bg-muted' : ''
-                    }`}
+                    className={`w-full text-left p-2 rounded-lg text-sm hover:bg-muted transition-colors ${conversationId === conv.id ? 'bg-muted' : ''
+                      }`}
                     onClick={() => {
-                      // TODO: Load conversation messages
-                      setConversationId(conv.id);
+                      loadConversation(conv.id);
                     }}
                   >
                     <p className="font-medium truncate">{conv.title || 'Conversa'}</p>
@@ -246,11 +262,10 @@ export default function AssistentePage() {
                     </Avatar>
                   )}
                   <div
-                    className={`max-w-[75%] rounded-xl px-4 py-3 ${
-                      msg.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
-                    }`}
+                    className={`max-w-[75%] rounded-xl px-4 py-3 ${msg.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
+                      }`}
                   >
                     {msg.role === 'assistant' ? (
                       <div className="prose prose-sm dark:prose-invert max-w-none">

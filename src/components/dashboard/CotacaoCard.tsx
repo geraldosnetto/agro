@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { SparklineChartWrapper as SparklineChart } from "./SparklineChartWrapper";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { VariationBadge } from "@/components/VariationBadge";
 
 import { CATEGORIA_CONFIG, type CategoriaKey } from '@/lib/categories';
 
@@ -83,28 +84,7 @@ export function CotacaoCard({
 
                     {/* Variação */}
                     <div className="flex items-center justify-between">
-                        <div
-                            className={cn(
-                                "flex items-center gap-1 text-sm font-medium px-2 py-0.5 rounded-full border",
-                                isPositive
-                                    ? "text-positive bg-positive-muted border-positive-subtle"
-                                    : "text-negative bg-negative-muted border-negative-subtle"
-                            )}
-                        >
-                            {isPositive ? (
-                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            ) : (
-                                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                                </svg>
-                            )}
-                            <span>
-                                {isPositive ? "+" : ""}
-                                {variacao.toFixed(2)}%
-                            </span>
-                        </div>
+                        <VariationBadge value={variacao} />
 
                         {dataAtualizacao && (
                             <span className="text-xs text-muted-foreground">
