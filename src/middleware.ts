@@ -7,11 +7,20 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
     const isLoggedIn = !!req.auth;
     const isAdmin = req.auth?.user?.role === "ADMIN";
-    const isAuthRoute = req.nextUrl.pathname.startsWith("/login");
-    const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
 
-    // Redirect unauthenticated users to login for admin routes
-    if (isAdminRoute && !isLoggedIn) {
+    const pathname = req.nextUrl.pathname;
+
+    const isAuthRoute = pathname.startsWith("/login");
+    const isAdminRoute = pathname.startsWith("/admin");
+    const isPrivateRoute =
+        pathname.startsWith("/perfil") ||
+        pathname.startsWith("/configuracoes") ||
+        pathname.startsWith("/favoritos") ||
+        pathname.startsWith("/alertas") ||
+        pathname.startsWith("/planos");
+
+    // Redirect unauthenticated users to login for admin or private routes
+    if ((isAdminRoute || isPrivateRoute) && !isLoggedIn) {
         return NextResponse.redirect(new URL("/login", req.nextUrl));
     }
 

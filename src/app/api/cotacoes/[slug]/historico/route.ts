@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { HistoricoQuerySchema, SlugSchema } from "@/lib/schemas/api";
 import logger from "@/lib/logger";
 import { PRACA_NAMES } from "@/lib/commodities";
@@ -78,55 +79,49 @@ export async function GET(
             }
         }
 
-        // Build where clause
-        const whereClause: {
-            commodityId: string;
-            dataReferencia: { gte: Date };
-            praca?: string;
-        } = {
-            commodityId: commodity.id,
-            dataReferencia: {
-                gte: startDate
-            }
-        };
+        let queryResultData;
 
+        // Utilizamos SQL bruto para delegar a agregação (GROUP BY + AVG) ao banco de dados,
+        // economizando memória da aplicação (Node.js) principalmente para intervalos longos
         if (pracaFilter) {
-            whereClause.praca = pracaFilter;
+            queryResultData = await prisma.$queryRaw<{ date: Date, valor: Prisma.Decimal }[]>`
+                SELECT 
+                    "dataReferencia"::DATE as "date",
+                    AVG("valor") as "valor"
+                FROM "Cotacao"
+                WHERE "commodityId" = ${commodity.id}
+                  AND "dataReferencia" >= ${startDate}
+                  AND "praca" = ${pracaFilter}
+                GROUP BY "dataReferencia"::DATE
+                ORDER BY "date" ASC
+            `;
+        } else {
+            queryResultData = await prisma.$queryRaw<{ date: Date, valor: Prisma.Decimal }[]>`
+                SELECT 
+                    "dataReferencia"::DATE as "date",
+                    AVG("valor") as "valor"
+                FROM "Cotacao"
+                WHERE "commodityId" = ${commodity.id}
+                  AND "dataReferencia" >= ${startDate}
+                GROUP BY "dataReferencia"::DATE
+                ORDER BY "date" ASC
+            `;
         }
 
-        // Buscar histórico
-        const historico = await prisma.cotacao.findMany({
-            where: whereClause,
-            orderBy: {
-                dataReferencia: 'asc'
-            },
-            select: {
-                dataReferencia: true,
-                valor: true,
-                praca: true
-            }
+        // Formatar para a resposta da API
+        const data = queryResultData.map((row) => {
+            // Instanciar uma nova Date caso o PG retorne string ou algo diferente
+            const d = new Date(row.date);
+            // Ajustar o fuso horário caso venha em UTC com 0h
+            const localDateStr = new Date(d.getTime() + d.getTimezoneOffset() * 60000)
+                .toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+
+            return {
+                date: localDateStr,
+                valor: Number(Number(row.valor).toFixed(2)),
+                praca: pracaFilter || "Média"
+            };
         });
-
-        // Agrupar por data (para evitar múltiplos pontos no mesmo dia se houver várias praças)
-        // Se houver filtro de praça, isso será redundante mas inofensivo
-        // Se não houver, calculará a média das praças para o dia
-        const groupedData = new Map<string, { total: number; count: number; dateRef: Date }>();
-
-        historico.forEach(h => {
-            const dateKey = h.dataReferencia.toISOString().split('T')[0];
-            const current = groupedData.get(dateKey) || { total: 0, count: 0, dateRef: h.dataReferencia };
-
-            current.total += h.valor.toNumber();
-            current.count += 1;
-            groupedData.set(dateKey, current);
-        });
-
-        const data = Array.from(groupedData.values()).map((val) => ({
-            date: val.dateRef.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
-            valor: Number((val.total / val.count).toFixed(2)),
-            // Se filtrou por praça, retorna ela, senão "Média"
-            praca: pracaFilter || "Média"
-        }));
 
         return NextResponse.json(data, {
             headers: {

@@ -1,8 +1,7 @@
-
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
 import { useWeather } from '@/contexts/WeatherContext';
+import useSWR from 'swr';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Wind, Droplets, Thermometer, Calendar } from 'lucide-react';
 import { type WeatherData, getWeatherDescription } from '@/lib/data-sources/weather';
@@ -18,36 +17,34 @@ import { RegionalComparison } from './RegionalComparison';
 import { PrecipitationMap } from './PrecipitationMap';
 import { ClimateAnalysis } from './ClimateAnalysis';
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json()).then(data => {
+    if (!data.success) throw new Error("Falha ao buscar dados climáticos");
+    return data.data as WeatherData;
+});
+
 export function WeatherDashboard() {
     // Agora usa o Contexto Global em vez de estado local
     const { selectedCity, setCity } = useWeather();
-    const [weather, setWeather] = useState<WeatherData | null>(null);
-    const [loading, setLoading] = useState(true);
 
-    const fetchWeatherData = useCallback(async () => {
-        setLoading(true);
-        try {
-            const res = await fetch(`/api/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}`);
-            const data = await res.json();
-            if (data.success) {
-                setWeather(data.data);
-            }
-        } catch (error) {
-            console.error('Erro ao buscar clima:', error);
-        } finally {
-            setLoading(false);
+    const {
+        data: weather,
+        error,
+        isLoading,
+        mutate
+    } = useSWR<WeatherData>(
+        selectedCity ? `/api/weather?lat=${selectedCity.lat}&lon=${selectedCity.lon}` : null,
+        fetcher,
+        {
+            revalidateOnFocus: false, // Weather doesn't change every second
+            dedupingInterval: 60000 * 30 // 30 minutes
         }
-    }, [selectedCity.lat, selectedCity.lon]);
+    );
 
-    useEffect(() => {
-        fetchWeatherData();
-    }, [fetchWeatherData]);
-
-    if (!weather && !loading) {
+    if (error && !isLoading) {
         return (
             <div className="text-center py-12">
                 <p className="text-muted-foreground">Não foi possível carregar os dados do clima.</p>
-                <Button onClick={fetchWeatherData} variant="outline" className="mt-4">Tentar Novamente</Button>
+                <Button onClick={() => mutate()} variant="outline" className="mt-4">Tentar Novamente</Button>
             </div>
         );
     }
@@ -71,7 +68,7 @@ export function WeatherDashboard() {
                 </div>
             </div>
 
-            {loading ? (
+            {isLoading ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-pulse">
                     {[...Array(4)].map((_, i) => (
                         <div key={i} className="h-32 bg-muted rounded-xl" />
