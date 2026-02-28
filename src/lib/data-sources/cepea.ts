@@ -90,8 +90,8 @@ const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
     'milho': { url: 'https://www.cepea.org.br/br/indicador/milho.aspx' },
     'trigo': { url: 'https://www.cepea.org.br/br/indicador/trigo.aspx', keywords: ['Paraná', 'PR'] },
     'arroz': { url: 'https://www.cepea.org.br/br/indicador/arroz.aspx' },
-    'feijao-carioca': { url: 'https://www.cepea.org.br/br/indicador/feijao.aspx', keywords: ['Carioca', 'peneira 12'] },
-    'feijao-preto': { url: 'https://www.cepea.org.br/br/indicador/feijao.aspx', keywords: ['Preto'], tableIndex: 2 },
+    'feijao-carioca': { url: 'https://www.cepea.org.br/br/indicador/feijao.aspx', keywords: ['Carioca', 'peneira 12'], priceColumnIndex: 2 },
+    'feijao-preto': { url: 'https://www.cepea.org.br/br/indicador/feijao.aspx', keywords: ['Preto'], tableIndex: 2, priceColumnIndex: 2 },
 
     // === PECUÁRIA ===
     'boi-gordo': { url: 'https://www.cepea.org.br/br/indicador/boi-gordo.aspx' },
@@ -100,7 +100,7 @@ const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
     'frango': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Congelado'] },
     'frango-resfriado': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Resfriado'] },
     'leite': { url: 'https://www.cepea.org.br/br/indicador/leite.aspx', priceColumnIndex: 2, varColumnIndex: -1 },
-    'ovos': { url: 'https://www.cepea.org.br/br/indicador/ovos.aspx' },
+    'ovos': { url: 'https://www.cepea.org.br/br/indicador/ovos.aspx', priceColumnIndex: 2 },
 
     // === CAFÉ ===
     'cafe-arabica': { url: 'https://www.cepea.org.br/br/indicador/cafe.aspx' },
@@ -124,7 +124,7 @@ const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
 
     // === OUTROS ===
     'mandioca': { url: 'https://www.cepea.org.br/br/indicador/mandioca.aspx', priceColumnIndex: 2, varColumnIndex: -1 },
-    'tilapia': { url: 'https://www.cepea.org.br/br/indicador/tilapia.aspx' },
+    'tilapia': { url: 'https://www.cepea.org.br/br/indicador/tilapia.aspx', priceColumnIndex: 2 },
 };
 
 // Slugs válidos para validação
@@ -194,9 +194,9 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
             const cells = row.querySelectorAll('td');
             if (cells.length >= 2) {
                 const dataText = cells[0].textContent?.trim();
-                // Regex para DD/MM/YYYY, MM/YYYY ou mmm/yy (suportar prefixos)
+                // Regex para DD/MM/YYYY, DD-MM-YYYY, MM/YYYY ou mmm/yy (suportar prefixos)
                 if (dataText && (
-                    /\d{1,2}\/\d{1,2}\/\d{4}/.test(dataText) ||
+                    /\d{1,2}[\/-]\d{1,2}[\/-]\d{4}/.test(dataText) ||
                     /\d{1,2}\/\d{4}/.test(dataText) ||
                     /[a-z]{3}\/\d{2}/i.test(dataText)
                 )) {
@@ -281,7 +281,14 @@ export async function fetchAllCepeaPrices(slug: string): Promise<CepeaPracaData[
                 if (cells.length < 2) continue;
 
                 const dataText = cells[0].textContent?.trim();
-                if (!dataText || !/\d{1,2}\/\d{1,2}\/\d{4}/.test(dataText)) continue;
+                // Regex para DD/MM/YYYY, DD-MM-YYYY, MM/YYYY ou mmm/yy (suportar prefixos)
+                if (!dataText || !(
+                    /\d{1,2}[\/-]\d{1,2}[\/-]\d{4}/.test(dataText) ||
+                    /\d{1,2}\/\d{4}/.test(dataText) ||
+                    /[a-z]{3}\/\d{2}/i.test(dataText)
+                )) {
+                    continue;
+                }
 
                 const priceIdx = config.priceColumnIndex || 1;
                 const valorStr = cells[priceIdx]?.textContent?.trim();
@@ -337,8 +344,8 @@ function parseValor(str: string): number {
 function parseData(str: string): Date {
     if (!str) return new Date();
 
-    // 1. Tentar encontrar DD/MM/YYYY em qualquer lugar da string (Mandioca: "5 - 09/01/2026")
-    const matchFull = str.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    // 1. Tentar encontrar DD/MM/YYYY ou DD-MM-YYYY em qualquer lugar da string (Mandioca: "5 - 09/01/2026")
+    const matchFull = str.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
     if (matchFull) {
         const [, dia, mes, ano] = matchFull;
         return new Date(Date.UTC(parseInt(ano), parseInt(mes) - 1, parseInt(dia)));
