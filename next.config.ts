@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   // Enable standalone output for Docker production
   output: "standalone",
   serverExternalPackages: ["@prisma/client"],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "50mb",
+    },
+  },
 
   // Image optimization - restricted to known news sources
   images: {

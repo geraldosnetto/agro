@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
@@ -7,66 +7,47 @@ datasource db {
   provider = "postgresql"
 }
 
-// ==================== AUTH ====================
-
-enum Role {
-  USER
-  ADMIN
-}
-
-// Usuário
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?   // Para login com email/senha
-
-  // Plano do usuário
-  plan          String    @default("free") // free, pro, business
-  role          Role      @default(USER)
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // Stripe
-  stripeCustomerId       String?   @unique
-  stripeSubscriptionId   String?   @unique
-  stripePriceId          String?
+  id                     String             @id @default(cuid())
+  name                   String?
+  email                  String             @unique
+  emailVerified          DateTime?
+  image                  String?
+  password               String?
+  plan                   String             @default("free")
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  role                   Role               @default(USER)
   stripeCurrentPeriodEnd DateTime?
-
-  accounts      Account[]
-  sessions      Session[]
-  alertas       AlertaUsuario[]
-  favoritos     Favorito[]
-
-  // IA
-  chatConversations ChatConversation[]
-  aiUsage           AIUsage[]
+  stripeCustomerId       String?            @unique
+  stripePriceId          String?
+  stripeSubscriptionId   String?            @unique
+  aiUsage                AIUsage[]
+  accounts               Account[]
+  alertas                AlertaUsuario[]
+  chatConversations      ChatConversation[]
+  favoritos              Favorito[]
+  sessions               Session[]
 }
 
-// Conta OAuth (Google, GitHub, etc)
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
-// Sessão de usuário
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -75,7 +56,6 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Token de verificação de email
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -84,141 +64,101 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Alerta de preço do usuário (relacionado com User)
 model AlertaUsuario {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   commodityId String
-
-  tipo        String    // "ACIMA" | "ABAIXO" | "VARIACAO"
-  valorAlvo   Decimal?  @db.Decimal(10, 2)
-  percentual  Decimal?  @db.Decimal(5, 2) // Para alerta de variação
-  ativo       Boolean   @default(true)
-  disparado   Boolean   @default(false)
-
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  tipo        String
+  valorAlvo   Decimal? @db.Decimal(10, 2)
+  percentual  Decimal? @db.Decimal(5, 2)
+  ativo       Boolean  @default(true)
+  disparado   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([commodityId])
 }
 
-// Commodities favoritas do usuário
 model Favorito {
   id          String   @id @default(cuid())
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   commodityId String
-
   createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, commodityId])
   @@index([userId])
 }
 
-// ==================== COMMODITIES ====================
-
-// Categoria de commodity
-enum Categoria {
-  GRAOS
-  PECUARIA
-  SUCROENERGETICO
-  FIBRAS
-  PEIXE           // Tilápia e outros
-  OUTROS
-}
-
-// Unidade de medida
-enum Unidade {
-  SACA_60KG      // sc 60kg (soja, milho)
-  ARROBA         // @ (boi gordo)
-  LITRO          // litro (etanol)
-  TONELADA       // ton (açúcar)
-  KG             // kg (café, frango, tilápia)
-  CABECA         // cabeça (bezerro)
-  DUZIA          // dúzia (ovos)
-}
-
-// Commodity (produto agrícola)
 model Commodity {
-  id          String    @id @default(cuid())
-  slug        String    @unique // ex: "soja", "boi-gordo"
-  nome        String    // ex: "Soja"
-  categoria   Categoria
-  unidade     Unidade
-  descricao   String?
-  icone       String?   // emoji ou path do ícone
-  ativo       Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  cotacoes    Cotacao[]
-  alertas     Alerta[]
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  nome      String
+  categoria Categoria
+  unidade   Unidade
+  descricao String?
+  icone     String?
+  ativo     Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  alertas   Alerta[]
+  cotacoes  Cotacao[]
 
   @@index([categoria])
   @@index([slug])
 }
 
-// Cotação de preço
 model Cotacao {
-  id            String    @id @default(cuid())
-  commodityId   String
-  commodity     Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
-  
-  valor         Decimal   @db.Decimal(10, 2)
-  valorAnterior Decimal?  @db.Decimal(10, 2)
-  variacao      Decimal?  @db.Decimal(10, 2)
-  
-  praca         String    // ex: "Paranaguá/PR", "São Paulo/SP"
-  estado        String    // ex: "PR", "SP"
-  
-  fonte         String    // ex: "CEPEA", "CONAB"
-  fonteUrl      String?
-  
-  dataReferencia DateTime // data da cotação
-  createdAt      DateTime @default(now())
+  id             String    @id @default(cuid())
+  commodityId    String
+  valor          Decimal   @db.Decimal(10, 2)
+  valorAnterior  Decimal?  @db.Decimal(10, 2)
+  variacao       Decimal?  @db.Decimal(10, 2)
+  praca          String
+  estado         String
+  fonte          String
+  fonteUrl       String?
+  dataReferencia DateTime
+  createdAt      DateTime  @default(now())
+  commodity      Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
 
   @@unique([commodityId, praca, dataReferencia])
   @@index([commodityId])
   @@index([dataReferencia])
-  @@index([commodityId, dataReferencia]) // Otimização para o Ticker (última cotação por commodity)
+  @@index([commodityId, dataReferencia])
   @@index([estado])
 }
 
-// Alerta de preço (futuro)
 model Alerta {
   id          String    @id @default(cuid())
   commodityId String
-  commodity   Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
-  
   email       String
-  tipo        String    // "ACIMA" | "ABAIXO"
+  tipo        String
   valorAlvo   Decimal   @db.Decimal(10, 2)
   ativo       Boolean   @default(true)
-  
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  commodity   Commodity @relation(fields: [commodityId], references: [id], onDelete: Cascade)
 
   @@index([commodityId])
   @@index([email])
 }
 
-// Log de atualização de dados
 model AtualizacaoLog {
   id        String   @id @default(cuid())
-  fonte     String   // "BCB", "CEPEA", "CONAB"
-  status    String   // "SUCCESS", "ERROR"
+  fonte     String
+  status    String
   mensagem  String?
   registros Int      @default(0)
-  duracao   Int?     // ms
+  duracao   Int?
   createdAt DateTime @default(now())
 
   @@index([fonte])
   @@index([createdAt])
 }
 
-// Cotação do dólar (PTAX)
 model CotacaoDolar {
   id             String   @id @default(cuid())
   dataReferencia DateTime @unique
@@ -229,100 +169,72 @@ model CotacaoDolar {
   @@index([dataReferencia])
 }
 
-// Analytics de Notícias (Mais Lidas)
 model NewsAccess {
   url       String   @id
   title     String
   source    String
   clicks    Int      @default(1)
-
   updatedAt DateTime @updatedAt
 
   @@index([clicks(sort: Desc)])
 }
 
-// ==================== IA ====================
-
-// Relatórios gerados por IA
 model AIReport {
-  id            String   @id @default(cuid())
-  type          String   // DAILY_MARKET | WEEKLY_COMMODITY | CONTEXTUAL_ALERT
-  commodityId   String?
-  title         String
-  content       String   @db.Text
-  summary       String?  @db.Text
+  id          String   @id @default(cuid())
+  type        String
+  commodityId String?
+  title       String
+  content     String
+  summary     String?
+  model       String
+  tokensUsed  Int
+  generatedAt DateTime @default(now())
+  validUntil  DateTime
+  dataHash    String?
+  reportDate  DateTime @default(now()) @db.Date
 
-  // Metadados
-  model         String   // claude-3-haiku, etc
-  tokensUsed    Int
-  generatedAt   DateTime @default(now())
-  validUntil    DateTime // Quando o relatório expira
-
-  // Data de referência do relatório (para histórico)
-  reportDate    DateTime @default(now()) @db.Date // Data do relatório (ex: 2026-01-30)
-
-  // Cache control
-  dataHash      String?  // Hash dos dados usados (para invalidação)
-
-  @@unique([type, reportDate, commodityId]) // Um relatório por tipo/data/commodity
+  @@unique([type, reportDate, commodityId])
   @@index([type, generatedAt])
   @@index([type, reportDate])
   @@index([commodityId])
 }
 
-// Conversas do chatbot
 model ChatConversation {
-  id        String   @id @default(cuid())
+  id        String        @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String?  // Auto-gerado do primeiro prompt
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  title     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages  ChatMessage[]
 
   @@index([userId, updatedAt])
 }
 
-// Mensagens individuais do chat
 model ChatMessage {
   id             String           @id @default(cuid())
   conversationId String
-  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  role           String   // user | assistant
-  content        String   @db.Text
-
-  // Metadados (apenas para assistant)
+  role           String
+  content        String
   tokensUsed     Int?
   model          String?
-
-  createdAt      DateTime @default(now())
+  createdAt      DateTime         @default(now())
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId, createdAt])
 }
 
-// Previsões de preço
 model PricePrediction {
   id              String   @id @default(cuid())
   commodityId     String
-
-  // Previsão
   predictedValue  Decimal  @db.Decimal(10, 2)
-  confidenceLevel Decimal  @db.Decimal(5, 2) // 0-100%
-  direction       String   // UP | DOWN | STABLE
-  horizon         Int      // dias para frente (7, 14, 30)
-
-  // Metadados do modelo
-  model           String   // SMA | EMA | LINEAR_REGRESSION | ENSEMBLE
+  confidenceLevel Decimal  @db.Decimal(5, 2)
+  direction       String
+  horizon         Int
+  model           String
   dataPointsUsed  Int
-
-  // Validade
   generatedAt     DateTime @default(now())
   targetDate      DateTime
-
-  // Resultado real (preenchido depois para tracking de accuracy)
   actualValue     Decimal? @db.Decimal(10, 2)
   wasAccurate     Boolean?
 
@@ -330,53 +242,37 @@ model PricePrediction {
   @@index([targetDate])
 }
 
-// Análise de sentimento de notícias
 model NewsSentiment {
-  id           String   @id @default(cuid())
-
-  // Referência à notícia (URL como identificador único)
-  newsUrl      String   @unique
-  newsTitle    String
-
-  // Análise básica
-  sentiment    String   // POSITIVE | NEGATIVE | NEUTRAL
-  score        Decimal  @db.Decimal(3, 2) // -1.0 a 1.0
-
-  // Commodities afetadas
-  commodities  String[] // Array de slugs
-  impactScore  Decimal  @db.Decimal(3, 2) // 0-1 relevância
-
-  // Análise avançada (v2)
-  emotion          String?  // FEAR | GREED | UNCERTAINTY | CONFIDENCE | PANIC | EUPHORIA
-  emotionIntensity Decimal? @db.Decimal(3, 2) // 0-1 intensidade da emoção
-  drivers          String[] // CLIMA | DEMANDA | OFERTA | POLITICA | CAMBIO | LOGISTICA | PRAGA | TECNOLOGIA
-  timeframe        String?  // IMEDIATO | CURTO_PRAZO | MEDIO_PRAZO | LONGO_PRAZO
-  reasoning        String?  @db.Text // Explicação da análise
-
-  // Metadados de Custo
-  tokensUsed       Int?     @default(0)
+  id               String   @id @default(cuid())
+  newsUrl          String   @unique
+  newsTitle        String
+  sentiment        String
+  score            Decimal  @db.Decimal(3, 2)
+  commodities      String[]
+  impactScore      Decimal  @db.Decimal(3, 2)
+  analyzedAt       DateTime @default(now())
+  drivers          String[]
+  emotion          String?
+  emotionIntensity Decimal? @db.Decimal(3, 2)
+  reasoning        String?
+  timeframe        String?
   model            String?
-
-  analyzedAt   DateTime @default(now())
+  tokensUsed       Int?     @default(0)
 
   @@index([sentiment])
   @@index([analyzedAt])
   @@index([emotion])
 }
 
-// Anomalias detectadas
 model PriceAnomaly {
   id               String   @id @default(cuid())
   commodityId      String
-
-  type             String   // PRICE_SPIKE | PRICE_DROP | HIGH_VOLATILITY | HISTORICAL_EXTREME
-  severity         String   // LOW | MEDIUM | HIGH
-
+  type             String
+  severity         String
   description      String
   detectedValue    Decimal  @db.Decimal(10, 2)
-  expectedRange    String   // "R$ 100 - R$ 120"
+  expectedRange    String
   deviationPercent Decimal  @db.Decimal(5, 2)
-
   detectedAt       DateTime @default(now())
   acknowledged     Boolean  @default(false)
 
@@ -384,37 +280,53 @@ model PriceAnomaly {
   @@index([severity])
 }
 
-// Uso de IA por usuário (para rate limiting e billing)
 model AIUsage {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  date      DateTime @db.Date
-
-  // Contadores diários
-  chatMessages    Int @default(0)
-  reportsViewed   Int @default(0)
-  predictionsUsed Int @default(0)
-  tokensUsed      Int @default(0)
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @db.Date
+  chatMessages    Int      @default(0)
+  reportsViewed   Int      @default(0)
+  predictionsUsed Int      @default(0)
+  tokensUsed      Int      @default(0)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
   @@index([userId, date])
 }
 
-// ==================== AGROCAST (PODCAST) ====================
-
-// Episódios do Podcast
 model PodcastEpisode {
   id          String   @id @default(cuid())
   title       String
-  description String   @db.Text
-  audioUrl    String   // URL do arquivo .mp3 gerado pelo NotebookLM
-  duration    Int?     // Duração em segundos (opcional)
+  description String
+  audioUrl    String
+  duration    Int?
   publishedAt DateTime @default(now())
-
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([publishedAt(sort: Desc)])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Categoria {
+  GRAOS
+  PECUARIA
+  SUCROENERGETICO
+  FIBRAS
+  OUTROS
+  PEIXE
+}
+
+enum Unidade {
+  SACA_60KG
+  ARROBA
+  LITRO
+  TONELADA
+  KG
+  CABECA
+  DUZIA
 }

@@ -70,18 +70,37 @@ export async function GET(req: Request) {
 
         // Passar os dados brutos para o Claude gerar um Dossiê narrativo perfeito para o NotebookLM absorver
         const anthropic = getAnthropicClient();
-        const prompt = `Você é um roteirista especializado em mercado financeiro agropecuário.
+        const prompt = `Você é o Economista Chefe e Roteirista Líder do "AgroCast", o podcast oficial de inteligência de mercado do IndicAgro.
         
-Abaixo estão os dados dos preços e as últimas notícias do agronegócio desta semana.
-Sua missão é gerar um "Dossiê Resumo da Semana" em português claro e objetivo, que servirá de fonte para alimentar uma inteligência artificial (Google NotebookLM) que criará um podcast em áudio a partir do seu texto.
+Sua missão é gerar um "Dossiê Resumo da Semana" cirúrgico. Este dossiê não será lido diretamente, ele servirá de base textual para alimentar a IA de voz (Google NotebookLM) que debaterá este texto em formato de mesacast.
 
-Escreva o texto como se fosse um briefing completo e em formato de narrativa para os apresentadores de rádio: 
-- Diga como a semana fechou para os produtores de Soja, Milho e Boi.
-- Comente as principais notícias que impactaram esses preços.
-- Termine com uma visão geral animadora ou de alerta.
-
-DADOS DA SEMANA:
+DADOS DA SEMANA (INSUMOS BRUTOS):
 ${dataContext}
+
+## INSTRUÇÕES DE RACIOCÍNIO (MANDATÓRIO)
+Antes de escrever o roteiro final, use a tag <analise_interna> para decodificar os insumos:
+1. Identifique qual das 3 commodities (Soja, Milho, Boi) teve o movimento mais brusco (bullish ou bearish).
+2. Conecte esse movimento com pelo menos uma das notícias listadas (se houver sinergia óbvia).
+3. Defina o 'humor' da semana (ex: pânico corporativo, otimismo de exportação, lateralização entediante).
+Feche a tag </analise_interna> ao terminar a matemática.
+
+## FORMATO DO DOSSIÊ (O QUE VOCÊ DEVE ENTREGAR APÓS A ANÁLISE)
+Escreva o texto final em formato de narrativa ou "briefing" para os hosts do podcast lerem:
+
+### 1. Abertura e Termômetro Geral
+Comece resumindo o sentimento geral da semana em dois parágrafos amigáveis e impactantes.
+
+### 2. O Pódio das Commodities
+Crie um bloco para a Soja, um para o Milho e um para o Boi Gordo.
+Fale os preços exatos e explique o PORQUÊ do movimento usando sua análise.
+
+### 3. Fator Notícia
+Destaque a notícia mais importante e explique como ela mexeu (ou pode mexer) com a vida e o bolso do produtor rural.
+
+### REGRAS
+- Somente texto e Markdown leve (sem tabelas pesadas).
+- NUNCA use emojis.
+- Tom de voz: Autoridade calma, estilo rádio jornalístico ("Boa noite, produtores...").
 `;
 
         const msg = await anthropic.messages.create({

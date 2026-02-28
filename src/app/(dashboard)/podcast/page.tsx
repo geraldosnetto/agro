@@ -10,6 +10,9 @@ export const metadata = {
     description: "Ouça o resumo semanal do mercado agropecuário gerado por Inteligência Artificial.",
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function PodcastPage() {
     const episodes = await prisma.podcastEpisode.findMany({
         orderBy: { publishedAt: "desc" },

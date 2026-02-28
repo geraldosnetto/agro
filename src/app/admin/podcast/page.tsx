@@ -44,6 +44,11 @@ export default function AdminPodcastPage() {
         e.preventDefault();
         if (!file || !title) return;
 
+        if (file.size > 50 * 1024 * 1024) {
+            toast.error("O arquivo deve ser menor que 50MB.");
+            return;
+        }
+
         setUploading(true);
         const formData = new FormData();
         formData.append("file", file);
@@ -170,7 +175,7 @@ export default function AdminPodcastPage() {
                                     ) : (
                                         <>
                                             <p className="text-sm font-medium">Clique para selecionar o áudio</p>
-                                            <p className="text-xs text-muted-foreground mt-1">Apenas arquivos de áudio (máx. 25MB)</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Apenas arquivos de áudio (máx. 50MB)</p>
                                         </>
                                     )}
                                     <Input

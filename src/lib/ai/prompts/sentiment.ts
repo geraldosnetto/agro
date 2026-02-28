@@ -37,66 +37,44 @@ export type Emotion = typeof EMOTIONS[number];
 export type MarketDriver = typeof MARKET_DRIVERS[number];
 export type Timeframe = typeof TIMEFRAMES[number];
 
-export const SENTIMENT_ANALYSIS_PROMPT = `Você é um analista especializado em mercado agrícola brasileiro com expertise em psicologia de mercado.
+export const SENTIMENT_ANALYSIS_PROMPT = `Você é um Analista de Sentimento Sênior com foco em Algoritmos de Trading e Psicologia de Mercado Agrícola.
 
-Analise a notícia abaixo e determine:
+Analise a notícia fornecida. Sua tarefa exige profunda capacidade de abstração antes de classificar os dados.
 
-1. SENTIMENT: Sentimento geral (POSITIVE, NEGATIVE ou NEUTRAL)
-2. SCORE: Valor de -1.0 (muito negativo) a 1.0 (muito positivo)
-3. COMMODITIES: Commodities afetadas (slugs: soja, milho, boi-gordo, cafe-arabica, cafe-robusta, acucar-cristal, etanol-hidratado, etanol-anidro, algodao, trigo, arroz, frango, suino, leite, bezerro, mandioca)
-4. IMPACT: Relevância do impacto (0 a 1)
+TÍTULO DA NOTÍCIA: {title}
+CONTEÚDO (se disponível): {content}
 
-5. EMOTION: Emoção predominante do mercado:
-   - FEAR: Medo, preocupação com perdas (ex: "produtores temem quebra de safra")
-   - GREED: Otimismo agressivo, busca por ganhos (ex: "exportações em alta recorde")
-   - UNCERTAINTY: Incerteza, falta de clareza (ex: "mercado aguarda definição")
-   - CONFIDENCE: Confiança, segurança (ex: "safra deve ser a maior da história")
-   - PANIC: Pânico, reação extrema (ex: "preços despencam após embargo")
-   - EUPHORIA: Euforia, otimismo extremo (ex: "produtores celebram preços recordes")
+ESTRUTURA DE PROCESSAMENTO COGNITIVO (CHAIN-OF-THOUGHT):
+Você DEVE processar a resposta EXCLUSIVAMENTE em formato JSON. 
+A PRIMEIRA chave do seu JSON deve ser obrigatoriamente "_analise_interna", onde você escreverá um rascunho de até 3 frases cruzando a notícia com possíveis impactos de oferta/demanda antes de preencher as outras variáveis de forma fria.
 
-6. EMOTION_INTENSITY: Intensidade da emoção (0 a 1, onde 1 = muito intenso)
+Variáveis obrigatórias no JSON:
+1. "_analise_interna": Seu rascunho de pensamento (CoT).
+2. "sentiment": Sentimento geral (POSITIVE, NEGATIVE ou NEUTRAL)
+3. "score": Valor de -1.0 (muito negativo) a 1.0 (muito positivo)
+4. "commodities": Array de slugs afetados (ex: ["soja", "milho", "boi-gordo", "cafe-arabica"])
+5. "impact": Relevância da notícia na precificação real, de 0.0 a 1.0.
 
-7. DRIVERS: Fatores que movimentam o mercado (array, pode ter múltiplos):
-   - CLIMA: Eventos climáticos (seca, geada, chuva excessiva)
-   - DEMANDA: Mudanças na demanda (exportação, consumo interno)
-   - OFERTA: Fatores de oferta (safra, estoques, produção)
-   - POLITICA: Políticas governamentais (tarifas, acordos, regulação)
-   - CAMBIO: Variações do dólar
-   - LOGISTICA: Transporte, armazenamento, portos
-   - PRAGA: Pragas, doenças, problemas fitossanitários
-   - TECNOLOGIA: Inovações, novos produtos, biotecnologia
+6. "emotion": Emoção predominante do mercado:
+   - FEAR: Medo de quebra ou perdas
+   - GREED: Otimismo agressivo, super-lucro
+   - UNCERTAINTY: Falta de rumo
+   - CONFIDENCE: Garantia técnica de alta produtividade
+   - PANIC: Colapso do book de ofertas
+   - EUPHORIA: Quebra de máxima histórica
 
-8. TIMEFRAME: Quando o impacto será sentido:
-   - IMEDIATO: Próximas horas/dias
-   - CURTO_PRAZO: Próximas 1-4 semanas
-   - MEDIO_PRAZO: Próximos 1-6 meses
-   - LONGO_PRAZO: Próxima safra ou mais
+7. "emotionIntensity": Intensidade de 0.0 a 1.0
+8. "drivers": Array contendo os gatilhos: ["CLIMA", "DEMANDA", "OFERTA", "POLITICA", "CAMBIO", "LOGISTICA", "PRAGA", "TECNOLOGIA"]
+9. "timeframe": "IMEDIATO" | "CURTO_PRAZO" | "MEDIO_PRAZO" | "LONGO_PRAZO"
+10. "reasoning": Versão traduzida e curta da sua análise interna para o cliente final ler.
 
-9. REASONING: Explicação breve (2-3 frases) do porquê da classificação
-
-CRITÉRIOS DE SENTIMENTO:
-- POSITIVE: Aumento de preços, safra recorde, demanda forte, exportações em alta
-- NEGATIVE: Queda de preços, quebra de safra, pragas, clima adverso, barreiras comerciais
-- NEUTRAL: Notícias informativas, dados mistos, previsões incertas
-
-Responda APENAS em formato JSON válido (sem markdown):
+Responda APENAS em JSON válido, suportado por JSON.parse(). Nada fora do JSON. Exemplo de estrutura:
 {
-  "sentiment": "POSITIVE" | "NEGATIVE" | "NEUTRAL",
-  "score": number,
-  "commodities": string[],
-  "impact": number,
-  "emotion": "FEAR" | "GREED" | "UNCERTAINTY" | "CONFIDENCE" | "PANIC" | "EUPHORIA",
-  "emotionIntensity": number,
-  "drivers": string[],
-  "timeframe": "IMEDIATO" | "CURTO_PRAZO" | "MEDIO_PRAZO" | "LONGO_PRAZO",
-  "reasoning": string
-}
-
-TÍTULO DA NOTÍCIA:
-{title}
-
-CONTEÚDO (se disponível):
-{content}`;
+  "_analise_interna": "Para haver pânico, a seca deve... como a notícia cita 60 dias sem chuva, o loss de produtividade é irreversível para a soja do MS. Classificarei como NEGATIVE com emoção FEAR.",
+  "sentiment": "NEGATIVE",
+  "score": -0.85,
+  ...
+}`;
 
 export function buildSentimentPrompt(title: string, content?: string): string {
   return SENTIMENT_ANALYSIS_PROMPT
