@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Loader2, Bot, User, Sparkles, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { DataStateError } from "@/components/ui/data-state-error";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -303,8 +304,8 @@ export default function AssistentePage() {
 
           {/* Error */}
           {error && (
-            <div className="px-6 py-3 bg-destructive/10 text-destructive text-sm border-t">
-              {error}
+            <div className="px-6 py-4 border-t border-border">
+              <DataStateError description={error} />
             </div>
           )}
 

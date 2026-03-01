@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCard } from "@/components/ui/data-state-loaders";
+import { DataStateEmpty } from "@/components/ui/data-state-empty";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -94,7 +96,7 @@ export default function FavoritosPage() {
                 <Skeleton className="h-10 w-48 mb-8" />
                 <div className="grid gap-4 md:grid-cols-2">
                     {[1, 2, 3, 4].map((i) => (
-                        <Skeleton key={i} className="h-40 w-full" />
+                        <SkeletonCard key={i} />
                     ))}
                 </div>
             </div>
@@ -122,20 +124,18 @@ export default function FavoritosPage() {
 
             {/* Empty State */}
             {favoritos.length === 0 && (
-                <Card className="text-center py-12">
-                    <CardContent>
-                        <Heart className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                        <h2 className="text-xl font-semibold mb-2">Nenhum favorito ainda</h2>
-                        <p className="text-muted-foreground mb-6">
-                            Adicione commodities aos favoritos para acompanhá-las mais facilmente.
-                        </p>
+                <DataStateEmpty
+                    icon={Heart}
+                    title="Nenhum favorito ainda"
+                    description="Adicione commodities aos favoritos para acompanhá-las mais facilmente."
+                    action={
                         <Link href="/cotacoes">
                             <Button>
                                 Explorar Cotações
                             </Button>
                         </Link>
-                    </CardContent>
-                </Card>
+                    }
+                />
             )}
 
             {/* Favorites Grid */}

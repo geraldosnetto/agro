@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Bell, TrendingUp, TrendingDown, Percent, Loader2, AlertCircle } from "lucide-react";
 import { formatarUnidade } from "@/lib/formatters";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { DataStateError } from "@/components/ui/data-state-error";
 
 interface Commodity {
     id: string;
@@ -171,10 +172,7 @@ function NovoAlertaForm() {
             <Card>
                 <CardContent className="pt-6">
                     {error && (
-                        <Alert variant="destructive" className="mb-6">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>{error}</AlertDescription>
-                        </Alert>
+                        <DataStateError description={error} className="mb-6" />
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-6">

@@ -27,6 +27,7 @@ import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { ReportRenderer } from '@/components/ai/ReportRenderer';
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { DataStateError } from "@/components/ui/data-state-error";
 
 interface DailyReport {
   id: string;
@@ -277,9 +278,7 @@ export default function RelatoriosPage() {
             </CardHeader>
             <CardContent>
               {error && !dailyReport && !noReportsYet && (
-                <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm">
-                  {error}
-                </div>
+                <DataStateError description={error} />
               )}
 
               {noReportsYet && !isLoadingDaily && (

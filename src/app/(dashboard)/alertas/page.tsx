@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonTable } from "@/components/ui/data-state-loaders";
+import { DataStateEmpty } from "@/components/ui/data-state-empty";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -22,7 +24,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Bell, Plus, Trash2, TrendingUp, TrendingDown, Percent, AlertTriangle, Clock, Edit2, Play, Pause, Filter, SortDesc } from "lucide-react";
 import { formatarMoeda, formatarUnidade } from "@/lib/formatters";
-import { revalidatePath } from "next/cache";
 import { PageHeader } from "@/components/dashboard/PageHeader";
 
 interface Alerta {
@@ -114,11 +115,7 @@ export default function AlertasPage() {
         return (
             <div className="container px-4 py-8 max-w-4xl">
                 <Skeleton className="h-10 w-48 mb-8" />
-                <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-32 w-full" />
-                    ))}
-                </div>
+                <SkeletonTable rows={3} />
             </div>
         );
     }
@@ -147,21 +144,19 @@ export default function AlertasPage() {
 
             {/* Empty State */}
             {alertas.length === 0 && (
-                <Card className="text-center py-12">
-                    <CardContent>
-                        <Bell className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                        <h2 className="text-xl font-semibold mb-2">Nenhum alerta configurado</h2>
-                        <p className="text-muted-foreground mb-6">
-                            Crie alertas para ser notificado quando uma commodity atingir o preço desejado.
-                        </p>
+                <DataStateEmpty
+                    icon={Bell}
+                    title="Nenhum alerta configurado"
+                    description="Crie alertas para ser notificado quando uma commodity atingir o preço desejado."
+                    action={
                         <Link href="/alertas/novo">
                             <Button>
                                 <Plus className="h-4 w-4 mr-2" />
                                 Criar Primeiro Alerta
                             </Button>
                         </Link>
-                    </CardContent>
-                </Card>
+                    }
+                />
             )}
 
             {/* Alerts List */}
