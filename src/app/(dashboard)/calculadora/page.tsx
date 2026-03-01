@@ -6,6 +6,7 @@ import { CalculatorForm } from '@/components/dashboard/calculator/CalculatorForm
 import { CalculatorResults } from '@/components/dashboard/calculator/CalculatorResults';
 import { calculateProfitability, type CalculatorInputs, type ProfitabilityResult } from '@/lib/calculators/profitability';
 import { Calculator } from 'lucide-react';
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export default function CalculatorPage() {
     const [result, setResult] = useState<ProfitabilityResult | null>(null);
@@ -17,15 +18,11 @@ export default function CalculatorPage() {
 
     return (
         <div className="container mx-auto p-6 space-y-8">
-            <div className="flex flex-col gap-2 mb-8">
-                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                    <Calculator className="h-8 w-8 text-primary" />
-                    Calculadora de Rentabilidade
-                </h1>
-                <p className="text-muted-foreground text-lg">
-                    Estime seus custos, margens e ponto de equilíbrio para a próxima safra.
-                </p>
-            </div>
+            <PageHeader
+                title="Calculadora de Rentabilidade"
+                description="Estime seus custos, margens e ponto de equilíbrio para a próxima safra."
+                icon={Calculator}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Coluna da Esquerda: Formulário (5 cols) */}

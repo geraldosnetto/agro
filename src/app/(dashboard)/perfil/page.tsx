@@ -12,6 +12,7 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DeleteAccountButton } from "@/components/auth/DeleteAccountButton";
 import Link from "next/link";
 import { createCustomerPortal } from "../planos/actions";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export const dynamic = 'force-dynamic';
 
@@ -57,15 +58,11 @@ export default async function PerfilPage() {
 
     return (
         <div className="container max-w-4xl py-10">
-            <div className="flex flex-col gap-2 mb-8">
-                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                    <User className="h-8 w-8 text-primary" />
-                    Meu Perfil
-                </h1>
-                <p className="text-muted-foreground">
-                    Gerencie suas informações e preferências
-                </p>
-            </div>
+            <PageHeader
+                title="Meu Perfil"
+                description="Gerencie suas informações e preferências"
+                icon={User}
+            />
 
             <div className="grid gap-6">
                 {/* User Info Card */}

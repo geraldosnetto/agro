@@ -9,6 +9,7 @@ import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { PRACA_NAMES } from "@/lib/commodities";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 // Força renderização dinâmica - evita erro de conexão Prisma durante build
 export const dynamic = 'force-dynamic';
@@ -107,16 +108,12 @@ export default async function CotacoesPage() {
     return (
         <div className="container px-4 py-6 md:py-8">
             {/* Header da página */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-                <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Cotações</h1>
-                    <p className="text-muted-foreground">
-                        Preços atualizados de commodities agrícolas
-                    </p>
-                </div>
-
+            <PageHeader
+                title="Cotações"
+                description="Preços atualizados de commodities agrícolas"
+            >
                 {/* Indicador do Dólar */}
-                <div className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                <div className="flex items-center gap-3 p-3 rounded-lg border bg-card w-full md:w-auto mt-2 md:mt-0">
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">🇺🇸</span>
                         <div>
@@ -140,7 +137,7 @@ export default async function CotacoesPage() {
                         </Badge>
                     )}
                 </div>
-            </div>
+            </PageHeader>
 
             {/* Gráfico com Seletor */}
             <div className="mb-8">

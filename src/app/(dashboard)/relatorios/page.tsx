@@ -26,6 +26,7 @@ import {
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { ReportRenderer } from '@/components/ai/ReportRenderer';
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 interface DailyReport {
   id: string;
@@ -219,21 +220,16 @@ export default function RelatoriosPage() {
   return (
     <div className="container py-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <FileText className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Relatórios de Mercado</h1>
-          <p className="text-muted-foreground mt-1">
-            Análises geradas por IA sobre o mercado agrícola
-          </p>
-        </div>
-        <Badge variant="secondary" className="ml-auto">
+      <PageHeader
+        title="Relatórios de Mercado"
+        description="Análises geradas por IA sobre o mercado agrícola"
+        icon={FileText}
+      >
+        <Badge variant="secondary" className="w-fit">
           <Sparkles className="h-3 w-3 mr-1" />
           Powered by Claude
         </Badge>
-      </div>
+      </PageHeader>
 
       <Tabs defaultValue="daily" className="space-y-6">
         <TabsList>

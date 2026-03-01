@@ -12,6 +12,7 @@ import {
 import { createCheckoutSession, createCustomerPortal } from "./actions"
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
+import { PageHeader } from "@/components/dashboard/PageHeader"
 
 export default async function PricingPage() {
     const session = await auth()
@@ -24,14 +25,10 @@ export default async function PricingPage() {
 
     return (
         <div className="container py-10">
-            <div className="mb-10 text-center flex flex-col items-center">
-                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                    Planos e Preços
-                </h1>
-                <p className="mt-4 text-lg text-muted-foreground">
-                    Escolha o plano ideal para alavancar suas análises de agronegócio.
-                </p>
-            </div>
+            <PageHeader
+                title="Planos e Preços"
+                description="Escolha o plano ideal para alavancar suas análises de agronegócio."
+            />
 
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {/* FREE PLAN */}

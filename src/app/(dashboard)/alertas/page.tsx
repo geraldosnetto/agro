@@ -20,8 +20,10 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Bell, Plus, Trash2, TrendingUp, TrendingDown, Percent, AlertTriangle } from "lucide-react";
-import { formatarUnidade } from "@/lib/formatters";
+import { Bell, Plus, Trash2, TrendingUp, TrendingDown, Percent, AlertTriangle, Clock, Edit2, Play, Pause, Filter, SortDesc } from "lucide-react";
+import { formatarMoeda, formatarUnidade } from "@/lib/formatters";
+import { revalidatePath } from "next/cache";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 interface Alerta {
     id: string;
@@ -130,23 +132,18 @@ export default function AlertasPage() {
     return (
         <div className="container px-4 py-8 max-w-4xl">
             {/* Header */}
-            <div className="flex flex-col gap-2 mb-8">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                        <Bell className="h-8 w-8 text-primary" />
-                        Meus Alertas
-                    </h1>
-                    <Link href="/alertas/novo">
-                        <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Novo Alerta
-                        </Button>
-                    </Link>
-                </div>
-                <p className="text-muted-foreground">
-                    Gerencie seus alertas de preço e acompanhe o mercado.
-                </p>
-            </div>
+            <PageHeader
+                title="Meus Alertas"
+                description="Gerencie seus alertas de preço e acompanhe o mercado."
+                icon={Bell}
+            >
+                <Link href="/alertas/novo">
+                    <Button className="w-full md:w-auto">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Novo Alerta
+                    </Button>
+                </Link>
+            </PageHeader>
 
             {/* Empty State */}
             {alertas.length === 0 && (

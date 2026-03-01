@@ -28,7 +28,7 @@ export default async function PodcastPage() {
                     <Headphones className="w-8 h-8 text-primary" />
                     AgroCast Semanal
                 </h1>
-                <p className="text-muted-foreground max-w-2xl">
+                <p className="text-muted-foreground">
                     Seu resumo completo das movimentações de preço, notícias e clima. Otimize seu tempo ouvindo nossa análise quinzenal enquanto se desloca.
                 </p>
             </div>

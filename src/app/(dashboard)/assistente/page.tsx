@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Loader2, Bot, User, Sparkles, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -169,24 +170,19 @@ export default function AssistentePage() {
 
   return (
     <div className="container py-6">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <Bot className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Assistente IndicAgro</h1>
-          <p className="text-muted-foreground mt-1">
-            Seu consultor inteligente para o agronegócio
-          </p>
-        </div>
+      <PageHeader
+        title="Assistente IndicAgro"
+        description="Seu consultor inteligente para o agronegócio"
+        icon={Bot}
+      >
         {remaining !== null && (
-          <Badge variant={remaining > 5 ? 'secondary' : 'destructive'} className="ml-auto">
+          <Badge variant={remaining > 5 ? 'secondary' : 'destructive'} className="w-fit ml-auto mt-1">
             {remaining === -1 ? 'Ilimitado' : `${remaining} msgs restantes`}
           </Badge>
         )}
-      </div>
+      </PageHeader>
 
-      <div className="grid lg:grid-cols-[280px_1fr] gap-6">
+      <div className="flex flex-col md:flex-row gap-6 max-w-6xl mx-auto h-[75vh]">
         {/* Sidebar - Conversations */}
         <Card className="h-fit lg:sticky lg:top-20">
           <CardHeader className="pb-3">

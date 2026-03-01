@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Star, Heart, Trash2, Bell, ExternalLink, TrendingUp, TrendingDown, Clock, Search, Calendar } from "lucide-react";
 import prisma from "@/lib/prisma";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 import { formatarUnidade, formatarCategoria, formatarMoeda } from "@/lib/formatters";
 import { getCategoriaConfig, getCategoriaLabel } from '@/lib/categories';
 import { VariationBadge } from "@/components/VariationBadge";
@@ -107,22 +108,17 @@ export default function FavoritosPage() {
     return (
         <div className="container px-4 py-8 max-w-4xl">
             {/* Header */}
-            <div className="flex flex-col gap-2 mb-8">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                        <Star className="h-8 w-8 text-primary fill-primary" />
-                        Meus Favoritos
-                    </h1>
-                    <Link href="/cotacoes">
-                        <Button variant="outline">
-                            Ver Todas as Cotações
-                        </Button>
-                    </Link>
-                </div>
-                <p className="text-muted-foreground">
-                    Acompanhe suas commodities favoritas em um só lugar.
-                </p>
-            </div>
+            <PageHeader
+                title="Meus Favoritos"
+                description="Acompanhe suas commodities favoritas em um só lugar."
+                icon={Star}
+            >
+                <Link href="/cotacoes">
+                    <Button variant="outline" className="w-full md:w-auto">
+                        Ver Todas as Cotações
+                    </Button>
+                </Link>
+            </PageHeader>
 
             {/* Empty State */}
             {favoritos.length === 0 && (
