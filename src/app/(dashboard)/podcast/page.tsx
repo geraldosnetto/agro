@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Headphones, Calendar, Clock, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export const metadata = {
     title: "AgroCast - IndicAgro",
@@ -22,16 +23,12 @@ export default async function PodcastPage() {
     const olderEpisodes = episodes.slice(1);
 
     return (
-        <div className="space-y-8 flex-1 max-w-5xl mx-auto w-full">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-emerald-600 dark:to-emerald-400 bg-clip-text text-transparent flex items-center gap-3">
-                    <Headphones className="w-8 h-8 text-primary" />
-                    AgroCast Semanal
-                </h1>
-                <p className="text-muted-foreground">
-                    Seu resumo completo das movimentações de preço, notícias e clima. Otimize seu tempo ouvindo nossa análise quinzenal enquanto se desloca.
-                </p>
-            </div>
+        <div className="container px-4 py-6 md:py-8 max-w-5xl space-y-8">
+            <PageHeader
+                title="AgroCast Semanal"
+                description="Seu resumo completo das movimentações de preço, notícias e clima. Otimize seu tempo ouvindo nossa análise quinzenal enquanto se desloca."
+                icon={Headphones}
+            />
 
             {episodes.length === 0 ? (
                 <div className="border border-dashed rounded-xl p-12 flex flex-col items-center justify-center text-center bg-muted/20">

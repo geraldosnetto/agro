@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function WeatherPage() {
     return (
-        <div className="container mx-auto p-6 space-y-8">
+        <div className="container px-4 py-6 md:py-8 space-y-8">
             <PageHeader
                 title="Previsão do Tempo"
                 description="Previsões atualizadas para as principais regiões produtoras."

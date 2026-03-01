@@ -57,10 +57,10 @@ export default async function PerfilPage() {
     const isEmailVerified = !!userData.emailVerified;
 
     return (
-        <div className="container max-w-4xl py-10">
+        <div className="container px-4 py-6 md:py-8 max-w-4xl">
             <PageHeader
                 title="Meu Perfil"
-                description="Gerencie suas informações e preferências"
+                description="Gerencie suas informações pessoais e preferências."
                 icon={User}
             />
 

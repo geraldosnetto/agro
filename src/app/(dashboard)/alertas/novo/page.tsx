@@ -144,7 +144,7 @@ function NovoAlertaForm() {
 
     if (status === "loading" || loading) {
         return (
-            <div className="container px-4 py-8 max-w-2xl">
+            <div className="container px-4 py-6 md:py-8 max-w-2xl">
                 <Skeleton className="h-8 w-32 mb-8" />
                 <Skeleton className="h-[400px] w-full" />
             </div>
@@ -156,7 +156,7 @@ function NovoAlertaForm() {
     }
 
     return (
-        <div className="container px-4 py-8 max-w-2xl">
+        <div className="container px-4 py-6 md:py-8 max-w-2xl">
             {/* Back button */}
             <Link href="/alertas" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -322,7 +322,7 @@ function NovoAlertaForm() {
 
 function NovoAlertaSkeleton() {
     return (
-        <div className="container px-4 py-8 max-w-2xl">
+        <div className="container px-4 py-6 md:py-8 max-w-2xl">
             <Skeleton className="h-8 w-32 mb-8" />
             <Skeleton className="h-[400px] w-full" />
         </div>

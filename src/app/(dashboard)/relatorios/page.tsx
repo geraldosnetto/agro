@@ -212,14 +212,14 @@ export default function RelatoriosPage() {
 
   if (status === 'loading') {
     return (
-      <div className="container py-8 flex items-center justify-center min-h-[60vh]">
+      <div className="container px-4 py-6 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   return (
-    <div className="container py-6">
+    <div className="container px-4 py-6 md:py-8">
       {/* Header */}
       <PageHeader
         title="Relatórios de Mercado"

@@ -17,10 +17,10 @@ export default function CalculatorPage() {
     };
 
     return (
-        <div className="container mx-auto p-6 space-y-8">
+        <div className="container px-4 py-6 md:py-8 space-y-8">
             <PageHeader
-                title="Calculadora de Rentabilidade"
-                description="Estime seus custos, margens e ponto de equilíbrio para a próxima safra."
+                title="Calculadora de Conversão"
+                description="Converta facilmente entre diferentes unidades de medida utilizadas no agronegócio."
                 icon={Calculator}
             />
 

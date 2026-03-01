@@ -14,13 +14,14 @@ import { CommodityStats } from "@/components/dashboard/CommodityStats";
 import { PredictionCard } from "@/components/ai/PredictionCard";
 import { SentimentWidget } from "@/components/ai/SentimentWidget";
 import { InternationalPriceCard } from "@/components/cotacoes/InternationalPriceCard";
-import { ChevronLeft, Bell } from "lucide-react";
+import { ChevronLeft, Bell, ArrowLeft, ArrowRight, Info, LineChart } from "lucide-react";
 import { getCategoriaConfig } from '@/lib/categories';
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { ExportButton } from "@/components/ExportButton";
 import { ShareButton } from "@/components/ShareButton";
 import { VariationBadge } from "@/components/VariationBadge";
 import { NewsFeed } from "@/components/dashboard/NewsFeed";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export const dynamic = 'force-dynamic';
 

@@ -92,7 +92,7 @@ export default function FavoritosPage() {
 
     if (status === "loading" || loading) {
         return (
-            <div className="container px-4 py-8 max-w-4xl">
+            <div className="container px-4 py-6 md:py-8 max-w-4xl">
                 <Skeleton className="h-10 w-48 mb-8" />
                 <div className="grid gap-4 md:grid-cols-2">
                     {[1, 2, 3, 4].map((i) => (
@@ -108,7 +108,7 @@ export default function FavoritosPage() {
     }
 
     return (
-        <div className="container px-4 py-8 max-w-4xl">
+        <div className="container px-4 py-6 md:py-8 max-w-4xl">
             {/* Header */}
             <PageHeader
                 title="Meus Favoritos"

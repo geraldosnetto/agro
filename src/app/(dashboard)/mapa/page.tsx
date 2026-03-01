@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 
 export default function MapaPage() {
     return (
-        <div className="container mx-auto p-6 md:py-8 space-y-8">
+        <div className="container px-4 py-6 md:py-8 space-y-8">
             <PageHeader
-                title="Mapa de Calor"
-                description="Visualize a tendência de preços em todo o território nacional."
+                title="Mapa de Preços"
+                description="Visualize a distribuição geográfica dos preços das commodities agrícolas."
                 icon={Map}
             />
 

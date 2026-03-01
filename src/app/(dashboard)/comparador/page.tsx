@@ -32,10 +32,10 @@ export default async function ComparadorPage() {
     }));
 
     return (
-        <div className="container mx-auto py-8 space-y-8">
+        <div className="container px-4 py-6 md:py-8 space-y-8">
             <PageHeader
                 title="Comparador de Preços"
-                description="Selecione commodities para comparar a evolução histórica. Use a &quot;Variação %&quot; para comparar tendências de produtos com preços muito diferentes."
+                description="Compare o histórico de preços entre diferentes commodities ou praças."
                 icon={ArrowRightLeft}
             />
 

@@ -9,10 +9,10 @@ import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export default function ConfiguracoesPage() {
     return (
-        <div className="container max-w-2xl py-10">
+        <div className="container px-4 py-6 md:py-8 max-w-2xl">
             <PageHeader
                 title="Configurações"
-                description="Ajuste as preferências do seu sistema"
+                description="Gerencie as configurações da sua conta e preferências do sistema."
                 icon={Settings}
             />
 

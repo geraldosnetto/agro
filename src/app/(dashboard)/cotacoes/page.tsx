@@ -5,11 +5,12 @@ import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import { PriceChartSelector } from "@/components/dashboard/PriceChartSelector";
 import { AnomalyAlert } from "@/components/ai/AnomalyAlert";
 import { SentimentSelector } from "@/components/ai/SentimentSelector";
-import { formatarUnidade, formatarCategoria } from "@/lib/formatters";
+import { formatarUnidade, formatarMoeda, formatarCategoria } from "@/lib/formatters";
 import prisma from "@/lib/prisma";
 import { auth } from "@/auth";
 import { PRACA_NAMES } from "@/lib/commodities";
 import { PageHeader } from "@/components/dashboard/PageHeader";
+import { LineChart } from "lucide-react";
 
 // Força renderização dinâmica - evita erro de conexão Prisma durante build
 export const dynamic = 'force-dynamic';
@@ -111,6 +112,7 @@ export default async function CotacoesPage() {
             <PageHeader
                 title="Cotações"
                 description="Preços atualizados de commodities agrícolas"
+                icon={LineChart}
             >
                 {/* Indicador do Dólar */}
                 <div className="flex items-center gap-3 p-3 rounded-lg border bg-card w-full md:w-auto mt-2 md:mt-0">

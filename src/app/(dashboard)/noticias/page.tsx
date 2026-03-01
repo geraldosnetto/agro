@@ -20,7 +20,7 @@ export default async function NoticiasPage() {
 
     return (
         <div className="space-y-8">
-            <div className="container mx-auto p-6 pb-0">
+            <div className="container px-4 py-6 md:py-8 space-y-8">
                 <PageHeader
                     title="Notícias do Agronegócio"
                     description="Acompanhe as últimas notícias e análises dos principais veículos do setor."
