@@ -15,14 +15,19 @@ export const PRACA_NAMES: Record<string, string[]> = {
     'suino': ['Regional (MG/PR/RS)', 'Carcaça SP'],
     'frango': ['Congelado SP'],
     'frango-resfriado': ['Resfriado SP'],
-    'leite': ['Brasil'],
+    'leite': ['RS', 'SC', 'PR', 'SP', 'MG', 'GO', 'BA', 'BRASIL', 'RJ', 'ES'],
     'ovos': ['São Paulo'],
     // Café
     'cafe-arabica': ['Indicador CEPEA'],
     'cafe-robusta': ['Indicador Robusta'],
     // Açúcar
     'acucar-cristal': ['Cristal SP'],
-    'acucar-vhp': ['VHP Exportação'],
+    'acucar-vhp': ['Mercado Externo SP'],
+    'acucar-refinado': ['Refinado Amorfo SP'],
+    'acucar-empacotado': ['Cristal Empacotado SP'],
+    'acucar-interno-al': ['Mercado Interno AL'],
+    'acucar-interno-pb': ['Mercado Interno PB'],
+    'acucar-interno-pe': ['Mercado Interno PE'],
     // Algodão
     'algodao': ['Indicador CEPEA'],
     // Citros

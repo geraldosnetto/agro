@@ -82,6 +82,7 @@ interface CommodityConfig {
     tableIndex?: number;
     priceColumnIndex?: number; // Default 1
     varColumnIndex?: number; // Default priceColumnIndex + 1. Set -1 to disable.
+    stateColumnIndex?: number; // Column index containing state name (e.g. leite: col 1 = Estado)
 }
 
 const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
@@ -99,18 +100,21 @@ const COMMODITY_CONFIG: Record<string, CommodityConfig> = {
     'suino': { url: 'https://www.cepea.org.br/br/indicador/suino.aspx', tableIndex: 1 },
     'frango': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Congelado'] },
     'frango-resfriado': { url: 'https://www.cepea.org.br/br/indicador/frango.aspx', keywords: ['Resfriado'] },
-    'leite': { url: 'https://www.cepea.org.br/br/indicador/leite.aspx', priceColumnIndex: 2, varColumnIndex: -1 },
+    'leite': { url: 'https://www.cepea.org.br/br/indicador/leite.aspx', priceColumnIndex: 2, varColumnIndex: -1, stateColumnIndex: 1 },
     'ovos': { url: 'https://www.cepea.org.br/br/indicador/ovos.aspx', priceColumnIndex: 2 },
 
     // === CAFÉ ===
     'cafe-arabica': { url: 'https://www.cepea.org.br/br/indicador/cafe.aspx' },
     'cafe-robusta': { url: 'https://www.cepea.org.br/br/indicador/cafe.aspx', tableIndex: 1, keywords: ['Robusta', 'ROBUSTA'] },
 
-    // === AÇÚCAR (todos os tipos) ===
-    'acucar-cristal': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['Cristal', 'CRISTAL'] },
-    'acucar-vhp': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['VHP'] },
-    'acucar-refinado': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['Refinado', 'Amorfo'] },
-    'acucar-empacotado': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx', keywords: ['Empacotado'] },
+    // === AÇÚCAR (cada tipo tem sua própria sub-página no CEPEA) ===
+    'acucar-cristal': { url: 'https://www.cepea.org.br/br/indicador/acucar.aspx' },
+    'acucar-vhp': { url: 'https://www.cepea.org.br/br/indicador/acucar-sao-paulo-mercado-externo.aspx' },
+    'acucar-refinado': { url: 'https://www.cepea.org.br/br/indicador/acucar-refinado-amorfo-sp.aspx' },
+    'acucar-empacotado': { url: 'https://www.cepea.org.br/br/indicador/acucar-cristal-empacotado-cepea-esalq-sao-paulo.aspx' },
+    'acucar-interno-al': { url: 'https://www.cepea.org.br/br/indicador/acucar-alagoas-mercado-interno.aspx' },
+    'acucar-interno-pb': { url: 'https://www.cepea.org.br/br/indicador/acucar-paraiba-mercado-interno.aspx' },
+    'acucar-interno-pe': { url: 'https://www.cepea.org.br/br/indicador/acucar-pernambuco-mercado-interno.aspx' },
 
     // === ETANOL ===
     'etanol-hidratado': { url: 'https://www.cepea.org.br/br/indicador/etanol.aspx', keywords: ['Hidratado', 'HIDRATADO'] },
@@ -190,16 +194,29 @@ export async function fetchCepeaSpotPrice(slug: string): Promise<CepeaData | nul
         const rows = targetTable.querySelectorAll('tbody tr');
         let validRow = null;
 
+        // For state-column tables (e.g. leite), find the row matching "BRASIL" as the spot reference
+        const stateCol = config.stateColumnIndex;
+
         for (const row of Array.from(rows)) {
             const cells = row.querySelectorAll('td');
             if (cells.length >= 2) {
                 const dataText = cells[0].textContent?.trim();
-                // Regex para DD/MM/YYYY, DD-MM-YYYY, MM/YYYY ou mmm/yy (suportar prefixos)
-                if (dataText && (
+                if (!dataText || !(
                     /\d{1,2}[\/-]\d{1,2}[\/-]\d{4}/.test(dataText) ||
                     /\d{1,2}\/\d{4}/.test(dataText) ||
                     /[a-z]{3}\/\d{2}/i.test(dataText)
                 )) {
+                    continue;
+                }
+
+                // If state column is defined, look for "BRASIL" row as the spot price
+                if (stateCol !== undefined) {
+                    const stateText = cells[stateCol]?.textContent?.trim().toUpperCase();
+                    if (stateText === 'BRASIL') {
+                        validRow = row;
+                        break;
+                    }
+                } else {
                     validRow = row;
                     break;
                 }
@@ -268,20 +285,27 @@ export async function fetchAllCepeaPrices(slug: string): Promise<CepeaPracaData[
         const dom = new JSDOM(html);
         const doc = dom.window.document;
         const tables = doc.querySelectorAll('table');
+        const stateCol = config.stateColumnIndex;
 
-        // Process each table as a different praça
-        for (let tableIdx = 0; tableIdx < tables.length && tableIdx < pracaNames.length; tableIdx++) {
-            const table = tables[tableIdx];
-            const pracaNome = pracaNames[tableIdx];
+        if (stateCol !== undefined) {
+            // === STATE COLUMN MODE (e.g. leite) ===
+            // Single table with a state column — each row is a different praça/state
+            const targetTable = (typeof config.tableIndex === 'number')
+                ? tables[config.tableIndex]
+                : tables[0];
 
-            const rows = table.querySelectorAll('tbody tr');
+            if (!targetTable) {
+                logger.warn(`Tabela não encontrada para ${slug}`);
+                return [];
+            }
+
+            const rows = targetTable.querySelectorAll('tbody tr');
 
             for (const row of Array.from(rows)) {
                 const cells = row.querySelectorAll('td');
                 if (cells.length < 2) continue;
 
                 const dataText = cells[0].textContent?.trim();
-                // Regex para DD/MM/YYYY, DD-MM-YYYY, MM/YYYY ou mmm/yy (suportar prefixos)
                 if (!dataText || !(
                     /\d{1,2}[\/-]\d{1,2}[\/-]\d{4}/.test(dataText) ||
                     /\d{1,2}\/\d{4}/.test(dataText) ||
@@ -289,6 +313,9 @@ export async function fetchAllCepeaPrices(slug: string): Promise<CepeaPracaData[
                 )) {
                     continue;
                 }
+
+                const stateName = cells[stateCol]?.textContent?.trim().toUpperCase() || 'BRASIL';
+                const pracaIdx = pracaNames.findIndex(p => p.toUpperCase() === stateName);
 
                 const priceIdx = config.priceColumnIndex || 1;
                 const valorStr = cells[priceIdx]?.textContent?.trim();
@@ -311,9 +338,57 @@ export async function fetchAllCepeaPrices(slug: string): Promise<CepeaPracaData[
                     valor,
                     data,
                     variacaoDiaria,
-                    pracaIndex: tableIdx,
-                    pracaNome
+                    pracaIndex: pracaIdx >= 0 ? pracaIdx : 0,
+                    pracaNome: stateName
                 });
+            }
+        } else {
+            // === MULTI-TABLE MODE (default) ===
+            // Each table is a different praça
+            for (let tableIdx = 0; tableIdx < tables.length && tableIdx < pracaNames.length; tableIdx++) {
+                const table = tables[tableIdx];
+                const pracaNome = pracaNames[tableIdx];
+
+                const rows = table.querySelectorAll('tbody tr');
+
+                for (const row of Array.from(rows)) {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length < 2) continue;
+
+                    const dataText = cells[0].textContent?.trim();
+                    if (!dataText || !(
+                        /\d{1,2}[\/-]\d{1,2}[\/-]\d{4}/.test(dataText) ||
+                        /\d{1,2}\/\d{4}/.test(dataText) ||
+                        /[a-z]{3}\/\d{2}/i.test(dataText)
+                    )) {
+                        continue;
+                    }
+
+                    const priceIdx = config.priceColumnIndex || 1;
+                    const valorStr = cells[priceIdx]?.textContent?.trim();
+
+                    let varDiaStr = '';
+                    const varIdx = config.varColumnIndex !== undefined ? config.varColumnIndex : (priceIdx + 1);
+                    if (varIdx >= 0) {
+                        varDiaStr = cells[varIdx]?.textContent?.trim().replace('%', '') || '';
+                    }
+
+                    if (!valorStr) continue;
+
+                    const valor = parseValor(valorStr);
+                    const data = parseData(dataText);
+                    const variacaoDiaria = varDiaStr ? parseValor(varDiaStr) : 0;
+
+                    if (isNaN(valor) || valor <= 0) continue;
+
+                    results.push({
+                        valor,
+                        data,
+                        variacaoDiaria,
+                        pracaIndex: tableIdx,
+                        pracaNome
+                    });
+                }
             }
         }
 
