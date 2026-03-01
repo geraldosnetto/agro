@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Bell, TrendingUp, TrendingDown, Percent, Loader2, AlertCircle } from "lucide-react";
 import { formatarUnidade } from "@/lib/formatters";
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 interface Commodity {
     id: string;
@@ -161,18 +162,14 @@ function NovoAlertaForm() {
                 Voltar para Alertas
             </Link>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Bell className="h-5 w-5" />
-                        Novo Alerta de Preço
-                    </CardTitle>
-                    <CardDescription>
-                        Configure um alerta para ser notificado quando o preço atingir o valor desejado.
-                    </CardDescription>
-                </CardHeader>
+            <PageHeader
+                title="Novo Alerta de Preço"
+                description="Configure um alerta para ser notificado quando o preço atingir o valor desejado."
+                icon={Bell}
+            />
 
-                <CardContent>
+            <Card>
+                <CardContent className="pt-6">
                     {error && (
                         <Alert variant="destructive" className="mb-6">
                             <AlertCircle className="h-4 w-4" />

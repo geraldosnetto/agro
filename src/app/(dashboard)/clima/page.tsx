@@ -1,6 +1,8 @@
 
 import { Metadata } from 'next';
 import { WeatherDashboard } from '@/components/dashboard/weather/WeatherDashboard';
+import { CloudRain } from 'lucide-react';
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export const metadata: Metadata = {
     title: 'Previsão do Tempo Agrícola | IndicAgro',
@@ -9,7 +11,12 @@ export const metadata: Metadata = {
 
 export default function WeatherPage() {
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto p-6 space-y-8">
+            <PageHeader
+                title="Previsão do Tempo"
+                description="Previsões atualizadas para as principais regiões produtoras."
+                icon={CloudRain}
+            />
             <WeatherDashboard />
         </div>
     );

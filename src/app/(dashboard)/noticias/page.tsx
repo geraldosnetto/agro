@@ -6,6 +6,7 @@ import { Newspaper } from 'lucide-react';
 import { NewsHero } from '@/components/news/NewsHero';
 import { NewsSidebar } from '@/components/news/NewsSidebar';
 import { VideoSection } from '@/components/news/VideoSection';
+import { PageHeader } from "@/components/dashboard/PageHeader";
 
 export const metadata: Metadata = {
     title: 'Notícias do Agronegócio | IndicAgro',
@@ -20,15 +21,11 @@ export default async function NoticiasPage() {
     return (
         <div className="space-y-8">
             <div className="container mx-auto p-6 pb-0">
-                <div className="flex flex-col gap-2 mb-8">
-                    <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                        <Newspaper className="h-8 w-8 text-primary" />
-                        Notícias do Agronegócio
-                    </h1>
-                    <p className="text-muted-foreground">
-                        Acompanhe as últimas notícias e análises dos principais veículos do setor.
-                    </p>
-                </div>
+                <PageHeader
+                    title="Notícias do Agronegócio"
+                    description="Acompanhe as últimas notícias e análises dos principais veículos do setor."
+                    icon={Newspaper}
+                />
 
                 {/* Seção Hero (Destaques) */}
                 <NewsHero news={news} />
