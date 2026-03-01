@@ -323,10 +323,13 @@ enum Categoria {
 
 enum Unidade {
   SACA_60KG
+  SACA_50KG
   ARROBA
   LITRO
   TONELADA
   KG
   CABECA
   DUZIA
+  CX_30DZ
+  CENTAVO_LIBRA
 }

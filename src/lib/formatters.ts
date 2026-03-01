@@ -6,13 +6,15 @@ import { Unidade, Categoria } from '@prisma/client';
 export function formatarUnidade(unidade: Unidade | string): string {
     const map: Record<string, string> = {
         'SACA_60KG': 'sc 60kg',
+        'SACA_50KG': 'sc 50kg',
         'ARROBA': '@',
         'LITRO': 'L',
         'TONELADA': 'ton',
         'KG': 'kg',
-        'SACA_50KG': 'sc 50kg',
         'DUZIA': 'dz',
-        'CABECA': 'cab'
+        'CABECA': 'cab',
+        'CX_30DZ': 'cx 30dz',
+        'CENTAVO_LIBRA': '¢/lb'
     };
     return map[unidade] || unidade;
 }
