@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { fetchAllCepeaPrices } from "@/lib/data-sources/cepea";
 import { timingSafeEqual } from "crypto";
 import logger from "@/lib/logger";
+import { extrairUF } from '@/lib/commodities';
 
 // Comparação segura contra timing attacks
 function safeCompare(a: string | null | undefined, b: string | null | undefined): boolean {
@@ -54,8 +55,8 @@ export async function POST(request: Request) {
 
                 // Prepare data for bulk insert
                 const dataToInsert = allPrices.map(data => {
-                    // Use the actual praça name from scraper
                     const pracaNome = data.pracaNome || 'Referência CEPEA';
+                    const estadoUF = extrairUF(pracaNome);
 
                     return {
                         commodityId: commodity.id,
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
                         valorAnterior: data.valor, // Histórico não tem valor anterior explícito
                         variacao: data.variacaoDiaria ?? 0,
                         praca: pracaNome,
-                        estado: 'BR', // Default, já que o scraper pega de tudo
+                        estado: estadoUF,
                         fonte: 'CEPEA',
                         dataReferencia: data.data,
                         createdAt: new Date(), // Explicitly set createdAt for createMany

@@ -39,3 +39,20 @@ export function getPrimaryPraca(slug: string): string | null {
 export function getAllPracas(slug: string): string[] {
     return PRACA_NAMES[slug] || [];
 }
+
+export function extrairUF(praca: string): string {
+    if (!praca) return 'BR';
+    const p = praca.toUpperCase();
+    if (p.includes('/PR') || p.includes('PARANÁ') || p.includes('PARANA')) return 'PR';
+    if (p.includes('SP') || p.includes('SÃO PAULO') || p.includes('SAO PAULO') || p.includes('PAULISTA') || p.includes('ESALQ')) return 'SP';
+    if (p.includes('RS') || p.includes('RIO GRANDE DO SUL') || p.includes('GAÚCHO')) return 'RS';
+    if (p.includes('MS') || p.includes('MATO GROSSO DO SUL')) return 'MS';
+    if (p.includes('MT') || p.includes('MATO GROSSO')) return 'MT';
+    if (p.includes('MG') || p.includes('MINAS GERAIS') || p.includes('MINEIRO')) return 'MG';
+    if (p.includes('GO') || p.includes('GOIÁS') || p.includes('GOIAS')) return 'GO';
+    if (p.includes('BA') || p.includes('BAHIA')) return 'BA';
+    if (p.includes('SC') || p.includes('SANTA CATARINA')) return 'SC';
+
+    // Default to BR for national indicators
+    return 'BR';
+}
