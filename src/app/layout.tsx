@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { WeatherProvider } from "@/contexts/WeatherContext";
 import { TickerServer } from "@/components/layout/TickerServer";
 import { Suspense } from "react";
+import { RechartsConsolePatch } from "@/components/RechartsConsolePatch";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${plusJakartaSans.variable} font-sans antialiased`} suppressHydrationWarning>
+        <RechartsConsolePatch />
         <AuthProvider>
           <WeatherProvider>
             <ThemeProvider>

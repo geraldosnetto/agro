@@ -1,6 +1,6 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { CotacaoCard, CotacaoCategoria } from "@/components/dashboard/CotacaoCard";
+import { CotacaoCategoria } from "@/components/dashboard/CotacaoCard";
+import { CotacoesClientTabs } from "@/components/dashboard/CotacoesClientTabs";
 import { fetchDolarPTAX } from "@/lib/data-sources/bcb";
 import { PriceChartSelector } from "@/components/dashboard/PriceChartSelector";
 import { AnomalyAlert } from "@/components/ai/AnomalyAlert";
@@ -14,6 +14,7 @@ import { PRACA_NAMES } from "@/lib/commodities";
 export const dynamic = 'force-dynamic';
 
 export default async function CotacoesPage() {
+
     // Busca sessão do usuário
     const session = await auth();
     const userId = session?.user?.id;
@@ -89,6 +90,9 @@ export default async function CotacoesPage() {
     const graos = sortedCotacoes.filter((c) => c.categoria === "graos");
     const pecuaria = sortedCotacoes.filter((c) => c.categoria === "pecuaria");
     const sucroenergetico = sortedCotacoes.filter((c) => c.categoria === "sucroenergetico");
+    const fibras = sortedCotacoes.filter((c) => c.categoria === "fibras");
+    const peixe = sortedCotacoes.filter((c) => c.categoria === "peixe");
+    const outros = sortedCotacoes.filter((c) => c.categoria === "outros");
 
     // Calcula timestamp real da última atualização
     const latestDate = commoditiesData.reduce((latest, c) => {
@@ -158,71 +162,16 @@ export default async function CotacoesPage() {
                 />
             </div>
 
-            {/* Tabs de categoria */}
-            <Tabs defaultValue="todos" className="space-y-6">
-                <TabsList className="w-full md:w-auto grid grid-cols-4 md:flex">
-                    <TabsTrigger value="todos" className="flex-1 md:flex-none">
-                        Todos
-                        <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
-                            {sortedCotacoes.length}
-                        </Badge>
-                    </TabsTrigger>
-                    <TabsTrigger value="graos" className="flex-1 md:flex-none">
-                        Grãos
-                        <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
-                            {graos.length}
-                        </Badge>
-                    </TabsTrigger>
-                    <TabsTrigger value="pecuaria" className="flex-1 md:flex-none">
-                        Pecuária
-                        <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
-                            {pecuaria.length}
-                        </Badge>
-                    </TabsTrigger>
-                    <TabsTrigger value="sucroenergetico" className="flex-1 md:flex-none text-xs sm:text-sm">
-                        Sucro
-                        <Badge variant="secondary" className="ml-2 hidden sm:inline-flex">
-                            {sucroenergetico.length}
-                        </Badge>
-                    </TabsTrigger>
-                </TabsList>
-
-                {/* Todos */}
-                <TabsContent value="todos" className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {sortedCotacoes.map((cotacao) => (
-                            <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
-                        ))}
-                    </div>
-                </TabsContent>
-
-                {/* Grãos */}
-                <TabsContent value="graos" className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {graos.map((cotacao) => (
-                            <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
-                        ))}
-                    </div>
-                </TabsContent>
-
-                {/* Pecuária */}
-                <TabsContent value="pecuaria" className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {pecuaria.map((cotacao) => (
-                            <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
-                        ))}
-                    </div>
-                </TabsContent>
-
-                {/* Sucroenergetico */}
-                <TabsContent value="sucroenergetico" className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {sucroenergetico.map((cotacao) => (
-                            <CotacaoCard key={`${cotacao.nome}-${cotacao.praca}`} {...cotacao} />
-                        ))}
-                    </div>
-                </TabsContent>
-            </Tabs>
+            {/* Tabs de categoria e Toggle importado do Client Component */}
+            <CotacoesClientTabs
+                sortedCotacoes={sortedCotacoes}
+                graos={graos}
+                pecuaria={pecuaria}
+                sucroenergetico={sucroenergetico}
+                fibras={fibras}
+                peixe={peixe}
+                outros={outros}
+            />
 
             {/* Fonte */}
             <div className="mt-8 pt-6 border-t">

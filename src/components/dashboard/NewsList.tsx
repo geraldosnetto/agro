@@ -1,12 +1,13 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ExternalLink, Search, Filter, Newspaper, Calendar } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ExternalLink, Search, Filter, Newspaper, Calendar, Loader2 } from 'lucide-react';
 
 import { type NewsItem } from '@/lib/data-sources/news';
 
@@ -49,14 +50,70 @@ interface NewsListProps {
 export function NewsList({ initialNews }: NewsListProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedSource, setSelectedSource] = useState('all');
+    const [selectedCategory, setSelectedCategory] = useState('all');
     const [filteredNews, setFilteredNews] = useState(initialNews);
+    const [allAvailableNews, setAllAvailableNews] = useState(initialNews); // Guarda as originais da API para buscas textuais
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Identificar fontes únicas
-    const sources = Array.from(new Set(initialNews.map(item => item.source)));
+    // Filter categories explicitly
+    const categories = [
+        { id: 'all', label: 'Todas' },
+        { id: 'soja', label: 'Soja' },
+        { id: 'milho', label: 'Milho' },
+        { id: 'boi-gordo', label: 'Boi Gordo' },
+        { id: 'cafe', label: 'Café' },
+        { id: 'etanol', label: 'Etanol' },
+        { id: 'trigo', label: 'Trigo' },
+        { id: 'algodao', label: 'Algodão' },
+        { id: 'arroz', label: 'Arroz' },
+        { id: 'feijao', label: 'Feijão' },
+        { id: 'suino', label: 'Suínos' },
+        { id: 'frango', label: 'Frango' },
+        { id: 'leite', label: 'Leite' },
+        { id: 'tilapia', label: 'Tilápia' },
+        { id: 'mandioca', label: 'Mandioca' },
+    ];
 
-    // Filtrar notícias
-    const filterNews = (search: string, source: string) => {
-        let filtered = initialNews;
+    // Efeito para re-buscar do servidor as news via API quando trocar a tab
+    useEffect(() => {
+        let mounted = true;
+        const fetchCategoryNews = async () => {
+            if (selectedCategory === 'all' && initialNews.length > 0) {
+                // Se for "all", usamos initialNews
+                if (mounted) {
+                    setAllAvailableNews(initialNews);
+                    applyLocalFilters(searchTerm, selectedSource, initialNews);
+                }
+                return;
+            }
+
+            // Se for outra coisa, buscamos a API parametrizada que fizemos
+            setIsLoading(true);
+            try {
+                const res = await fetch(`/api/news?commodity=${selectedCategory}&limit=30`);
+                const data = await res.json();
+                if (data.success && mounted) {
+                    setAllAvailableNews(data.news);
+                    applyLocalFilters(searchTerm, selectedSource, data.news);
+                }
+            } catch (err) {
+                console.error("Failed to fetch categorized news", err);
+            } finally {
+                if (mounted) setIsLoading(false);
+            }
+        };
+
+        fetchCategoryNews();
+
+        return () => { mounted = false; };
+    }, [selectedCategory]);
+
+    // Identificar fontes únicas a partir da aba atual
+    const sources = Array.from(new Set(allAvailableNews.map(item => item.source)));
+
+    // Filtrar notícias textuais na memória
+    const applyLocalFilters = (search: string, source: string, pool: NewsItem[]) => {
+        let filtered = pool;
 
         if (search) {
             const searchLower = search.toLowerCase();
@@ -76,17 +133,35 @@ export function NewsList({ initialNews }: NewsListProps) {
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setSearchTerm(val);
-        filterNews(val, selectedSource);
+        applyLocalFilters(val, selectedSource, allAvailableNews);
     };
 
     const handleSourceChange = (val: string) => {
         setSelectedSource(val);
-        filterNews(searchTerm, val);
+        applyLocalFilters(searchTerm, val, allAvailableNews);
     };
 
     return (
         <div className="space-y-6">
-            {/* Filtros e Busca */}
+
+            {/* Abas / Categorias */}
+            <div className="w-full overflow-x-auto pb-2 scrollbar-hide">
+                <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <TabsList className="inline-flex h-10 w-fit items-center justify-start rounded-md bg-muted p-1 text-muted-foreground">
+                        {categories.map((cat) => (
+                            <TabsTrigger
+                                key={cat.id}
+                                value={cat.id}
+                                className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                            >
+                                {cat.label}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </Tabs>
+            </div>
+
+            {/* Filtros e Busca Textual ou por Fonte */}
             <Card>
                 <CardContent className="pt-6">
                     <div className="flex flex-col md:flex-row gap-4">
@@ -119,12 +194,16 @@ export function NewsList({ initialNews }: NewsListProps) {
                 </CardContent>
             </Card>
 
-            {/* Grid de Notícias */}
-            {filteredNews.length === 0 ? (
+            {/* Loading Grid ou  Grid de Notícias */}
+            {isLoading ? (
+                <div className="flex justify-center py-20 text-muted-foreground">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+            ) : filteredNews.length === 0 ? (
                 <div className="text-center py-12">
                     <Newspaper className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-medium">Nenhuma notícia encontrada</h3>
-                    <p className="text-muted-foreground">Tente ajustar seus termos de busca.</p>
+                    <p className="text-muted-foreground">Não há publicações neste filtro no momento.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

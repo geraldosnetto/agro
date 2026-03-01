@@ -1,0 +1,48 @@
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').
+# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
+0 3 * * * /home/symbolon/backup.sh
+# FOLKOR - Automated Backups
+# PostgreSQL backup: Daily at 2:00 AM
+0 2 * * * /home/folkor/scripts/backup-database.sh >> /var/log/folkor-backup.log 2>&1
+
+# Docker volumes backup: Weekly (Sundays at 3:00 AM)
+0 3 * * 0 /home/folkor/scripts/backup-volumes.sh >> /var/log/folkor-backup-volumes.log 2>&1
+
+# Let's Encrypt certificate renewal check: Twice daily
+0 0,12 * * * certbot renew --quiet --post-hook "systemctl reload nginx" >> /var/log/letsencrypt/renew.log 2>&1
+
+0 18 * * 1-5 /home/indicagro/scripts/cron-update-prices.sh
+
+# Relatório diário às 07:00
+0 7 * * * curl -s -H "Authorization: Bearer pgGbhwtUQkla1JhlmHaae2GuKhJf9j2qNcZZx5AjIXg=" https://indicagro.com.br/api/cron/generate-daily-report
+
+# Relatórios semanais às segundas 08:00
+0 8 * * 1 curl -s -H "Authorization: Bearer pgGbhwtUQkla1JhlmHaae2GuKhJf9j2qNcZZx5AjIXg=" https://indicagro.com.br/api/cron/generate-weekly-reports
+
+# Verificar anomalias às 09:00
+0 9 * * * curl -s -H "Authorization: Bearer pgGbhwtUQkla1JhlmHaae2GuKhJf9j2qNcZZx5AjIXg=" https://indicagro.com.br/api/cron/check-anomalies
+
+0 */6 * * * curl -H "Authorization: Bearer pgGbhwtUQkla1JhlmHaae2GuKhJf9j2qNcZZx5AjIXg=" https://indicagro.com.br/api/cron/analyze-sentiment
+* * * * * /home/terraria-manual/monitor_terraria.sh >> /home/terraria-manual/monitor.log 2>&1
+0 11 * * * /home/terraria-manual/auto_update_terraria.sh >> /home/terraria-manual/update.log 2>&1

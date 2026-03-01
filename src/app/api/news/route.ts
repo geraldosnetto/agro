@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { fetchAllNews } from '@/lib/data-sources/news';
+import { fetchAllNews, fetchNewsForCommodity } from '@/lib/data-sources/news';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
@@ -9,9 +9,15 @@ export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const limitParam = searchParams.get('limit');
+        const commodityParam = searchParams.get('commodity');
         const limit = limitParam ? parseInt(limitParam, 10) : 20;
 
-        const news = await fetchAllNews(limit);
+        let news;
+        if (commodityParam && commodityParam !== 'all') {
+            news = await fetchNewsForCommodity(commodityParam, limit);
+        } else {
+            news = await fetchAllNews(limit);
+        }
 
         return NextResponse.json({
             success: true,

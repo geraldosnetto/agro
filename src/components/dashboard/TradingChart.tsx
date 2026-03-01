@@ -297,7 +297,7 @@ export function TradingChart({
                             Sem dados para o período
                         </div>
                     ) : (
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={1}>
+                        <ResponsiveContainer width="99%" height="100%" minWidth={1} minHeight={1}>
                             <ComposedChart data={data}>
                                 <defs>
                                     <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
@@ -387,7 +387,7 @@ export function TradingChart({
                             <span className="text-xs font-medium text-muted-foreground">RSI (14)</span>
                         </div>
                         <div className="h-[100px]">
-                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={1}>
+                            <ResponsiveContainer width="99%" height="100%" minWidth={1} minHeight={1}>
                                 <AreaChart data={data}>
                                     <defs>
                                         <linearGradient id="colorRsi" x1="0" y1="0" x2="0" y2="1">
@@ -413,7 +413,7 @@ export function TradingChart({
                             <span className="text-xs font-medium text-muted-foreground">MACD (12, 26, 9)</span>
                         </div>
                         <div className="h-[100px]">
-                            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={1}>
+                            <ResponsiveContainer width="99%" height="100%" minWidth={1} minHeight={1}>
                                 <ComposedChart data={data}>
                                     <XAxis dataKey="date" hide />
                                     <YAxis tickLine={false} axisLine={false} width={30} className="text-xs" />

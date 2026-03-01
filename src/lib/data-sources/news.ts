@@ -58,48 +58,66 @@ interface CustomFeed {
     items: CustomItem[];
 }
 
-// Fontes RSS públicas (verificadas e funcionando)
+// Fontes RSS públicas (Mapeamento inteligente por Cultura)
 const RSS_SOURCES = [
-    {
-        name: 'Globo Rural',
-        url: 'https://g1.globo.com/rss/g1/economia/agronegocios/',
-        baseUrl: 'https://g1.globo.com/economia/agronegocios'
-    },
-    {
-        name: 'Canal Rural',
-        url: 'https://www.canalrural.com.br/feed/',
-        baseUrl: 'https://www.canalrural.com.br'
-    },
-    {
-        name: 'Beef Point',
-        url: 'https://www.beefpoint.com.br/feed/',
-        baseUrl: 'https://www.beefpoint.com.br'
-    },
-    {
-        name: 'AgroNoticia',
-        url: 'https://www.agronoticia.com.br/feed/',
-        baseUrl: 'https://www.agronoticia.com.br'
-    },
-    {
-        name: 'Portal DBO',
-        url: 'https://www.portaldbo.com.br/feed/',
-        baseUrl: 'https://www.portaldbo.com.br'
-    },
-    {
-        name: 'RPA News',
-        url: 'https://revistarpanews.com.br/feed/',
-        baseUrl: 'https://revistarpanews.com.br'
-    },
-    {
-        name: 'Revista Cafeicultura',
-        url: 'https://revistacafeicultura.com.br/feed/',
-        baseUrl: 'https://revistacafeicultura.com.br'
-    },
-    {
-        name: 'JornalCana',
-        url: 'https://www.jornalcana.com.br/feed/',
-        baseUrl: 'https://www.jornalcana.com.br'
-    },
+    // --- GERAIS (Trazem notícias de todas as culturas) ---
+    { name: 'Globo Rural', url: 'https://g1.globo.com/rss/g1/economia/agronegocios/', baseUrl: 'https://g1.globo.com/economia/agronegocios', tags: ['all'] },
+    { name: 'Canal Rural', url: 'https://www.canalrural.com.br/feed/', baseUrl: 'https://www.canalrural.com.br', tags: ['all'] },
+    { name: 'Notícias Agrícolas', url: 'https://www.noticiasagricolas.com.br/rss/', baseUrl: 'https://www.noticiasagricolas.com.br', tags: ['all'] },
+    { name: 'Agrolink', url: 'https://www.agrolink.com.br/rss/noticias.xml', baseUrl: 'https://www.agrolink.com.br', tags: ['all'] },
+    { name: 'CompreRural', url: 'https://www.comprerural.com/feed/', baseUrl: 'https://www.comprerural.com', tags: ['all'] },
+    { name: 'Portal do Agronegócio', url: 'https://www.portaldoagronegocio.com.br/feed/', baseUrl: 'https://www.portaldoagronegocio.com.br', tags: ['all'] },
+    { name: 'Agro Estadão', url: 'https://agro.estadao.com.br/feed/', baseUrl: 'https://agro.estadao.com.br', tags: ['all'] },
+    { name: 'Brasilagro', url: 'https://www.brasilagro.com.br/feed/', baseUrl: 'https://www.brasilagro.com.br', tags: ['all'] },
+    { name: 'AgroNoticia', url: 'https://www.agronoticia.com.br/feed/', baseUrl: 'https://www.agronoticia.com.br', tags: ['all'] },
+
+    // --- GRÃOS (Soja, Milho, Trigo, Arroz e Feijão) ---
+    { name: 'Embrapa Soja', url: 'https://www.embrapa.br/rss/soja', baseUrl: 'https://www.embrapa.br/soja', tags: ['soja'] },
+    { name: 'SAFRAS & Mercado', url: 'https://safras.com.br/feed/', baseUrl: 'https://safras.com.br', tags: ['soja', 'milho', 'trigo', 'cafe', 'algodao'] },
+    { name: 'Embrapa Milho e Sorgo', url: 'https://www.embrapa.br/rss/milho-e-sorgo', baseUrl: 'https://www.embrapa.br', tags: ['milho'] },
+    { name: 'Revista Cultivar', url: 'https://revistacultivar.com.br/feed/', baseUrl: 'https://revistacultivar.com.br', tags: ['milho', 'soja'] },
+    { name: 'Embrapa Trigo', url: 'https://www.embrapa.br/rss/trigo', baseUrl: 'https://www.embrapa.br/trigo', tags: ['trigo'] },
+    { name: 'Planeta Arroz', url: 'https://planetaarroz.com.br/feed/', baseUrl: 'https://planetaarroz.com.br', tags: ['arroz'] },
+    { name: 'IRGA', url: 'https://irga.rs.gov.br/rss', baseUrl: 'https://irga.rs.gov.br', tags: ['arroz'] },
+    { name: 'Embrapa Arroz e Feijão', url: 'https://www.embrapa.br/rss/arroz-e-feijao', baseUrl: 'https://www.embrapa.br', tags: ['arroz', 'feijao'] },
+    { name: 'IBRAFE', url: 'https://ibrafe.org/feed/', baseUrl: 'https://ibrafe.org', tags: ['feijao'] },
+
+    // --- RAIZES ---
+    { name: 'Embrapa Mandioca', url: 'https://www.embrapa.br/rss/mandioca-e-fruticultura', baseUrl: 'https://www.embrapa.br', tags: ['mandioca'] },
+    { name: 'Planeta Campo', url: 'https://planetacampo.com.br/feed/', baseUrl: 'https://planetacampo.com.br', tags: ['mandioca', 'boi-gordo', 'soja', 'milho'] },
+
+    // --- PROTEÍNA ANIMAL (Boi, Suíno, Frango, Ovos, Peixe) ---
+    { name: 'BeefPoint', url: 'https://www.beefpoint.com.br/feed/', baseUrl: 'https://www.beefpoint.com.br', tags: ['boi-gordo'] },
+    { name: 'Portal DBO', url: 'https://www.portaldbo.com.br/feed/', baseUrl: 'https://www.portaldbo.com.br', tags: ['boi-gordo'] },
+    { name: 'Canal do Boi', url: 'https://sba1.com/feed/', baseUrl: 'https://sba1.com', tags: ['boi-gordo'] },
+    { name: 'SuiSite', url: 'https://www.suisite.com.br/feed/', baseUrl: 'https://www.suisite.com.br', tags: ['suino'] },
+    { name: 'Suínocultura - 3tres3', url: 'https://www.3tres3.com.br/rss/', baseUrl: 'https://www.3tres3.com.br', tags: ['suino'] },
+    { name: 'Agrimídia', url: 'https://agrimidia.com.br/feed/', baseUrl: 'https://agrimidia.com.br', tags: ['suino', 'frango', 'ovos', 'boi-gordo'] },
+    { name: 'O Presente Rural', url: 'https://opresenterural.com.br/feed/', baseUrl: 'https://opresenterural.com.br', tags: ['suino', 'frango'] },
+    { name: 'AviSite', url: 'https://www.avisite.com.br/feed/', baseUrl: 'https://www.avisite.com.br', tags: ['frango', 'ovos'] },
+    { name: 'AviNews Brasil', url: 'https://avinews.com/br/feed/', baseUrl: 'https://avinews.com/br', tags: ['frango', 'ovos'] },
+    { name: 'OvoSite', url: 'https://www.ovosite.com.br/feed/', baseUrl: 'https://www.ovosite.com.br', tags: ['ovos'] },
+    { name: 'Peixe BR', url: 'https://www.peixebr.com.br/feed/', baseUrl: 'https://www.peixebr.com.br', tags: ['tilapia'] },
+    { name: 'Aquaculture Brasil', url: 'https://www.aquaculturebrasil.com.br/feed/', baseUrl: 'https://www.aquaculturebrasil.com.br', tags: ['tilapia'] },
+    { name: 'Seafood Brasil', url: 'https://seafoodbrasil.com.br/feed/', baseUrl: 'https://seafoodbrasil.com.br', tags: ['tilapia'] },
+    { name: 'Panorama da Aquicultura', url: 'https://panoramadaaquicultura.com.br/feed/', baseUrl: 'https://panoramadaaquicultura.com.br', tags: ['tilapia'] },
+
+    // --- LEITE ---
+    { name: 'MilkPoint', url: 'https://www.milkpoint.com.br/rss', baseUrl: 'https://www.milkpoint.com.br', tags: ['leite'] },
+    { name: 'Canal do Leite', url: 'https://canaldoleite.com/feed/', baseUrl: 'https://canaldoleite.com', tags: ['leite'] },
+    { name: 'Revista Laticínios', url: 'https://revistalaticinios.com.br/feed/', baseUrl: 'https://revistalaticinios.com.br', tags: ['leite'] },
+    { name: 'Balde Branco', url: 'https://baldebranco.com.br/feed/', baseUrl: 'https://baldebranco.com.br', tags: ['leite'] },
+
+    // --- CAFE e ALGODÃO ---
+    { name: 'CaféPoint', url: 'https://www.cafepoint.com.br/rss', baseUrl: 'https://www.cafepoint.com.br', tags: ['cafe'] },
+    { name: 'AgnoCafé', url: 'https://agnocafe.com.br/feed/', baseUrl: 'https://agnocafe.com.br', tags: ['cafe'] },
+    { name: 'Revista Cafeicultura', url: 'https://revistacafeicultura.com.br/feed/', baseUrl: 'https://revistacafeicultura.com.br', tags: ['cafe'] },
+    { name: 'ABRAPA (Algodão)', url: 'https://abrapa.com.br/feed/', baseUrl: 'https://abrapa.com.br', tags: ['algodao'] },
+
+    // --- SUCROENERGÉTICO ---
+    { name: 'NovaCana', url: 'https://www.novacana.com/rss', baseUrl: 'https://www.novacana.com', tags: ['acucar', 'etanol', 'etanol-hidratado', 'etanol-anidro'] },
+    { name: 'JornalCana', url: 'https://www.jornalcana.com.br/feed/', baseUrl: 'https://www.jornalcana.com.br', tags: ['acucar', 'etanol', 'etanol-hidratado', 'etanol-anidro'] },
+    { name: 'RPA News', url: 'https://revistarpanews.com.br/feed/', baseUrl: 'https://revistarpanews.com.br', tags: ['acucar', 'etanol', 'etanol-hidratado', 'etanol-anidro'] },
 ];
 
 // Keywords por commodity para filtrar notícias relevantes
@@ -300,8 +318,13 @@ export async function fetchNewsForCommodity(slug: string, limit = 5): Promise<Ne
     // Keywords para filtrar
     const keywords = COMMODITY_KEYWORDS[slug] || [slug.replace('-', ' ')];
 
-    // Busca de todas as fontes em paralelo com tratamento de erro individual
-    const results = await Promise.allSettled(RSS_SOURCES.map(source => fetchFromSource(source)));
+    // Seleciona as fontes baseadas nas tags da cultura para evitar timeouts do servidor
+    const relevantSources = RSS_SOURCES.filter(source =>
+        source.tags.includes('all') || source.tags.includes(slug)
+    );
+
+    // Busca apenas nas fontes relevantes em paralelo com tratamento de erro individual
+    const results = await Promise.allSettled(relevantSources.map(source => fetchFromSource(source)));
 
     // Filtra apenas os sucessos
     const successfulFeeds = results

@@ -63,7 +63,7 @@ export function SentimentGauge({
         <div className={cn("flex flex-col items-center", className)}>
             <div style={{ width: size, height: size / 2 + 30, overflow: 'visible', position: 'relative' }}>
                 <div style={{ width: size, height: size / 2, overflow: 'hidden' }}>
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={1}>
+                    <ResponsiveContainer width="99%" height="100%" minWidth={1} minHeight={1}>
                         <PieChart>
                             <Pie
                                 data={data}

@@ -20,8 +20,8 @@ export async function GET(request: Request) {
   try {
     const startTime = Date.now();
 
-    // Buscar notícias recentes
-    const news = await fetchAllNews(30);
+    // Buscar notícias recentes (ampliando para 50 para garantir margem maior de ineditismo)
+    const news = await fetchAllNews(50);
 
     if (news.length === 0) {
       return NextResponse.json({
@@ -38,17 +38,20 @@ export async function GET(request: Request) {
     });
 
     const existingUrls = new Set(existing.map(e => e.newsUrl));
-    const toAnalyze = news.filter(n => !existingUrls.has(n.link));
+    let toAnalyze = news.filter(n => !existingUrls.has(n.link));
 
-    if (toAnalyze.length === 0) {
-      return NextResponse.json({
-        message: 'Todas as notícias já foram analisadas',
-        existing: existing.length,
-        analyzed: 0,
-      });
+    // O usuário requisitou que *sempre* sejam analisadas no mínimo 10 notícias.
+    // Se não houver 10 inéditas, pegamos as mais antigas já lidas para bater a cota (completamos a diferença)
+    if (toAnalyze.length < 10) {
+      const needed = 10 - toAnalyze.length;
+      const readNews = news.filter(n => existingUrls.has(n.link));
+
+      // Ordena de forma a pegar as mais antigas dentre as recentes para reanálise
+      const fallbacks = readNews.slice(0, needed);
+      toAnalyze = [...toAnalyze, ...fallbacks];
     }
 
-    // Limitar a 10 por execução para não estourar tokens
+    // Limitar cota a 10 por execução para não estourar tokens e janela de contexto do LLM
     const batch = toAnalyze.slice(0, 10);
 
     // Analisar em batch
@@ -61,7 +64,7 @@ export async function GET(request: Request) {
 
     const response = await client.messages.create({
       model: config.model,
-      max_tokens: 1024,
+      max_tokens: 2500, // Aumentado para 2500 devido ao aumento do batch para 10 (evita corte do JSON)
       temperature: config.temperature,
       messages: [{ role: 'user', content: prompt }],
     });
@@ -73,14 +76,16 @@ export async function GET(request: Request) {
     // Parse da resposta
     let analyses: Array<{
       index: number;
-      sentiment: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+      sentiment: string; // relaxando tipo antes do parse para poder validar
       score: number;
       commodities: string[];
       impact: number;
     }>;
 
     try {
-      analyses = JSON.parse(responseText);
+      // Limpeza de markdown no responseText caso a IA adicione ```json ... ```
+      const cleanedText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      analyses = JSON.parse(cleanedText);
     } catch {
       logger.error('Erro ao parsear resposta batch de sentimento', { responseText });
       return NextResponse.json(
@@ -95,20 +100,28 @@ export async function GET(request: Request) {
       const newsItem = batch[analysis.index];
       if (!newsItem) continue;
 
+      // Garantir que o enum do prisma seja respeitado
+      let validSentiment: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL' = 'NEUTRAL';
+      if (analysis.sentiment === 'POSITIVE' || analysis.sentiment === 'NEGATIVE' || analysis.sentiment === 'NEUTRAL') {
+        validSentiment = analysis.sentiment;
+      } else if (analysis.sentiment === 'MIXED') {
+        validSentiment = 'NEUTRAL';
+      }
+
       try {
         await prisma.newsSentiment.upsert({
           where: { newsUrl: newsItem.link },
           create: {
             newsUrl: newsItem.link,
             newsTitle: newsItem.title,
-            sentiment: analysis.sentiment,
+            sentiment: validSentiment,
             score: Math.max(-1, Math.min(1, analysis.score)),
             commodities: analysis.commodities || [],
             impactScore: Math.max(0, Math.min(1, analysis.impact)),
           },
           update: {
             newsTitle: newsItem.title,
-            sentiment: analysis.sentiment,
+            sentiment: validSentiment,
             score: Math.max(-1, Math.min(1, analysis.score)),
             commodities: analysis.commodities || [],
             impactScore: Math.max(0, Math.min(1, analysis.impact)),

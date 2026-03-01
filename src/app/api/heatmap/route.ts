@@ -99,35 +99,10 @@ export async function GET(request: Request) {
         });
 
         // =================================================================================
-        // FALLBACK: Se só tivermos dados genéricos "BR", distribuímos para os estados
-        // para o mapa não ficar em branco (Demonstração)
+        // O FALLBACK simulado com Math.random foi removido por exigência do negócio. 
+        // Apenas dados reais agregados nos estados via Prisma serão exibidos.
+        // Se a commodity só tiver cotação unificada 'BR', o mapa não pintará os estados.
         // =================================================================================
-        if (heatmapData.length === 1 && heatmapData[0].uf === 'BR') {
-            const basePrice = heatmapData[0].value;
-            const baseVariation = heatmapData[0].variation;
-
-            // Principais estados produtores
-            const states = ['MT', 'PR', 'GO', 'MS', 'RS', 'SP', 'MG', 'BA', 'MA', 'TO', 'PI', 'SC'];
-
-            heatmapData = states.map(uf => {
-                // Variação aleatória leve em torno do preço base (-2% a +2%)
-                const priceFactor = 0.98 + Math.random() * 0.04;
-                const mockPrice = basePrice * priceFactor;
-
-                // Variação aleatória do dia (-0.5% a +0.5% em cima da variação base)
-                const varFactor = (Math.random() - 0.5);
-                const mockVariation = baseVariation + varFactor;
-
-                return {
-                    id: `BR-${uf}`,
-                    uf,
-                    value: Number(mockPrice.toFixed(2)),
-                    variation: Number(mockVariation.toFixed(2)),
-                    cities: 1 // simulado
-                };
-            });
-        }
-
 
         // 5. Buscar lista de commodities para o dropdown
         const allCommodities = await prisma.commodity.findMany({
