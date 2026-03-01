@@ -219,13 +219,13 @@ export default function RelatoriosPage() {
   return (
     <div className="container py-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-8">
         <div className="p-2 rounded-lg bg-primary/10">
           <FileText className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Relatórios de Mercado</h1>
-          <p className="text-muted-foreground text-sm">
+          <h1 className="text-3xl font-bold tracking-tight">Relatórios de Mercado</h1>
+          <p className="text-muted-foreground mt-1">
             Análises geradas por IA sobre o mercado agrícola
           </p>
         </div>

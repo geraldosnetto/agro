@@ -19,7 +19,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Heart, Trash2, Bell, ExternalLink } from "lucide-react";
+import { Star, Heart, Trash2, Bell, ExternalLink, TrendingUp, TrendingDown, Clock, Search, Calendar } from "lucide-react";
+import prisma from "@/lib/prisma";
 import { formatarUnidade, formatarCategoria, formatarMoeda } from "@/lib/formatters";
 import { getCategoriaConfig, getCategoriaLabel } from '@/lib/categories';
 import { VariationBadge } from "@/components/VariationBadge";
@@ -106,21 +107,21 @@ export default function FavoritosPage() {
     return (
         <div className="container px-4 py-8 max-w-4xl">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-3">
-                        <Heart className="h-8 w-8 fill-rose-500 text-rose-500" />
+            <div className="flex flex-col gap-2 mb-8">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                        <Star className="h-8 w-8 text-primary fill-primary" />
                         Meus Favoritos
                     </h1>
-                    <p className="text-muted-foreground mt-1">
-                        {favoritos.length} commodity{favoritos.length !== 1 ? "s" : ""} favoritada{favoritos.length !== 1 ? "s" : ""}
-                    </p>
+                    <Link href="/cotacoes">
+                        <Button variant="outline">
+                            Ver Todas as Cotações
+                        </Button>
+                    </Link>
                 </div>
-                <Link href="/cotacoes">
-                    <Button variant="outline">
-                        Ver Todas as Cotações
-                    </Button>
-                </Link>
+                <p className="text-muted-foreground">
+                    Acompanhe suas commodities favoritas em um só lugar.
+                </p>
             </div>
 
             {/* Empty State */}

@@ -4,11 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Settings } from "lucide-react";
 
 export default function ConfiguracoesPage() {
     return (
-        <div className="container max-w-4xl py-8">
-            <h1 className="text-3xl font-bold mb-8">Configurações</h1>
+        <div className="container max-w-2xl py-10">
+            <div className="flex flex-col gap-2 mb-8">
+                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                    <Settings className="h-8 w-8 text-primary" />
+                    Configurações
+                </h1>
+                <p className="text-muted-foreground">
+                    Ajuste as preferências do seu sistema
+                </p>
+            </div>
 
             <div className="space-y-6">
                 <Card>

@@ -2,6 +2,7 @@
 import { Metadata } from "next";
 import prisma from "@/lib/prisma";
 import { CommodityComparator } from "@/components/dashboard/comparator/CommodityComparator";
+import { ArrowRightLeft } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -31,9 +32,12 @@ export default async function ComparadorPage() {
 
     return (
         <div className="container mx-auto py-8 space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Comparador de Preços</h1>
-                <p className="text-muted-foreground mt-2">
+            <div className="flex flex-col gap-2 mb-8">
+                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                    <ArrowRightLeft className="h-8 w-8 text-primary" />
+                    Comparador de Preços
+                </h1>
+                <p className="text-muted-foreground">
                     Selecione commodities para comparar a evolução histórica. Use a &quot;Variação %&quot; para comparar tendências de produtos com preços muito diferentes.
                 </p>
             </div>

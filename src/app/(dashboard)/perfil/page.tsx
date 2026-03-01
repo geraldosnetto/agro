@@ -6,7 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, Calendar, Crown, Bell, Heart, Settings, CheckCircle, XCircle } from "lucide-react";
+import { Mail, Shield, AlertCircle, TrendingUp, Sparkles, Plus, Clock, User, Calendar, Crown, Bell, Heart, Settings, CheckCircle, XCircle } from "lucide-react";
+import { formatarMoeda } from "@/lib/formatters";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { DeleteAccountButton } from "@/components/auth/DeleteAccountButton";
 import Link from "next/link";
@@ -55,8 +56,16 @@ export default async function PerfilPage() {
     const isEmailVerified = !!userData.emailVerified;
 
     return (
-        <div className="container px-4 py-8 max-w-4xl">
-            <h1 className="text-3xl font-bold mb-8">Meu Perfil</h1>
+        <div className="container max-w-4xl py-10">
+            <div className="flex flex-col gap-2 mb-8">
+                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                    <User className="h-8 w-8 text-primary" />
+                    Meu Perfil
+                </h1>
+                <p className="text-muted-foreground">
+                    Gerencie suas informações e preferências
+                </p>
+            </div>
 
             <div className="grid gap-6">
                 {/* User Info Card */}

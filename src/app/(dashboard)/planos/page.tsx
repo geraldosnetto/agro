@@ -24,8 +24,8 @@ export default async function PricingPage() {
 
     return (
         <div className="container py-10">
-            <div className="mb-10 text-center">
-                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            <div className="mb-10 text-center flex flex-col items-center">
+                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
                     Planos e Preços
                 </h1>
                 <p className="mt-4 text-lg text-muted-foreground">

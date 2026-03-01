@@ -107,10 +107,10 @@ export default async function CotacoesPage() {
     return (
         <div className="container px-4 py-6 md:py-8">
             {/* Header da página */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">Cotações</h1>
-                    <p className="text-muted-foreground mt-1">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Cotações</h1>
+                    <p className="text-muted-foreground">
                         Preços atualizados de commodities agrícolas
                     </p>
                 </div>

@@ -169,14 +169,14 @@ export default function AssistentePage() {
 
   return (
     <div className="container py-6">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-8">
         <div className="p-2 rounded-lg bg-primary/10">
-          <Sparkles className="h-6 w-6 text-primary" />
+          <Bot className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Assistente IndicAgro</h1>
-          <p className="text-muted-foreground text-sm">
-            IA especializada em commodities agrícolas brasileiras
+          <h1 className="text-3xl font-bold tracking-tight">Assistente IndicAgro</h1>
+          <p className="text-muted-foreground mt-1">
+            Seu consultor inteligente para o agronegócio
           </p>
         </div>
         {remaining !== null && (

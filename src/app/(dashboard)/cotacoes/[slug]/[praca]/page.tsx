@@ -122,7 +122,7 @@ export default async function CommodityPracaPage({ params }: CommodityPracaPageP
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 mb-8">
                 <div className="space-y-4">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl md:text-4xl font-bold">{commodity.nome} <span className="text-muted-foreground font-medium text-2xl">| {realPraca}</span></h1>
+                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{commodity.nome} <span className="text-muted-foreground font-medium text-2xl">| {realPraca}</span></h1>
                     </div>
 
                     <div className="space-y-2">

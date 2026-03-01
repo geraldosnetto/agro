@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function MapaPage() {
     return (
         <div className="container mx-auto p-6 md:py-8 space-y-8">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mb-8">
                 <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
                     <Map className="h-8 w-8 text-primary" />
                     Mapa de Calor

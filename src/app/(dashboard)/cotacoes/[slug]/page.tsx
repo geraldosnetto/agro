@@ -134,7 +134,7 @@ export default async function CommodityPage({ params }: CommodityPageProps) {
                 <div className="space-y-4">
                     {/* Title and Category */}
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl md:text-4xl font-bold">{commodity.nome}</h1>
+                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{commodity.nome}</h1>
                         <Badge variant="outline" className={categoriaConfig.badgeClassName}>
                             {categoriaConfig.label}
                         </Badge>
